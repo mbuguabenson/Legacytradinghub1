@@ -1,397 +1,143 @@
 // ═══════════════════════════════════════════════════════════════
-// ✦ LEGACY TRADING HUB — NEXT-GEN 3D QUANTUM CHUNK LOADER SCSS
+// ✦ LEGACY TRADING HUB — MODERN SIMPLE CHUNK LOADER SCSS
 // ═══════════════════════════════════════════════════════════════
 
 .lth-chunk-loader {
-    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 20px;
     width: 100%;
     height: 100%;
-    min-height: 240px;
-    padding: 32px 20px;
-    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-    color: #f8fafc;
+    min-height: 180px;
+    padding: 32px 16px;
+    box-sizing: border-box;
+    animation: lthLoaderFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     user-select: none;
-    overflow: hidden;
 
-    // Subtle Ambient Glow Behind Loader
-    .lth-loader-ambient-glow {
-        position: absolute;
-        width: 180px;
-        height: 180px;
-        border-radius: 50%;
-        background: radial-gradient(circle, rgba(0, 245, 255, 0.16) 0%, rgba(99, 102, 241, 0.08) 50%, transparent 75%);
-        filter: blur(28px);
-        pointer-events: none;
-        animation: lthAmbientBreath 3s ease-in-out infinite alternate;
-    }
-
-    // ── 3D QUANTUM GYROSCOPE CORE ──
-    .lth-quantum-gyro {
-        position: relative;
-        width: 72px;
-        height: 72px;
-        perspective: 900px;
-        transform-style: preserve-3d;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        .lth-ring {
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-            border: 2px solid transparent;
-            box-sizing: border-box;
-            transform-style: preserve-3d;
-
-            .lth-photon {
-                position: absolute;
-                width: 7px;
-                height: 7px;
-                border-radius: 50%;
-                top: -3.5px;
-                left: 50%;
-                transform: translateX(-50%);
-
-                &--cyan {
-                    background: #00f5ff;
-                    box-shadow: 0 0 12px #00f5ff, 0 0 20px rgba(0, 245, 255, 0.8);
-                }
-
-                &--purple {
-                    background: #c084fc;
-                    box-shadow: 0 0 12px #c084fc, 0 0 18px rgba(192, 132, 252, 0.8);
-                }
-
-                &--emerald {
-                    background: #10b981;
-                    box-shadow: 0 0 10px #10b981, 0 0 16px rgba(16, 185, 129, 0.8);
-                }
-            }
-
-            // Outer Laser Ring
-            &--outer {
-                border-top-color: #00f5ff;
-                border-right-color: rgba(0, 245, 255, 0.4);
-                filter: drop-shadow(0 0 8px rgba(0, 245, 255, 0.6));
-                animation: lthGyroSpinX 1.6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
-            }
-
-            // Mid Gimbal Ring (Tilted in 3D Space)
-            &--mid {
-                inset: 9px;
-                border-bottom-color: #8b5cf6;
-                border-left-color: rgba(139, 92, 246, 0.45);
-                filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.6));
-                animation: lthGyroSpinY 2s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite reverse;
-            }
-
-            // Inner High-Frequency Laser Ring
-            &--inner {
-                inset: 18px;
-                border-top-color: #10b981;
-                border-left-color: rgba(16, 185, 129, 0.5);
-                filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.7));
-                animation: lthGyroSpinZ 1s linear infinite;
-            }
-        }
-
-        // Central Quantum Reactor Core
-        .lth-reactor-core {
-            position: relative;
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%, #ffffff 0%, #00f5ff 45%, #6366f1 90%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 18px rgba(0, 245, 255, 0.9), 0 0 32px rgba(99, 102, 241, 0.5);
-            animation: lthReactorPulse 1.4s ease-in-out infinite alternate;
-            z-index: 5;
-
-            .lth-core-flare {
-                position: absolute;
-                inset: -4px;
-                border-radius: 50%;
-                border: 1px dashed rgba(255, 255, 255, 0.6);
-                animation: lthSpinLinear 6s linear infinite;
-            }
-
-            .lth-core-icon {
-                width: 13px;
-                height: 13px;
-                color: #060911;
-                stroke-width: 2.6;
-                filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.9));
-            }
-        }
-    }
-
-    // ── TELEMETRY CAPSULE (HUD STATUS) ──
-    .lth-telemetry-capsule {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 8px 18px;
-        border-radius: 9999px;
-        background: rgba(10, 16, 32, 0.78);
-        border: 1px solid rgba(0, 245, 255, 0.22);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.75), 0 0 20px rgba(0, 245, 255, 0.1);
-        transition: all 0.3s ease;
-
-        &:hover {
-            border-color: rgba(0, 245, 255, 0.45);
-            box-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.85), 0 0 24px rgba(0, 245, 255, 0.2);
-        }
-
-        // Live Audio/Data Frequency Waveform
-        .lth-waveform {
-            display: flex;
-            align-items: center;
-            gap: 2.5px;
-            height: 14px;
-
-            .wave-bar {
-                width: 2.5px;
-                height: 100%;
-                border-radius: 2px;
-                background: #00f5ff;
-                transform-origin: bottom;
-                animation: lthWaveformBounce 0.8s ease-in-out infinite alternate;
-
-                &.bar-1 {
-                    animation-delay: 0s;
-                    height: 50%;
-                }
-                &.bar-2 {
-                    animation-delay: 0.18s;
-                    height: 100%;
-                    background: #38bdf8;
-                }
-                &.bar-3 {
-                    animation-delay: 0.36s;
-                    height: 70%;
-                    background: #818cf8;
-                }
-                &.bar-4 {
-                    animation-delay: 0.12s;
-                    height: 85%;
-                    background: #c084fc;
-                }
-                &.bar-5 {
-                    animation-delay: 0.28s;
-                    height: 45%;
-                    background: #00ff88;
-                }
-            }
-        }
-
-        .lth-telemetry-text {
-            display: flex;
-            flex-direction: column;
-            gap: 1px;
-
-            .lth-msg-primary {
-                font-size: 0.82rem;
-                font-weight: 700;
-                letter-spacing: 0.05em;
-                color: #f1f5f9;
-                text-transform: uppercase;
-                text-shadow: 0 0 10px rgba(0, 245, 255, 0.3);
-            }
-
-            .lth-msg-sub {
-                font-size: 0.65rem;
-                font-weight: 500;
-                letter-spacing: 0.08em;
-                color: #94a3b8;
-                font-family: 'JetBrains Mono', monospace;
-            }
-        }
-
-        // Status Badge Pill
-        .lth-status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 3px 8px;
-            border-radius: 9999px;
-            background: rgba(16, 185, 129, 0.12);
-            border: 1px solid rgba(16, 185, 129, 0.32);
-
-            .lth-beacon-dot {
-                width: 5px;
-                height: 5px;
-                border-radius: 50%;
-                background: #10b981;
-                box-shadow: 0 0 8px #10b981;
-                animation: lthBeaconBlink 1.4s infinite ease-in-out;
-            }
-
-            .lth-beacon-label {
-                font-size: 0.62rem;
-                font-weight: 800;
-                letter-spacing: 0.08em;
-                color: #34d399;
-                font-family: 'JetBrains Mono', monospace;
-            }
-        }
-    }
-
-    // ── SIZE VARIANTS ──
     &--small {
-        min-height: 140px;
-        gap: 14px;
-        padding: 16px;
+        min-height: 80px;
+        padding: 16px 8px;
 
-        .lth-quantum-gyro {
-            width: 48px;
-            height: 48px;
-
-            .lth-reactor-core {
-                width: 18px;
-                height: 18px;
-
-                .lth-core-icon {
-                    width: 9px;
-                    height: 9px;
-                }
-            }
+        .lth-loader-text {
+            margin-top: 10px;
         }
 
-        .lth-telemetry-capsule {
-            padding: 5px 12px;
-            gap: 8px;
-
-            .lth-telemetry-text {
-                .lth-msg-primary {
-                    font-size: 0.74rem;
-                }
-                .lth-msg-sub {
-                    display: none;
-                }
-            }
+        .lth-loader-message {
+            font-size: 12px;
         }
     }
 
     &--large {
-        min-height: 340px;
-        gap: 26px;
+        min-height: 260px;
+        padding: 48px 24px;
 
-        .lth-quantum-gyro {
-            width: 96px;
-            height: 96px;
-
-            .lth-reactor-core {
-                width: 36px;
-                height: 36px;
-
-                .lth-core-icon {
-                    width: 17px;
-                    height: 17px;
-                }
-            }
+        .lth-loader-text {
+            margin-top: 20px;
         }
 
-        .lth-telemetry-capsule {
-            padding: 10px 24px;
-            gap: 16px;
-
-            .lth-telemetry-text {
-                .lth-msg-primary {
-                    font-size: 0.92rem;
-                }
-                .lth-msg-sub {
-                    font-size: 0.72rem;
-                }
-            }
+        .lth-loader-message {
+            font-size: 15px;
         }
+    }
+
+    .lth-spinner {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+
+        &__svg {
+            animation: lthSpinnerRotate 1.4s linear infinite;
+            transform-origin: center center;
+            overflow: visible;
+        }
+
+        &__track {
+            stroke: var(--general-section-2, rgba(148, 163, 184, 0.15));
+            opacity: 0.6;
+            transition: stroke 0.2s ease;
+        }
+
+        &__head {
+            stroke: var(--brand-red-coral, #ff444f);
+            stroke-linecap: round;
+            stroke-dasharray: 25, 125;
+            stroke-dashoffset: 0;
+            animation: lthSpinnerDash 1.4s ease-in-out infinite;
+            filter: drop-shadow(0 0 6px rgba(255, 68, 79, 0.35));
+            transition: stroke 0.2s ease;
+        }
+    }
+
+    .lth-loader-text {
+        margin-top: 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        text-align: center;
+    }
+
+    .lth-loader-message {
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: -0.01em;
+        line-height: 1.4;
+        color: var(--text-general, #94a3b8);
+        font-family: var(--brand-font-primary, 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+        animation: lthTextPulse 2.5s ease-in-out infinite;
+    }
+
+    .lth-loader-sub {
+        font-size: 11px;
+        font-weight: 400;
+        color: var(--text-less-prominent, #64748b);
+        letter-spacing: 0.01em;
+        line-height: 1.3;
     }
 }
 
 // ── KEYFRAME ANIMATIONS ──
-@keyframes lthGyroSpinX {
-    0% {
-        transform: rotateX(0deg) rotateY(15deg) rotateZ(0deg);
-    }
-    100% {
-        transform: rotateX(360deg) rotateY(15deg) rotateZ(360deg);
-    }
-}
-
-@keyframes lthGyroSpinY {
-    0% {
-        transform: rotateX(45deg) rotateY(0deg) rotateZ(0deg);
-    }
-    100% {
-        transform: rotateX(45deg) rotateY(360deg) rotateZ(180deg);
-    }
-}
-
-@keyframes lthGyroSpinZ {
-    0% {
-        transform: rotateZ(0deg);
-    }
-    100% {
-        transform: rotateZ(360deg);
-    }
-}
-
-@keyframes lthSpinLinear {
+@keyframes lthSpinnerRotate {
     100% {
         transform: rotate(360deg);
     }
 }
 
-@keyframes lthReactorPulse {
+@keyframes lthSpinnerDash {
     0% {
-        transform: scale(0.88);
-        box-shadow: 0 0 14px rgba(0, 245, 255, 0.7), 0 0 24px rgba(99, 102, 241, 0.35);
+        stroke-dasharray: 1, 150;
+        stroke-dashoffset: 0;
+    }
+    50% {
+        stroke-dasharray: 90, 150;
+        stroke-dashoffset: -35px;
     }
     100% {
-        transform: scale(1.08);
-        box-shadow: 0 0 24px rgba(0, 245, 255, 1), 0 0 40px rgba(99, 102, 241, 0.7);
+        stroke-dasharray: 90, 150;
+        stroke-dashoffset: -124px;
     }
 }
 
-@keyframes lthAmbientBreath {
-    0% {
-        transform: scale(0.85);
-        opacity: 0.15;
+@keyframes lthLoaderFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
     }
-    100% {
-        transform: scale(1.15);
-        opacity: 0.35;
-    }
-}
-
-@keyframes lthWaveformBounce {
-    0% {
-        transform: scaleY(0.3);
-        opacity: 0.5;
-    }
-    100% {
-        transform: scaleY(1);
-        opacity: 1;
-    }
-}
-
-@keyframes lthBeaconBlink {
-    0%,
-    100% {
+    to {
         opacity: 1;
         transform: scale(1);
     }
+}
+
+@keyframes lthTextPulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
     50% {
-        opacity: 0.35;
-        transform: scale(0.75);
+        opacity: 0.65;
     }
 }

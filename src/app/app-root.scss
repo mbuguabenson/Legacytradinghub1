@@ -4,13 +4,9 @@
 // ✦ LEGACY TRADING HUB — WELCOME SCREEN & APP ROOT STYLES
 // ═══════════════════════════════════════════════════════════════
 
-$bg-dark: #0e1117;
-$card-bg: #181c25;
-$card-border: rgba(255, 68, 79, 0.22);
-$cyan-glow: #ff444f;
-$gold-glow: #ff9c1a;
-$emerald-glow: #00a79e;
-$blue-glow: #ff444f;
+$bg-dark: #080b12;
+$card-bg: #0e1422;
+$card-border: rgba(0, 245, 255, 0.18);
 $text-white: #f8fafc;
 $text-gray: #94a3b8;
 $text-muted: #676a6f;
@@ -110,748 +106,318 @@ $text-muted: #676a6f;
 }
 
 // ═══════════════════════════════════════════════════════════════
-// ✦ MAIN WELCOME CONTAINER & CINEMATIC 3D ATMOSPHERE
+// ✦ MODERN INSTITUTIONAL WELCOME LOADING SCREEN
 // ═══════════════════════════════════════════════════════════════
 .welcome-screen {
     position: fixed;
     inset: 0;
     z-index: 99999;
     overflow: hidden;
-    background: radial-gradient(circle at 50% 20%, #0d1527 0%, #070a12 60%, #030509 100%);
-    color: $text-white;
+    background: #080b12;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     padding: 24px;
-    perspective: 1200px;
     user-select: none;
-}
 
-.welcome-screen--visible {
-    opacity: 1;
-    transform: scale(1);
-    transition:
-        opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-        transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
+    &--visible {
+        opacity: 1;
+        transform: scale(1);
+        transition: opacity 0.35s ease, transform 0.35s ease;
+    }
 
-// ✦ CINEMATIC ZOOM-OUT & EXPANSION INTO TRADING SITE
-.welcome-screen--zoom-out {
-    opacity: 0;
-    transform: scale(1.16) translateZ(90px);
-    filter: blur(24px);
-    pointer-events: none;
-    transition:
-        opacity 0.48s cubic-bezier(0.25, 1, 0.5, 1),
-        transform 0.48s cubic-bezier(0.25, 1, 0.5, 1),
-        filter 0.48s ease;
-
-    .welcome-screen__card {
-        transform: scale(1.1) translateY(-20px);
+    &--exiting {
         opacity: 0;
-        transition: all 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+        transform: scale(1.02);
+        filter: blur(6px);
+        pointer-events: none;
+        transition: opacity 0.32s cubic-bezier(0.2, 0.9, 0.3, 1),
+                    transform 0.32s cubic-bezier(0.2, 0.9, 0.3, 1),
+                    filter 0.32s ease;
     }
 }
 
-// ── 1. Cyber Perspective Floor Grid ──
-.ws-cyber-grid {
-    position: absolute;
-    inset: -50% -20% 0 -20%;
-    height: 150%;
-    background-image:
-        linear-gradient(rgba(0, 245, 255, 0.08) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 245, 255, 0.08) 1px, transparent 1px);
-    background-size: 48px 48px;
-    transform: perspective(400px) rotateX(68deg) translateY(-8%);
-    transform-origin: bottom center;
-    mask-image: radial-gradient(ellipse at 50% 65%, rgba(0, 0, 0, 0.8) 15%, transparent 75%);
-    -webkit-mask-image: radial-gradient(ellipse at 50% 65%, rgba(0, 0, 0, 0.8) 15%, transparent 75%);
-    pointer-events: none;
-    opacity: 0.55;
-    animation: lthGridDrift 20s linear infinite;
-}
-
-// ── 2. Ambient Glowing Nebulas ──
+// ── Subtle Atmospheric Ambient Spheres ──
 .ws-ambient-glow {
     position: absolute;
     border-radius: 50%;
     filter: blur(120px);
     pointer-events: none;
-    opacity: 0.26;
 
-    &-cyan {
-        width: 48vw;
-        height: 48vw;
-        top: -12%;
+    &--cyan {
+        width: 50vw;
+        height: 50vw;
+        top: -15%;
         left: -10%;
         background: #00f5ff;
-        animation: lthGlowPulse 6s ease-in-out infinite alternate;
+        opacity: 0.12;
+        animation: wsAmbientPulse 7s ease-in-out infinite alternate;
     }
 
-    &-purple {
+    &--amber {
         width: 45vw;
         height: 45vw;
-        top: 25%;
-        right: -8%;
-        background: #8b5cf6;
-        opacity: 0.2;
-        animation: lthGlowPulse 7s ease-in-out infinite alternate-reverse;
-    }
-
-    &-gold {
-        width: 42vw;
-        height: 42vw;
         bottom: -15%;
-        left: 20%;
+        right: -5%;
         background: #f59e0b;
-        opacity: 0.16;
-        animation: lthGlowPulse 8s ease-in-out infinite alternate;
+        opacity: 0.08;
+        animation: wsAmbientPulse 8s ease-in-out infinite alternate-reverse;
     }
 }
 
-// ── 3. Candlestick Background Atmosphere ──
-.ws-candlesticks-bg {
+.ws-vignette {
     position: absolute;
     inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    padding: 0 5vw;
-    pointer-events: none;
-    opacity: 0.28;
-    mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.15) 30%, rgba(0, 0, 0, 0.95) 85%);
-    -webkit-mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.15) 30%, rgba(0, 0, 0, 0.95) 85%);
-
-    .candle-item {
-        position: relative;
-        width: 12px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-
-        .candle-wick {
-            width: 2px;
-            background: currentColor;
-            opacity: 0.65;
-        }
-
-        .candle-body {
-            width: 100%;
-            flex: 1;
-            border-radius: 2px;
-            background: currentColor;
-            opacity: 0.8;
-        }
-
-        &.candle--bull {
-            color: #00f5ff;
-            filter: drop-shadow(0 0 10px rgba(0, 245, 255, 0.4));
-        }
-
-        &.candle--bear {
-            color: #f59e0b;
-            filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.35));
-        }
-    }
-}
-
-.ws-vignette-overlay {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse at center, transparent 35%, rgba(4, 7, 14, 0.88) 100%);
+    background: radial-gradient(circle at center, transparent 35%, rgba(4, 6, 11, 0.75) 100%);
     pointer-events: none;
 }
 
-// ═══════════════════════════════════════════════════════════════
-// ✦ CENTER COMMAND CONSOLE CARD (ULTRA LUXURY HOLOGRAPHIC STYLE)
-// ═══════════════════════════════════════════════════════════════
+// ── Central Sleek Institutional Console Card ──
 .welcome-screen__card {
     position: relative;
     z-index: 10;
     width: 100%;
-    max-width: 520px;
-    background: rgba(11, 17, 32, 0.82);
-    border: 1px solid rgba(0, 245, 255, 0.22);
-    border-radius: 28px;
-    padding: 30px 28px 24px;
+    max-width: 440px;
+    background: rgba(11, 16, 26, 0.88);
+    border: 1px solid rgba(0, 245, 255, 0.18);
+    border-radius: 24px;
+    padding: 38px 32px 30px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    backdrop-filter: blur(36px);
-    -webkit-backdrop-filter: blur(36px);
-    box-shadow:
-        0 40px 80px -20px rgba(0, 0, 0, 0.96),
-        0 0 50px rgba(0, 245, 255, 0.12),
-        inset 0 1px 1px rgba(255, 255, 255, 0.15);
+    text-align: center;
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    box-shadow: 0 32px 64px -16px rgba(0, 0, 0, 0.92),
+                0 0 40px rgba(0, 245, 255, 0.08),
+                inset 0 1px 1px rgba(255, 255, 255, 0.12);
     overflow: hidden;
-    transform: translateZ(0);
-    transition: transform 0.4s ease;
 
-    // Specular Light Sweep Animation on Card Rim
-    .ws-specular-edge {
+    .ws-card-glow-edge {
         position: absolute;
         top: 0;
         left: -100%;
-        width: 50%;
-        height: 2px;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.9), #00f5ff, transparent);
-        animation: lthSpecularSweep 4.5s ease-in-out infinite;
+        width: 60%;
+        height: 1.5px;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.85), #00f5ff, transparent);
+        animation: wsSpecularSweep 4s ease-in-out infinite;
         pointer-events: none;
     }
 
-    // ── A. 3D Holographic Crest Section ──
-    .ws-crest-section {
+    // ── Brand Emblem with Orbital Ring ──
+    .ws-emblem-wrapper {
+        position: relative;
+        width: 96px;
+        height: 96px;
+        margin-bottom: 20px;
         display: flex;
-        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        .ws-orbit-ring {
+            position: absolute;
+            border-radius: 50%;
+            box-sizing: border-box;
+
+            &--outer {
+                inset: 0;
+                border: 1px solid rgba(0, 245, 255, 0.25);
+                animation: wsSpin 10s linear infinite;
+
+                .ws-orbit-dot {
+                    position: absolute;
+                    top: -3px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 6px;
+                    height: 6px;
+                    border-radius: 50%;
+                    background: #00f5ff;
+                    box-shadow: 0 0 10px #00f5ff, 0 0 18px #00f5ff;
+                }
+            }
+
+            &--inner {
+                inset: 8px;
+                border: 1px dashed rgba(245, 158, 11, 0.25);
+                animation: wsSpinRev 14s linear infinite;
+            }
+        }
+
+        .ws-emblem-core {
+            width: 58px;
+            height: 58px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(14, 22, 38, 0.95), rgba(7, 11, 20, 0.98));
+            border: 1.5px solid rgba(0, 245, 255, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 25px rgba(0, 245, 255, 0.3),
+                        inset 0 1px 1px rgba(255, 255, 255, 0.2);
+            animation: wsHeartbeat 3.2s ease-in-out infinite;
+            z-index: 2;
+
+            .ws-emblem-logo {
+                width: 34px;
+                height: 34px;
+                object-fit: contain;
+                filter: drop-shadow(0 0 8px rgba(0, 245, 255, 0.6));
+            }
+        }
+    }
+
+    // ── Brand Header ──
+    .ws-brand-header {
+        font-size: 1.5rem;
+        font-weight: 900;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        display: flex;
         align-items: center;
         gap: 8px;
+        margin-bottom: 10px;
+
+        .brand-white {
+            color: #ffffff;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+        }
+
+        .brand-gold-cyan {
+            background: linear-gradient(135deg, #00f5ff 0%, #38bdf8 35%, #f5c542 80%, #ffd700 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 12px rgba(0, 245, 255, 0.35));
+        }
+    }
+
+    // ── Institutional Badge ──
+    .ws-hud-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        border-radius: 9999px;
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.64rem;
+        font-weight: 700;
+        color: #34d399;
+        letter-spacing: 0.08em;
         margin-bottom: 12px;
 
-        .ws-gyro-crest-wrapper {
-            position: relative;
-            width: 78px;
-            height: 78px;
-            margin-bottom: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            perspective: 800px;
-
-            .ws-radar-ring {
-                position: absolute;
-                border-radius: 50%;
-                box-sizing: border-box;
-
-                &.ws-radar-outer {
-                    inset: 0;
-                    border: 1.5px dashed rgba(0, 245, 255, 0.45);
-                    animation: lthRadarRotate 10s linear infinite;
-
-                    .radar-node {
-                        position: absolute;
-                        top: -3px;
-                        left: 50%;
-                        transform: translateX(-50%);
-                        width: 6px;
-                        height: 6px;
-                        border-radius: 50%;
-
-                        &.node-cyan {
-                            background: #00f5ff;
-                            box-shadow: 0 0 10px #00f5ff, 0 0 18px #00f5ff;
-                        }
-                    }
-                }
-
-                &.ws-radar-mid {
-                    inset: 6px;
-                    border: 1px solid rgba(245, 158, 11, 0.35);
-                    animation: lthRadarRev 14s linear infinite;
-
-                    .radar-node {
-                        position: absolute;
-                        bottom: -3px;
-                        left: 50%;
-                        transform: translateX(-50%);
-                        width: 5px;
-                        height: 5px;
-                        border-radius: 50%;
-
-                        &.node-gold {
-                            background: #f59e0b;
-                            box-shadow: 0 0 10px #f59e0b, 0 0 16px #f59e0b;
-                        }
-                    }
-                }
-
-                &.ws-radar-inner {
-                    inset: 12px;
-                    border: 1px dotted rgba(139, 92, 246, 0.4);
-                    animation: lthRadarRotate 6s linear infinite;
-                }
-            }
-
-            .ws-crest-shield {
-                width: 50px;
-                height: 50px;
-                border-radius: 14px;
-                background: linear-gradient(135deg, rgba(14, 23, 42, 0.95), rgba(6, 10, 20, 0.95));
-                border: 1.5px solid rgba(0, 245, 255, 0.4);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                box-shadow:
-                    0 0 24px rgba(0, 245, 255, 0.45),
-                    0 0 45px rgba(99, 102, 241, 0.25),
-                    inset 0 1px 1px rgba(255, 255, 255, 0.25);
-                animation: lthHeartbeat 3s infinite ease-in-out;
-                z-index: 5;
-
-                .ws-crest-image {
-                    width: 32px;
-                    height: 32px;
-                    object-fit: contain;
-                    filter: drop-shadow(0 0 8px rgba(0, 245, 255, 0.7));
-                }
-            }
-        }
-
-        .ws-brand-title {
-            font-size: 1.65rem;
-            font-weight: 900;
-            letter-spacing: 0.05em;
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            text-transform: uppercase;
-
-            .brand-left {
-                color: #ffffff;
-                text-shadow: 0 2px 14px rgba(0, 0, 0, 0.9);
-            }
-
-            .brand-right {
-                background: linear-gradient(135deg, #00f5ff 0%, #38bdf8 35%, #c084fc 70%, #f59e0b 100%);
-                background-size: 200% auto;
-                -webkit-background-clip: text;
-                background-clip: text;
-                -webkit-text-fill-color: transparent;
-                animation: lthTextShimmer 4s linear infinite;
-                filter: drop-shadow(0 0 14px rgba(0, 245, 255, 0.45));
-            }
-        }
-
-        .ws-hud-pills {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-            justify-content: center;
-
-            .hud-pill {
-                display: inline-flex;
-                align-items: center;
-                gap: 5px;
-                padding: 3px 9px;
-                border-radius: 9999px;
-                font-family: 'JetBrains Mono', monospace;
-                font-size: 0.62rem;
-                font-weight: 700;
-                letter-spacing: 0.08em;
-
-                &--live {
-                    background: rgba(16, 185, 129, 0.12);
-                    border: 1px solid rgba(16, 185, 129, 0.35);
-                    color: #34d399;
-
-                    .pulse-dot {
-                        width: 5px;
-                        height: 5px;
-                        border-radius: 50%;
-                        background: #10b981;
-                        box-shadow: 0 0 8px #10b981;
-                        animation: lthBeaconBlink 1.4s infinite ease-in-out;
-                    }
-                }
-
-                &--security {
-                    background: rgba(0, 245, 255, 0.1);
-                    border: 1px solid rgba(0, 245, 255, 0.3);
-                    color: #38bdf8;
-                }
-
-                &--gateway {
-                    background: rgba(245, 158, 11, 0.1);
-                    border: 1px solid rgba(245, 158, 11, 0.3);
-                    color: #fbbf24;
-                }
-            }
+        .live-beacon-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 8px #10b981;
+            animation: wsBlink 1.4s infinite ease-in-out;
         }
     }
 
-    .ws-card-divider {
-        width: 100%;
-        height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.25), rgba(139, 92, 246, 0.25), transparent);
-        margin: 8px 0 16px;
+    // ── Subtitle ──
+    .ws-subtitle {
+        font-size: 0.76rem;
+        color: #94a3b8;
+        margin: 0 0 24px;
+        font-weight: 500;
+        line-height: 1.5;
     }
 
-    // ── B. Subtitle Greetings ──
-    .ws-greetings {
-        text-align: center;
-        margin-bottom: 18px;
-
-        .greeting-title {
-            font-size: 1.15rem;
-            font-weight: 800;
-            color: #ffffff;
-            margin: 0 0 4px;
-            letter-spacing: 0.02em;
-        }
-
-        .greeting-sub {
-            font-size: 0.76rem;
-            color: #94a3b8;
-            margin: 0;
-            font-weight: 500;
-            line-height: 1.4;
-        }
-    }
-
-    // ── C. Precision Laser Progress Block & Telemetry ──
-    .ws-progress-block {
+    // ── Hairline Precision Progress & Telemetry ──
+    .ws-telemetry-container {
         width: 100%;
         display: flex;
         flex-direction: column;
-        gap: 9px;
-        margin-bottom: 16px;
+        gap: 8px;
+        margin-bottom: 20px;
 
-        .progress-meta-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-
-            .telemetry-status-stream {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-
-                .ws-waveform-bars {
-                    display: flex;
-                    align-items: center;
-                    gap: 2px;
-                    height: 12px;
-
-                    .wf-bar {
-                        width: 2.5px;
-                        height: 100%;
-                        border-radius: 2px;
-                        background: #00f5ff;
-                        animation: lthWaveDance 0.75s ease-in-out infinite alternate;
-
-                        &.wf-1 { animation-delay: 0s; height: 40%; }
-                        &.wf-2 { animation-delay: 0.15s; height: 90%; background: #38bdf8; }
-                        &.wf-3 { animation-delay: 0.3s; height: 60%; background: #818cf8; }
-                        &.wf-4 { animation-delay: 0.1s; height: 100%; background: #c084fc; }
-                        &.wf-5 { animation-delay: 0.25s; height: 50%; background: #f59e0b; }
-                    }
-                }
-
-                .phase-badge {
-                    font-size: 0.64rem;
-                    font-weight: 800;
-                    color: #00f5ff;
-                    font-family: 'JetBrains Mono', monospace;
-                    padding: 2px 6px;
-                    border-radius: 4px;
-                    background: rgba(0, 245, 255, 0.12);
-                    border: 1px solid rgba(0, 245, 255, 0.25);
-                }
-
-                .status-caption {
-                    font-size: 0.72rem;
-                    font-weight: 600;
-                    color: #cbd5e1;
-                    font-family: 'JetBrains Mono', monospace;
-                    letter-spacing: 0.02em;
-                }
-            }
-
-            .progress-bracket-value {
-                font-family: 'JetBrains Mono', monospace;
-                font-size: 0.88rem;
-                font-weight: 800;
-
-                .bracket {
-                    color: rgba(0, 245, 255, 0.5);
-                }
-                .value {
-                    color: #00f5ff;
-                    text-shadow: 0 0 10px rgba(0, 245, 255, 0.8);
-                }
-            }
-        }
-
-        // Precision Inset Track with Laser Fill
         .ws-progress-track {
             position: relative;
             width: 100%;
-            height: 8px;
-            background: rgba(8, 13, 25, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            height: 4px;
+            background: rgba(255, 255, 255, 0.08);
             border-radius: 9999px;
             overflow: hidden;
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
 
-            .ws-progress-fill {
-                position: relative;
+            .ws-progress-bar {
                 height: 100%;
-                background: linear-gradient(90deg, #00f5ff 0%, #38bdf8 40%, #8b5cf6 75%, #f59e0b 100%);
+                background: linear-gradient(90deg, #00f5ff 0%, #818cf8 50%, #f5c542 100%);
                 border-radius: 9999px;
-                transition: width 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
-                box-shadow:
-                    0 0 14px rgba(0, 245, 255, 0.9),
-                    0 0 25px rgba(139, 92, 246, 0.5);
+                transition: width 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+                box-shadow: 0 0 12px rgba(0, 245, 255, 0.8);
+                position: relative;
 
-                .laser-particle-head {
+                .ws-progress-photon {
                     position: absolute;
-                    top: 0;
                     right: 0;
+                    top: 0;
                     bottom: 0;
-                    width: 12px;
-                    border-radius: 50%;
+                    width: 8px;
                     background: #ffffff;
-                    box-shadow: 0 0 10px #ffffff, 0 0 20px #00f5ff;
-                }
-            }
-
-            .ws-track-grid-ticks {
-                position: absolute;
-                inset: 0;
-                display: flex;
-                justify-content: space-between;
-                padding: 0 20%;
-                pointer-events: none;
-
-                span {
-                    width: 1px;
-                    height: 100%;
-                    background: rgba(255, 255, 255, 0.08);
+                    border-radius: 50%;
+                    box-shadow: 0 0 8px #ffffff, 0 0 16px #00f5ff;
                 }
             }
         }
-    }
 
-    // ── D. Dots / Step Phase Indicators ──
-    .ws-dots-row {
-        display: flex;
-        gap: 6px;
-        margin-bottom: 20px;
-
-        .dot-pill {
-            width: 8px;
-            height: 4px;
-            border-radius: 9999px;
-            background: rgba(255, 255, 255, 0.12);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-            &--active {
-                width: 26px;
-                background: linear-gradient(90deg, #00f5ff, #f59e0b);
-                box-shadow: 0 0 10px rgba(0, 245, 255, 0.7);
-            }
-
-            &--passed {
-                background: rgba(0, 245, 255, 0.45);
-            }
-        }
-    }
-
-    // ── E. 3 High-Tech Glass Feature Capsules ──
-    .ws-orbs-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-        width: 100%;
-        margin-bottom: 20px;
-
-        .feature-capsule {
+        .ws-telemetry-footer {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
-            border-radius: 14px;
-            background: rgba(14, 22, 40, 0.65);
-            border: 1px solid rgba(255, 255, 255, 0.07);
-            backdrop-filter: blur(12px);
-            transition: all 0.25s ease;
+            justify-content: space-between;
+            font-size: 0.72rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 600;
 
-            .capsule-icon-wrap {
-                width: 34px;
-                height: 34px;
-                border-radius: 10px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background: rgba(10, 16, 32, 0.85);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                flex-shrink: 0;
+            .ws-status-text {
+                color: #cbd5e1;
+                letter-spacing: 0.02em;
             }
 
-            .capsule-text {
-                display: flex;
-                flex-direction: column;
-                gap: 1px;
-                overflow: hidden;
-
-                .capsule-title {
-                    font-size: 0.74rem;
-                    font-weight: 800;
-                    color: #ffffff;
-                    white-space: nowrap;
-                    letter-spacing: 0.02em;
-                }
-
-                .capsule-desc {
-                    font-size: 0.6rem;
-                    color: #94a3b8;
-                    white-space: nowrap;
-                    font-family: 'JetBrains Mono', monospace;
-                }
-            }
-
-            &--cyan {
-                border-color: rgba(0, 245, 255, 0.2);
-                &:hover {
-                    border-color: rgba(0, 245, 255, 0.45);
-                    box-shadow: 0 4px 18px rgba(0, 245, 255, 0.15);
-                    transform: translateY(-2px);
-                }
-                .capsule-icon-wrap {
-                    border-color: rgba(0, 245, 255, 0.35);
-                    box-shadow: 0 0 12px rgba(0, 245, 255, 0.2);
-                }
-                .text-cyan { color: #00f5ff; }
-            }
-
-            &--gold {
-                border-color: rgba(245, 158, 11, 0.2);
-                &:hover {
-                    border-color: rgba(245, 158, 11, 0.45);
-                    box-shadow: 0 4px 18px rgba(245, 158, 11, 0.15);
-                    transform: translateY(-2px);
-                }
-                .capsule-icon-wrap {
-                    border-color: rgba(245, 158, 11, 0.35);
-                    box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
-                }
-                .text-gold { color: #f59e0b; }
-            }
-
-            &--teal {
-                border-color: rgba(16, 185, 129, 0.2);
-                &:hover {
-                    border-color: rgba(16, 185, 129, 0.45);
-                    box-shadow: 0 4px 18px rgba(16, 185, 129, 0.15);
-                    transform: translateY(-2px);
-                }
-                .capsule-icon-wrap {
-                    border-color: rgba(16, 185, 129, 0.35);
-                    box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
-                }
-                .text-teal { color: #34d399; }
+            .ws-status-percent {
+                color: #00f5ff;
+                font-weight: 800;
+                text-shadow: 0 0 8px rgba(0, 245, 255, 0.6);
             }
         }
     }
 
-    // ── F. Footer Caption ──
-    .ws-card-footer-caption {
+    // ── Security Tag ──
+    .ws-security-tag {
         display: flex;
         align-items: center;
-        gap: 7px;
+        gap: 6px;
         font-size: 0.64rem;
         color: #64748b;
-        font-weight: 600;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
         font-family: 'JetBrains Mono', monospace;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
 
-        .text-emerald {
+        .ws-security-icon {
             color: #10b981;
+            flex-shrink: 0;
         }
     }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// ✦ BOTTOM REAL-TIME MARKET TICKER BAR
-// ═══════════════════════════════════════════════════════════════
-.ws-bottom-ticker-bar {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 40px;
-    background: rgba(5, 8, 16, 0.88);
-    border-top: 1px solid rgba(0, 245, 255, 0.15);
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.6);
-
-    .ticker-track {
-        display: flex;
-        align-items: center;
-        gap: 32px;
-        white-space: nowrap;
-        animation: tickerScroll 24s linear infinite;
-
-        .ticker-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            font-size: 0.74rem;
-            font-family: 'JetBrains Mono', monospace;
-
-            .ticker-symbol {
-                color: #94a3b8;
-                font-weight: 700;
-            }
-
-            .ticker-price {
-                color: #ffffff;
-                font-weight: 800;
-            }
-
-            .ticker-change {
-                font-size: 0.68rem;
-                font-weight: 800;
-                padding: 1px 5px;
-                border-radius: 4px;
-
-                &.change-up {
-                    color: #10b981;
-                    background: rgba(16, 185, 129, 0.12);
-                    border: 1px solid rgba(16, 185, 129, 0.25);
-                }
-                &.change-down {
-                    color: #ef4444;
-                    background: rgba(239, 68, 68, 0.12);
-                    border: 1px solid rgba(239, 68, 68, 0.25);
-                }
-            }
-        }
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// ✦ ANIMATION KEYFRAMES
-// ═══════════════════════════════════════════════════════════════
-@keyframes lthGridDrift {
-    0% {
-        background-position: 0 0;
-    }
+// ── KEYFRAMES ──
+@keyframes wsSpin {
     100% {
-        background-position: 0 48px;
+        transform: rotate(360deg);
     }
 }
 
-@keyframes lthGlowPulse {
-    0% {
-        transform: scale(0.9);
-        opacity: 0.18;
-    }
+@keyframes wsSpinRev {
     100% {
-        transform: scale(1.15);
-        opacity: 0.32;
+        transform: rotate(-360deg);
     }
 }
 
-@keyframes lthSpecularSweep {
+@keyframes wsSpecularSweep {
     0% {
         left: -100%;
     }
@@ -860,68 +426,34 @@ $text-muted: #676a6f;
     }
 }
 
-@keyframes lthRadarRotate {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-@keyframes lthRadarRev {
-    0% {
-        transform: rotate(360deg);
-    }
-    100% {
-        transform: rotate(0deg);
-    }
-}
-
-@keyframes lthHeartbeat {
+@keyframes wsHeartbeat {
     0%, 100% {
         transform: scale(1);
     }
     50% {
-        transform: scale(1.05);
-        box-shadow:
-            0 0 32px rgba(0, 245, 255, 0.65),
-            0 0 60px rgba(99, 102, 241, 0.4);
+        transform: scale(1.04);
+        box-shadow: 0 0 32px rgba(0, 245, 255, 0.45);
     }
 }
 
-@keyframes lthTextShimmer {
-    0% {
-        background-position: 0% 50%;
-    }
-    100% {
-        background-position: 200% 50%;
-    }
-}
-
-@keyframes lthWaveDance {
-    0% {
-        transform: scaleY(0.35);
-        opacity: 0.6;
-    }
-    100% {
-        transform: scaleY(1);
+@keyframes wsBlink {
+    0%, 100% {
         opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.35;
+        transform: scale(0.8);
     }
 }
 
-@keyframes tickerScroll {
+@keyframes wsAmbientPulse {
     0% {
-        transform: translateX(0);
+        transform: scale(0.95);
+        opacity: 0.09;
     }
     100% {
-        transform: translateX(-50%);
+        transform: scale(1.05);
+        opacity: 0.14;
     }
 }
-
-@keyframes spin {
-    100% {
-        transform: rotate(360deg);
-    }
-}
-

@@ -59,79 +59,72 @@
         <div id="modal_root" class="modal-root"></div>
         <div id="popup_root" class="popup-root"></div>
         <div id="root">
-            <div style="position:fixed;inset:0;background:radial-gradient(circle at 50% 20%, #0d1527 0%, #070a12 60%, #030509 100%);display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans','Inter',system-ui,sans-serif;color:#f8fafc;z-index:999999;overflow:hidden;user-select:none;">
-                <!-- Ambient Glowing Nebulas -->
-                <div style="position:absolute;width:45vw;height:45vw;top:-10%;left:-10%;border-radius:50%;background:#00f5ff;opacity:0.22;filter:blur(110px);pointer-events:none;"></div>
-                <div style="position:absolute;width:40vw;height:40vw;bottom:-10%;right:-5%;border-radius:50%;background:#f59e0b;opacity:0.16;filter:blur(110px);pointer-events:none;"></div>
-                <div style="position:absolute;width:35vw;height:35vw;top:30%;right:10%;border-radius:50%;background:#8b5cf6;opacity:0.18;filter:blur(100px);pointer-events:none;"></div>
+            <div style="position:fixed;inset:0;background:#080b12;display:flex;align-items:center;justify-content:center;font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#f8fafc;z-index:999999;overflow:hidden;user-select:none;padding:24px;">
+                <!-- Ambient Glow Spheres -->
+                <div style="position:absolute;width:50vw;height:50vw;top:-15%;left:-10%;border-radius:50%;background:#00f5ff;opacity:0.12;filter:blur(120px);pointer-events:none;"></div>
+                <div style="position:absolute;width:45vw;height:45vw;bottom:-15%;right:-5%;border-radius:50%;background:#f59e0b;opacity:0.08;filter:blur(120px);pointer-events:none;"></div>
+                <div style="position:absolute;inset:0;background:radial-gradient(circle at center, transparent 35%, rgba(4,6,11,0.75) 100%);pointer-events:none;"></div>
 
-                <!-- Glassmorphic Command Console -->
-                <div style="position:relative;display:flex;flex-direction:column;align-items:center;padding:32px 30px 28px;border-radius:28px;background:rgba(11,17,32,0.85);backdrop-filter:blur(36px);-webkit-backdrop-filter:blur(36px);border:1px solid rgba(0,245,255,0.22);box-shadow:0 40px 80px -20px rgba(0,0,0,0.96), 0 0 50px rgba(0,245,255,0.12), inset 0 1px 1px rgba(255,255,255,0.15);max-width:500px;width:90%;text-align:center;overflow:hidden;">
-                    <!-- Top Specular Edge -->
-                    <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.8),#00f5ff,transparent);animation:specularSweep 3.5s infinite ease-in-out;"></div>
+                <!-- Central Institutional Console Card -->
+                <div style="position:relative;z-index:10;width:100%;max-width:440px;background:rgba(11,16,26,0.88);border:1px solid rgba(0,245,255,0.18);border-radius:24px;padding:38px 32px 30px;display:flex;flex-direction:column;align-items:center;text-align:center;backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);box-shadow:0 32px 64px -16px rgba(0,0,0,0.92), 0 0 40px rgba(0,245,255,0.08), inset 0 1px 1px rgba(255,255,255,0.12);overflow:hidden;">
+                    <!-- Specular Light Sweep -->
+                    <div style="position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.85),#00f5ff,transparent);animation:wsSpecularSweep 4s ease-in-out infinite;"></div>
 
-                    <!-- 3D Holographic Crest -->
-                    <div style="position:relative;width:76px;height:76px;margin-bottom:14px;display:flex;align-items:center;justify-content:center;">
-                        <div style="position:absolute;inset:0;border-radius:50%;border:1.5px dashed rgba(0,245,255,0.45);animation:spin 9s linear infinite;"></div>
-                        <div style="position:absolute;inset:7px;border-radius:50%;border:1px solid rgba(245,158,11,0.35);animation:spinRev 13s linear infinite;"></div>
-                        <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg, #0e172a, #060911);border:1.5px solid rgba(0,245,255,0.4);display:flex;align-items:center;justify-content:center;box-shadow:0 0 24px rgba(0,245,255,0.45), 0 0 45px rgba(99,102,241,0.25);">
-                            <img src="/logo_icon.svg" alt="Legacy Trading Hub" style="width:32px;height:32px;object-fit:contain;" onerror="this.style.display='none'">
+                    <!-- Sleek Orbital Brand Emblem -->
+                    <div style="position:relative;width:96px;height:96px;margin-bottom:20px;display:flex;align-items:center;justify-content:center;">
+                        <div style="position:absolute;inset:0;border-radius:50%;border:1px solid rgba(0,245,255,0.25);animation:wsSpin 10s linear infinite;">
+                            <div style="position:absolute;top:-3px;left:50%;transform:translateX(-50%);width:6px;height:6px;border-radius:50%;background:#00f5ff;box-shadow:0 0 10px #00f5ff, 0 0 18px #00f5ff;"></div>
+                        </div>
+                        <div style="position:absolute;inset:8px;border-radius:50%;border:1px dashed rgba(245,158,11,0.25);animation:wsSpinRev 14s linear infinite;"></div>
+                        <div style="width:58px;height:58px;border-radius:16px;background:linear-gradient(135deg,rgba(14,22,38,0.95),rgba(7,11,20,0.98));border:1.5px solid rgba(0,245,255,0.35);display:flex;align-items:center;justify-content:center;box-shadow:0 0 25px rgba(0,245,255,0.3), inset 0 1px 1px rgba(255,255,255,0.2);animation:wsHeartbeat 3.2s ease-in-out infinite;z-index:2;">
+                            <img src="/logo_icon.svg" alt="Legacy Trading Hub" style="width:34px;height:34px;object-fit:contain;filter:drop-shadow(0 0 8px rgba(0,245,255,0.6));" onerror="this.style.display='none'">
                         </div>
                     </div>
 
-                    <!-- Brand Header -->
-                    <h1 style="font-size:24px;font-weight:900;letter-spacing:0.05em;margin:0 0 6px 0;color:#ffffff;text-transform:uppercase;display:flex;align-items:center;gap:8px;">
-                        <span>LEGACY</span>
-                        <span style="background:linear-gradient(135deg,#00f5ff 0%,#38bdf8 35%,#c084fc 70%,#f59e0b 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;">TRADING HUB</span>
-                    </h1>
+                    <!-- Brand Title -->
+                    <div style="font-size:24px;font-weight:900;letter-spacing:0.08em;text-transform:uppercase;display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                        <span style="color:#ffffff;text-shadow:0 2px 10px rgba(0,0,0,0.6);">LEGACY</span>
+                        <span style="background:linear-gradient(135deg,#00f5ff 0%,#38bdf8 35%,#f5c542 80%,#ffd700 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 12px rgba(0,245,255,0.35));">TRADING HUB</span>
+                    </div>
 
-                    <!-- HUD Status Pills -->
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:18px;flex-wrap:wrap;justify-content:center;">
-                        <div style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:9999px;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.35);font-size:9.5px;font-weight:800;color:#34d399;font-family:'JetBrains Mono',monospace;letter-spacing:0.08em;">
-                            <span style="width:5px;height:5px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;display:inline-block;"></span>
-                            <span>SYSTEM INITIALIZING</span>
-                        </div>
-                        <div style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:9999px;background:rgba(0,245,255,0.1);border:1px solid rgba(0,245,255,0.25);font-size:9.5px;font-weight:800;color:#38bdf8;font-family:'JetBrains Mono',monospace;letter-spacing:0.08em;">
-                            <span>QUANTUM SUITE v4.2</span>
-                        </div>
+                    <!-- Institutional Badge -->
+                    <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:9999px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#34d399;letter-spacing:0.08em;margin-bottom:12px;">
+                        <span style="width:5px;height:5px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;display:inline-block;animation:wsBlink 1.4s infinite ease-in-out;"></span>
+                        <span>INSTITUTIONAL QUANTUM PLATFORM</span>
                     </div>
 
                     <!-- Subtitle -->
-                    <p style="font-size:11.5px;color:#94a3b8;margin:0 0 18px 0;line-height:1.45;letter-spacing:0.05em;font-weight:600;text-transform:uppercase;">
-                        Institutional Algorithmic Trading & Neural Market Analysis
+                    <p style="font-size:12px;color:#94a3b8;margin:0 0 24px;font-weight:500;line-height:1.5;">
+                        Next-Gen Algorithmic Execution &amp; Neural Market Suite
                     </p>
 
-                    <!-- Precision Laser Progress Bar & Telemetry -->
-                    <div style="width:100%;margin-bottom:14px;">
-                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:11px;font-family:'JetBrains Mono',monospace;">
-                            <div style="display:flex;align-items:center;gap:6px;color:#cbd5e1;font-weight:600;">
-                                <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#00f5ff;box-shadow:0 0 8px #00f5ff;"></span>
-                                <span>Loading Workspace Modules...</span>
+                    <!-- Hairline Precision Progress & Telemetry -->
+                    <div style="width:100%;display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
+                        <div style="position:relative;width:100%;height:4px;background:rgba(255,255,255,0.08);border-radius:9999px;overflow:hidden;">
+                            <div style="height:100%;width:72%;background:linear-gradient(90deg,#00f5ff 0%,#818cf8 50%,#f5c542 100%);border-radius:9999px;box-shadow:0 0 12px rgba(0,245,255,0.8);position:relative;">
+                                <span style="position:absolute;right:0;top:0;bottom:0;width:8px;background:#ffffff;border-radius:50%;box-shadow:0 0 8px #ffffff,0 0 16px #00f5ff;"></span>
                             </div>
-                            <span style="color:#00f5ff;font-weight:800;">[ 84% ]</span>
                         </div>
 
-                        <div style="width:100%;height:8px;border-radius:9999px;background:rgba(8,13,25,0.95);border:1px solid rgba(255,255,255,0.08);overflow:hidden;position:relative;box-shadow:inset 0 2px 4px rgba(0,0,0,0.8);">
-                            <div style="position:relative;height:100%;width:84%;border-radius:9999px;background:linear-gradient(90deg,#00f5ff 0%,#38bdf8 40%,#8b5cf6 75%,#f59e0b 100%);box-shadow:0 0 16px rgba(0,245,255,0.9), 0 0 28px rgba(139,92,246,0.5);animation:laserPulse 2s infinite ease-in-out;"></div>
+                        <div style="display:flex;align-items:center;justify-content:space-between;font-size:11.5px;font-family:'JetBrains Mono',monospace;font-weight:600;">
+                            <span style="color:#cbd5e1;letter-spacing:0.02em;">Initializing Trading Suite...</span>
+                            <span style="color:#00f5ff;font-weight:800;text-shadow:0 0 8px rgba(0,245,255,0.6);">72%</span>
                         </div>
                     </div>
 
-                    <div style="font-size:10px;color:#64748b;font-family:'JetBrains Mono',monospace;letter-spacing:0.04em;text-transform:uppercase;">
-                        Protected by Legacy Quantum Security Infrastructure
+                    <!-- Security Tag -->
+                    <div style="display:flex;align-items:center;gap:6px;font-size:10px;color:#64748b;font-family:'JetBrains Mono',monospace;letter-spacing:0.02em;text-transform:uppercase;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                        <span>256-Bit Quantum Enclave &bull; End-to-End WebSocket Encryption</span>
                     </div>
                 </div>
             </div>
             <style>
-                @keyframes spin { 100% { transform: rotate(360deg); } }
-                @keyframes spinRev { 100% { transform: rotate(-360deg); } }
-                @keyframes specularSweep {
-                    0% { transform: translateX(-100%); }
-                    50%, 100% { transform: translateX(100%); }
-                }
-                @keyframes laserPulse {
-                    0%, 100% { opacity: 0.9; }
-                    50% { opacity: 1; filter: drop-shadow(0 0 12px #00f5ff); }
-                }
+                @keyframes wsSpin { 100% { transform: rotate(360deg); } }
+                @keyframes wsSpinRev { 100% { transform: rotate(-360deg); } }
+                @keyframes wsSpecularSweep { 0% { transform: translateX(-100%); } 50%, 100% { transform: translateX(100%); } }
+                @keyframes wsHeartbeat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+                @keyframes wsBlink { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(0.8); } }
             </style>
         </div>
         <!-- LiveChat script -->

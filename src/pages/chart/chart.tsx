@@ -225,7 +225,7 @@ const Chart = observer(({ show_digits_stats: _show_digits_stats }: { show_digits
     );
 
     if (!isChartReadyToMount || !validSymbol) {
-        return <ChunkLoader message='' />;
+        return null;
     }
 
     return (

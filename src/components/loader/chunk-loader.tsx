@@ -1,5 +1,4 @@
 import React from 'react';
-import { Cpu, Zap } from 'lucide-react';
 import './chunk-loader.scss';
 
 export interface ChunkLoaderProps {
@@ -11,66 +10,57 @@ export interface ChunkLoaderProps {
 
 export default function ChunkLoader({
     message = 'Loading workspace...',
-    subMessage = 'Synchronizing algorithmic matrix',
+    subMessage,
     size = 'medium',
     className = '',
 }: ChunkLoaderProps) {
+    const sizeMap = {
+        small: 24,
+        medium: 36,
+        large: 48,
+    };
+
+    const pixelSize = sizeMap[size] || 36;
+    const strokeWidth = size === 'small' ? 3 : 3.5;
+
     return (
         <div
             className={`lth-chunk-loader lth-chunk-loader--${size} ${className}`}
             role='status'
             aria-live='polite'
         >
-            {/* Ambient Background Aura */}
-            <div className='lth-loader-ambient-glow' aria-hidden='true' />
-
-            {/* 3D Quantum Gyroscope Core */}
-            <div className='lth-quantum-gyro'>
-                {/* Outer Hologram Halo with Orbiting Photon */}
-                <div className='lth-ring lth-ring--outer'>
-                    <div className='lth-photon lth-photon--cyan' />
-                </div>
-
-                {/* Mid Tilted Energy Gimbal Ring */}
-                <div className='lth-ring lth-ring--mid'>
-                    <div className='lth-photon lth-photon--purple' />
-                </div>
-
-                {/* Inner High-Frequency Laser Ring */}
-                <div className='lth-ring lth-ring--inner'>
-                    <div className='lth-photon lth-photon--emerald' />
-                </div>
-
-                {/* Central Crystalline Reactor Core */}
-                <div className='lth-reactor-core'>
-                    <div className='lth-core-flare' />
-                    <Zap className='lth-core-icon' />
-                </div>
+            <div className='lth-spinner' style={{ width: pixelSize, height: pixelSize }}>
+                <svg
+                    className='lth-spinner__svg'
+                    viewBox='0 0 48 48'
+                    width={pixelSize}
+                    height={pixelSize}
+                >
+                    <circle
+                        className='lth-spinner__track'
+                        cx='24'
+                        cy='24'
+                        r='20'
+                        fill='none'
+                        strokeWidth={strokeWidth}
+                    />
+                    <circle
+                        className='lth-spinner__head'
+                        cx='24'
+                        cy='24'
+                        r='20'
+                        fill='none'
+                        strokeWidth={strokeWidth}
+                    />
+                </svg>
             </div>
 
-            {/* Interactive Telemetry Capsule */}
-            <div className='lth-telemetry-capsule'>
-                {/* Live Data Throughput Waveform (5 Frequency Bars) */}
-                <div className='lth-waveform' aria-hidden='true'>
-                    <span className='wave-bar bar-1' />
-                    <span className='wave-bar bar-2' />
-                    <span className='wave-bar bar-3' />
-                    <span className='wave-bar bar-4' />
-                    <span className='wave-bar bar-5' />
+            {message && (
+                <div className='lth-loader-text'>
+                    <span className='lth-loader-message'>{message}</span>
+                    {subMessage && <span className='lth-loader-sub'>{subMessage}</span>}
                 </div>
-
-                {/* Message and Status Indicator */}
-                <div className='lth-telemetry-text'>
-                    <span className='lth-msg-primary'>{message}</span>
-                    {subMessage && <span className='lth-msg-sub'>{subMessage}</span>}
-                </div>
-
-                {/* Live Quantum Beacon Badge */}
-                <div className='lth-status-badge'>
-                    <span className='lth-beacon-dot' />
-                    <span className='lth-beacon-label'>LIVE SYNC</span>
-                </div>
-            </div>
+            )}
         </div>
     );
 }

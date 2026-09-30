@@ -9,8 +9,6 @@
     position: relative;
     border-radius: 12px;
     overflow: hidden;
-    background-color: var(--general-section-1);
-    border: 1px solid var(--general-section-2);
 
     @include desktop-screen {
         width: 100%;
