@@ -8,7 +8,20 @@ import { useTokenRefresh } from '@/hooks/useTokenRefresh';
 import { sanitizeAccountsList } from '@/utils/token-bridge';
 import { DerivAnalyticsService } from '@/services/deriv-analytics.service';
 import { getBrandLabel } from '@/components/shared/utils/brand/brand';
-import { BarChart3, Bot, Copy, Loader2, ShieldCheck } from 'lucide-react';
+import {
+    Activity,
+    BarChart3,
+    Bot,
+    Copy,
+    Cpu,
+    Loader2,
+    Lock,
+    Radio,
+    ShieldCheck,
+    Sparkles,
+    TrendingUp,
+    Zap,
+} from 'lucide-react';
 import './app-root.scss';
 
 const AppContent = lazy(() => import('./app-content'));
@@ -49,12 +62,12 @@ const ErrorComponentWrapper = observer(() => {
 });
 
 const INIT_STEPS = [
-    'Connecting to Volatility Markets...',
-    'Loading Neural Trading Models...',
-    'Authenticating Deriv Gateway...',
-    'Calibrating Multi-Market Scanner...',
-    'Synchronizing Live Orderbook...',
-    'Finalizing Legacy Trading Suite...',
+    { code: 'NET_01', text: 'Connecting to Volatility Markets...' },
+    { code: 'AI_02', text: 'Loading Neural Trading Models...' },
+    { code: 'AUTH_03', text: 'Authenticating Deriv Quantum Gateway...' },
+    { code: 'SCAN_04', text: 'Calibrating Multi-Market Scanner...' },
+    { code: 'SYNC_05', text: 'Synchronizing Live Orderbook...' },
+    { code: 'CORE_06', text: 'Finalizing Legacy Trading Suite...' },
 ];
 
 const TICKER_ITEMS = [
@@ -107,15 +120,15 @@ const WelcomeScreen = ({
     const [exiting, setExiting] = useState(false);
     const [activeStep, setActiveStep] = useState(0);
 
-    // Fast, crisp step cycling
+    // Dynamic step cycling for telemetry stream
     useEffect(() => {
         const stepTimer = window.setInterval(() => {
             setActiveStep(prev => (prev + 1) % INIT_STEPS.length);
-        }, 800);
+        }, 750);
         return () => window.clearInterval(stepTimer);
     }, []);
 
-    // Instant exit zoom effect when complete
+    // Instant smooth exit transition when initialization completes
     useEffect(() => {
         if (!isComplete) return;
         const exitTimer = window.setTimeout(() => {
@@ -127,7 +140,7 @@ const WelcomeScreen = ({
 
     const roundedProgress = Math.min(100, Math.round(progress));
 
-    // Dynamic brand split (e.g. LEGACY + TRADING HUB)
+    // Dynamic split brand representation
     const { leftBrand, rightBrand } = useMemo(() => {
         const full = (brandLabel || 'LEGACY TRADING HUB').trim();
         const parts = full.split(' ');
@@ -138,9 +151,15 @@ const WelcomeScreen = ({
         return { leftBrand: full.slice(0, mid), rightBrand: full.slice(mid) };
     }, []);
 
+    const currentStepObj = INIT_STEPS[activeStep] || INIT_STEPS[0];
+    const displayStatus = statusMessage || currentStepObj.text;
+
     return (
         <div className={`welcome-screen ${exiting ? 'welcome-screen--zoom-out' : 'welcome-screen--visible'}`}>
-            {/* Background Candlestick Atmosphere */}
+            {/* 1. Cyber Perspective Floor Grid */}
+            <div className='ws-cyber-grid' aria-hidden='true' />
+
+            {/* 2. Background Financial Candlesticks */}
             <div className='ws-candlesticks-bg' aria-hidden='true'>
                 {CANDLESTICKS.map((candle, idx) => (
                     <div
@@ -155,94 +174,153 @@ const WelcomeScreen = ({
                 ))}
             </div>
 
-            {/* Subtle Vignette & Neon Glows */}
+            {/* 3. Deep Ambient Atmospheric Glows */}
             <div className='ws-vignette-overlay' aria-hidden='true' />
             <div className='ws-ambient-glow ws-ambient-glow-cyan' aria-hidden='true' />
+            <div className='ws-ambient-glow ws-ambient-glow-purple' aria-hidden='true' />
             <div className='ws-ambient-glow ws-ambient-glow-gold' aria-hidden='true' />
 
-            {/* Glowing Glass Hero Card */}
+            {/* 4. Centerpiece Glassmorphic Command Console Card */}
             <div className='welcome-screen__card'>
-                {/* 1. Glowing Dual-Tone Brand Logo */}
-                <div className='ws-brand-header'>
-                    <div className='ws-logo-crest-wrapper'>
-                        <img src='/logo_icon.svg' alt='Legacy' className='ws-logo-crest' />
+                {/* Specular Light Sweep Edge */}
+                <div className='ws-specular-edge' aria-hidden='true' />
+
+                {/* A. 3D Holographic Crest with Multi-Ring Gyroscope */}
+                <div className='ws-crest-section'>
+                    <div className='ws-gyro-crest-wrapper'>
+                        <div className='ws-radar-ring ws-radar-outer'>
+                            <span className='radar-node node-cyan' />
+                        </div>
+                        <div className='ws-radar-ring ws-radar-mid'>
+                            <span className='radar-node node-gold' />
+                        </div>
+                        <div className='ws-radar-ring ws-radar-inner' />
+                        <div className='ws-crest-shield'>
+                            <img
+                                src='/logo_icon.svg'
+                                alt='Legacy Trading Hub'
+                                className='ws-crest-image'
+                                onError={(e: any) => {
+                                    e.currentTarget.style.display = 'none';
+                                }}
+                            />
+                        </div>
                     </div>
+
+                    {/* Brand Titles with Shimmer */}
                     <div className='ws-brand-title'>
                         <span className='brand-left'>{leftBrand}</span>
                         <span className='brand-right'>{rightBrand}</span>
                     </div>
-                    <div className='ws-hub-sub'>
-                        <span className='hub-text'>INSTITUTIONAL QUANTUM SUITE</span>
-                        <span className='hub-live-badge'>
-                            <span className='dot-live' />
-                            <span>LIVE</span>
-                        </span>
+
+                    {/* System HUD Status Pill */}
+                    <div className='ws-hud-pills'>
+                        <div className='hud-pill hud-pill--live'>
+                            <span className='pulse-dot' />
+                            <span className='hud-label'>SYSTEM ONLINE</span>
+                        </div>
+                        <div className='hud-pill hud-pill--security'>
+                            <Lock size={10} className='text-cyan' />
+                            <span className='hud-label'>256-BIT ENCRYPTED</span>
+                        </div>
+                        <div className='hud-pill hud-pill--gateway'>
+                            <Radio size={10} className='text-amber' />
+                            <span className='hud-label'>DERIV WS-SECURE</span>
+                        </div>
                     </div>
                 </div>
 
                 <div className='ws-card-divider' />
 
-                {/* 2. Welcome Subtitle */}
+                {/* B. Subtitle Greetings */}
                 <div className='ws-greetings'>
-                    <h2 className='greeting-title'>Welcome to {brandLabel}</h2>
-                    <p className='greeting-sub'>High-Performance Algorithmic Trading & AI Analytics</p>
+                    <h2 className='greeting-title'>Institutional Quantum Trading Suite</h2>
+                    <p className='greeting-sub'>Next-Generation Algorithmic Execution & Neural Market Analysis</p>
                 </div>
 
-                {/* 3. Sleek Progress Bar with Percentage */}
+                {/* C. Precision Laser Progress Bar & Telemetry */}
                 <div className='ws-progress-block'>
-                    <div className='progress-row'>
-                        <div className='ws-progress-track'>
-                            <div className='ws-progress-fill' style={{ width: `${roundedProgress}%` }} />
+                    <div className='progress-meta-row'>
+                        <div className='telemetry-status-stream'>
+                            <div className='ws-waveform-bars' aria-hidden='true'>
+                                <span className='wf-bar wf-1' />
+                                <span className='wf-bar wf-2' />
+                                <span className='wf-bar wf-3' />
+                                <span className='wf-bar wf-4' />
+                                <span className='wf-bar wf-5' />
+                            </div>
+                            <span className='phase-badge'>PHASE 0{activeStep + 1}</span>
+                            <span className='status-caption'>{displayStatus}</span>
                         </div>
-                        <span className='ws-progress-pct'>{roundedProgress}%</span>
+                        <div className='progress-bracket-value'>
+                            <span className='bracket'>[</span>
+                            <span className='value'>{roundedProgress}%</span>
+                            <span className='bracket'>]</span>
+                        </div>
                     </div>
 
-                    {/* Step Status with Animated Spinner */}
-                    <div className='ws-status-row'>
-                        <Loader2 size={13} className='status-spinner' />
-                        <span className='status-text'>{statusMessage || INIT_STEPS[activeStep]}</span>
+                    <div className='ws-progress-track'>
+                        <div className='ws-progress-fill' style={{ width: `${roundedProgress}%` }}>
+                            <div className='laser-particle-head' />
+                        </div>
+                        <div className='ws-track-grid-ticks' aria-hidden='true'>
+                            <span /><span /><span /><span /><span />
+                        </div>
                     </div>
                 </div>
 
-                {/* 4. Dots / Step Carousel Indicators */}
+                {/* D. Step Phase Indicators */}
                 <div className='ws-dots-row'>
-                    {INIT_STEPS.map((_, idx) => (
-                        <span key={idx} className={`dot-pill ${idx === activeStep ? 'dot-pill--active' : ''}`} />
+                    {INIT_STEPS.map((step, idx) => (
+                        <div
+                            key={step.code}
+                            className={`dot-pill ${idx === activeStep ? 'dot-pill--active' : idx < activeStep ? 'dot-pill--passed' : ''}`}
+                            title={step.text}
+                        />
                     ))}
                 </div>
 
-                {/* 5. 3 Feature Icon Orbs with Labels */}
+                {/* E. 3 High-Tech Glass Feature Pillars */}
                 <div className='ws-orbs-grid'>
-                    <div className='feature-orb-item'>
-                        <div className='orb-circle orb-blue'>
-                            <BarChart3 size={20} className='orb-icon text-cyan' />
+                    <div className='feature-capsule feature-capsule--cyan'>
+                        <div className='capsule-icon-wrap'>
+                            <Activity size={18} className='text-cyan' />
                         </div>
-                        <span className='orb-label'>Advanced Charts</span>
+                        <div className='capsule-text'>
+                            <span className='capsule-title'>Neural Scanners</span>
+                            <span className='capsule-desc'>Deep Pattern AI</span>
+                        </div>
                     </div>
 
-                    <div className='feature-orb-item'>
-                        <div className='orb-circle orb-gold'>
-                            <Bot size={20} className='orb-icon text-gold' />
+                    <div className='feature-capsule feature-capsule--gold'>
+                        <div className='capsule-icon-wrap'>
+                            <Bot size={18} className='text-gold' />
                         </div>
-                        <span className='orb-label'>Quantum Bots</span>
+                        <div className='capsule-text'>
+                            <span className='capsule-title'>Quantum Bots</span>
+                            <span className='capsule-desc'>Automated Execution</span>
+                        </div>
                     </div>
 
-                    <div className='feature-orb-item'>
-                        <div className='orb-circle orb-teal'>
-                            <Copy size={20} className='orb-icon text-teal' />
+                    <div className='feature-capsule feature-capsule--teal'>
+                        <div className='capsule-icon-wrap'>
+                            <Copy size={18} className='text-teal' />
                         </div>
-                        <span className='orb-label'>Copy Trading</span>
+                        <div className='capsule-text'>
+                            <span className='capsule-title'>Copy-Trading</span>
+                            <span className='capsule-desc'>Real-time Replication</span>
+                        </div>
                     </div>
                 </div>
 
-                {/* 6. Footer Caption inside Card */}
+                {/* F. Footer Caption */}
                 <div className='ws-card-footer-caption'>
                     <ShieldCheck size={13} className='text-emerald' />
-                    <span>Protected by Legacy Quantum Security Infrastructure</span>
+                    <span>Protected by Legacy Quantum Security Gateway • Zero-Knowledge Proofs</span>
                 </div>
             </div>
 
-            {/* Bottom Real-Time Market Ticker Bar */}
+            {/* 5. Bottom Live Financial Ticker Ribbon */}
             <div className='ws-bottom-ticker-bar'>
                 <div className='ticker-track'>
                     {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, idx) => (
@@ -380,7 +458,8 @@ const AppRoot = () => {
         };
     }, []);
 
-    const statusMessage = INIT_STEPS[statusIndex % INIT_STEPS.length] || 'Connecting to Volatility Markets...';
+    const statusMessage =
+        INIT_STEPS[statusIndex % INIT_STEPS.length]?.text || 'Connecting to Volatility Markets...';
     const welcomeComplete = (is_api_initialized && progress >= 95) || welcomeForceExit;
 
     if (showWelcome) {

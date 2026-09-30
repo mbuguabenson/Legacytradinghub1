@@ -26,6 +26,7 @@ const CURRENCY_ICONS = {
     usdc: lazy(() => import('@deriv/quill-icons/Currencies').then(module => ({ default: module.CurrencyUsdcIcon }))),
     usdk: lazy(() => import('@deriv/quill-icons/Currencies').then(module => ({ default: module.CurrencyUsdkIcon }))),
     ust: lazy(() => import('@deriv/quill-icons/Currencies').then(module => ({ default: module.CurrencyUsdtIcon }))),
+    demo: lazy(() => import('@deriv/quill-icons/Currencies').then(module => ({ default: module.CurrencyDemoIcon }))),
     virtual: lazy(() => import('@deriv/quill-icons/Currencies').then(module => ({ default: module.CurrencyDemoIcon }))),
     xrp: lazy(() => import('@deriv/quill-icons/Currencies').then(module => ({ default: module.CurrencyXrpIcon }))),
     algo: lazy(() => import('@deriv/quill-icons/Currencies').then(module => ({ default: module.CurrencyAlgoIcon }))),
@@ -62,9 +63,17 @@ const CURRENCY_ICONS = {
     zec: lazy(() => import('@deriv/quill-icons/Currencies').then(module => ({ default: module.CurrencyZecIcon }))),
 };
 
-export const CurrencyIcon = ({ currency }: { currency?: string; isVirtual?: boolean }) => {
-    // Both real and demo accounts use the same real currency icon (e.g. USD flag coin)
-    const key = (currency && currency.toLowerCase() !== 'virtual' ? currency : 'usd').toLowerCase();
+export const CurrencyIcon = ({ currency, isVirtual }: { currency?: string; isVirtual?: boolean }) => {
+    if (isVirtual || currency?.toLowerCase() === 'virtual' || currency?.toLowerCase() === 'demo') {
+        const DemoIcon = CURRENCY_ICONS.demo;
+        return (
+            <Suspense fallback={null}>
+                <DemoIcon iconSize='sm' />
+            </Suspense>
+        );
+    }
+
+    const key = (currency || 'usd').toLowerCase();
     const Icon = CURRENCY_ICONS[key as keyof typeof CURRENCY_ICONS] || CURRENCY_ICONS.usd || CURRENCY_ICONS.unknown;
 
     return (

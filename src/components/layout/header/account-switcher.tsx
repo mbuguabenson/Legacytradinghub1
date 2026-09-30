@@ -113,7 +113,7 @@ const AccountAvatar = ({ currency, isVirtual }: { currency?: string; isVirtual?:
             'acc-icon--real': !isVirtual,
         })}
     >
-        <CurrencyIcon currency={currency || 'usd'} isVirtual={false} />
+        <CurrencyIcon currency={currency || 'usd'} isVirtual={isVirtual} />
     </div>
 );
 
@@ -567,7 +567,7 @@ const AccountSwitcher = observer(({ activeAccount, forceDropdown = false }: TAcc
                             'acc-chip__currency-icon--real': !isVirtual,
                         })}
                     >
-                        <CurrencyIcon currency={currency || 'usd'} isVirtual={false} />
+                        <CurrencyIcon currency={currency || 'usd'} isVirtual={isVirtual} />
                         <span className='acc-chip__online-dot'></span>
                     </div>
 

@@ -731,12 +731,12 @@ main {
 
 .bot-builder {
     position: absolute;
-    top: 6.6rem;
-    inset-inline-start: 1.6rem;
+    top: 4.2rem;
+    inset-inline-start: 1rem;
     z-index: -1;
     background: var(--general-main-1);
-    height: var(--tab-content-height);
-    width: calc(100% - 3.2rem);
+    height: calc(100% - 4.2rem);
+    width: calc(100% - 2rem);
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.2s ease-in-out;
@@ -764,7 +764,7 @@ main {
     }
 
     &--drawer-open {
-        width: calc(100% - 3.2rem - 36.6rem - 1.6rem) !important;
+        width: calc(100% - 2rem - 36.6rem - 1.6rem) !important;
     }
 
     &--inactive {
@@ -772,10 +772,10 @@ main {
     }
 
     @include mobile-or-tablet-screen {
-        top: 5.6rem;
+        top: 4.2rem;
         inset-inline-start: 0;
         width: 100vw;
-        height: var(--tab-content-height-mobile);
+        height: calc(100% - 4.2rem);
     }
 }
 
