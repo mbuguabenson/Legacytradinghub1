@@ -1,0 +1,57 @@
+{
+  "totalPageViews": 1,
+  "uniqueVisitors": 0,
+  "eventsCount": 2,
+  "hourlyHistory": {
+    "2026-09-30-19": 1
+  },
+  "dailyHistory": {
+    "2026-09-30": 1
+  },
+  "toolUsage": {
+    "digit-cracker": 0,
+    "bot-builder": 0,
+    "auto-x-eo": 0,
+    "copy-trading": 0,
+    "signals": 0,
+    "dtrader": 0,
+    "chart": 0,
+    "analysis-tool": 0,
+    "other": 0
+  },
+  "pageHits": {
+    "/": 1
+  },
+  "deviceStats": {
+    "desktop": 1,
+    "mobile": 0,
+    "tablet": 0
+  },
+  "browserStats": {
+    "Chrome": 1
+  },
+  "recentEvents": [
+    {
+      "id": "ev_1790786984930_56mk8",
+      "eventType": "heartbeat",
+      "path": "/",
+      "sessionId": "sess_1790786973033_rumgfxtl3",
+      "loginid": null,
+      "device": "desktop",
+      "ip": "::1",
+      "timestamp": "2026-09-30T16:49:44.929Z",
+      "metadata": {}
+    },
+    {
+      "id": "ev_1790786973056_jggix",
+      "eventType": "page_view",
+      "path": "/",
+      "sessionId": "sess_1790786973033_rumgfxtl3",
+      "loginid": null,
+      "device": "desktop",
+      "ip": "::1",
+      "timestamp": "2026-09-30T16:49:33.056Z",
+      "metadata": {}
+    }
+  ]
+}

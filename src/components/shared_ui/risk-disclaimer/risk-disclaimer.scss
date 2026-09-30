@@ -1,0 +1,168 @@
+@keyframes slideInDisclaimer {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes slideOutDisclaimer {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(20px) scale(0.96);
+    }
+}
+
+.risk-disclaimer-float {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1050;
+    max-width: 380px;
+    width: calc(100% - 48px);
+    animation: slideInDisclaimer 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    pointer-events: auto;
+
+    &--closing {
+        animation: slideOutDisclaimer 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
+    }
+
+    @media (max-width: 768px) {
+        bottom: calc(84px + env(safe-area-inset-bottom, 16px));
+        right: 12px;
+        left: 12px;
+        max-width: none;
+        width: auto;
+    }
+
+    &__card {
+        position: relative;
+        overflow: hidden;
+        background: rgba(15, 19, 28, 0.92);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(245, 197, 66, 0.3);
+        border-radius: 14px;
+        padding: 16px 18px;
+        box-shadow:
+            0 12px 36px rgba(0, 0, 0, 0.55),
+            0 0 20px rgba(245, 197, 66, 0.08);
+        box-sizing: border-box;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+
+        &:hover {
+            border-color: rgba(245, 197, 66, 0.45);
+        }
+    }
+
+    &__glow-line {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent 0%, #f5c542 50%, transparent 100%);
+    }
+
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    &__badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    &__badge-icon {
+        width: 18px;
+        height: 18px;
+        color: #f5c542;
+        filter: drop-shadow(0 0 6px rgba(245, 197, 66, 0.4));
+    }
+
+    &__title {
+        color: #f5c542;
+        font-weight: 700;
+        font-size: 0.88rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-family: inherit;
+    }
+
+    &__close {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        color: rgba(255, 255, 255, 0.6);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        cursor: pointer;
+        padding: 0;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #ef4444;
+            transform: scale(1.05);
+        }
+
+        &:active {
+            transform: scale(0.95);
+        }
+    }
+
+    &__text {
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 0.78rem;
+        line-height: 1.5;
+        margin: 0 0 14px 0;
+        font-weight: 400;
+    }
+
+    &__footer {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    &__btn {
+        background: linear-gradient(135deg, #f5c542 0%, #d4a017 100%);
+        border: none;
+        color: #0f131c;
+        font-weight: 700;
+        font-size: 0.78rem;
+        padding: 7px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 3px 10px rgba(245, 197, 66, 0.25);
+        transition: all 0.2s ease;
+
+        &:hover {
+            background: linear-gradient(135deg, #ffd700 0%, #e5b225 100%);
+            box-shadow: 0 4px 14px rgba(245, 197, 66, 0.4);
+            transform: translateY(-1px);
+        }
+
+        &:active {
+            transform: translateY(0) scale(0.98);
+        }
+    }
+}

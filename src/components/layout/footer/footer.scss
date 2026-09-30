@@ -1,0 +1,187 @@
+@use 'components/shared/styles/constants' as *;
+@use 'components/shared/styles/mixins' as *;
+
+.app-footer {
+    height: 3.6rem;
+    display: flex;
+    flex-direction: row-reverse;
+    padding: 0 1rem;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    border-top: 1px solid var(--general-section-1);
+    box-shadow: 0 1px 0 0 var(--general-section-1) inset;
+    background: var(--general-main-1);
+    z-index: 2;
+
+    &__icon {
+        padding: 0.8rem;
+
+        svg > g > path,
+        svg > path {
+            fill: var(--text-prominent);
+        }
+
+        @include mobile-or-tablet-screen {
+            padding: 0;
+        }
+    }
+
+    &__vertical-line {
+        width: 0.1rem;
+        height: 1.6rem;
+        background-color: var(--general-section-1);
+        margin: 0 0.8rem;
+    }
+
+    &__language {
+        display: flex;
+        align-items: center;
+        padding: 0.8rem;
+
+        & span {
+            margin-inline-start: 0.4rem;
+        }
+    }
+
+    &__network-status {
+        width: 1rem;
+        height: 1rem;
+        border-radius: 100%;
+
+        &-online {
+            background-color: $color-green-1;
+        }
+
+        &-offline {
+            background-color: $color-red;
+        }
+
+        &-blinking {
+            animation: blink 1s infinite alternate;
+        }
+
+        @include mobile-or-tablet-screen {
+            margin-inline-start: 1.2rem;
+        }
+    }
+
+    &__endpoint {
+        margin-inline-end: 2rem;
+
+        &-text {
+            color: $color-blue;
+            text-decoration: underline;
+        }
+    }
+}
+
+// ─── WhatsApp footer link ────────────────────────────────────────────────────
+.app-footer__whatsapp {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem;
+    border-radius: 6px;
+    color: var(--text-prominent);
+    text-decoration: none;
+    transition:
+        color 0.18s,
+        background-color 0.18s;
+
+    &:hover {
+        color: #25d366;
+        background-color: rgba(37, 211, 102, 0.1);
+    }
+
+    svg > path {
+        fill: currentColor;
+    }
+}
+
+// ─── Account footer button ───────────────────────────────────────────────────
+.app-footer__account {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem;
+    border-radius: 6px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-prominent);
+    transition: color 0.18s, background-color 0.18s, transform 0.18s;
+
+    &:hover {
+        color: #3b82f6;
+        background-color: rgba(59, 130, 246, 0.12);
+        transform: translateY(-1px);
+    }
+
+    svg {
+        stroke: currentColor;
+    }
+}
+
+// ─── Risk Disclaimer footer button ───────────────────────────────────────────
+.app-footer__risk-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.8rem;
+    border-radius: 6px;
+    background: rgba(245, 197, 66, 0.08);
+    border: 1px solid rgba(245, 197, 66, 0.25);
+    color: #f5c542;
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+        background: rgba(245, 197, 66, 0.18);
+        border-color: rgba(245, 197, 66, 0.5);
+        color: #ffd600;
+        box-shadow: 0 0 10px rgba(245, 197, 66, 0.2);
+    }
+
+    svg {
+        stroke: currentColor;
+    }
+}
+
+.languages-modal__body {
+    padding-inline: 1.6rem;
+
+    &-button {
+        height: 8.8rem;
+        width: 13.3rem;
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        padding: 0.8rem;
+
+        &-selected {
+            border-radius: 4px;
+            border: 1px solid var(--brand-blue, $color-green);
+        }
+    }
+
+    // Hide flag SVG icons in language modal buttons - icons are intentionally not shown,
+    // only language names are displayed
+    &-button svg {
+        display: none;
+    }
+}
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.2;
+    }
+}

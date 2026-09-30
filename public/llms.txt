@@ -1,0 +1,133 @@
+# ProfitHub Platform (Pfhub) — LLM Documentation & Architecture Map
+
+> **File:** `public/llms.txt`
+> **Description:** Concise, structured, LLM-optimized technical map of the ProfitHub automated trading & financial analysis application. Accessible via HTTP at `/llms.txt`. Includes alignment with official Deriv API specifications (`https://developers.deriv.com/llms.txt`).
+
+---
+
+## 1. Executive Summary & Application Overview
+
+**ProfitHub (Pfhub)** is an enterprise-grade, high-performance web trading terminal and financial analysis application built on top of Deriv's API ecosystem. It unifies:
+- Visual algorithmic bot building (**Google Blockly** engine)
+- High-frequency manual and automated trading terminals
+- Multi-indicator digit analysis, statistical circles, and strategy scanners
+- Cross-origin iframe tools (**Deriv Circles**, **Analysis Tool**, **DigitFlow**)
+- Copy-trading and multi-account state synchronization across Real and Demo accounts
+
+---
+
+## 2. Core Tech Stack & Framework Architecture
+
+| Layer | Framework / Library | Primary Purpose |
+| :--- | :--- | :--- |
+| **UI Framework** | React 18+, TypeScript 5+, RSBuild | Fast SPA rendering & modern ES module bundling |
+| **State Engine** | MobX 6+, MobX React Lite | Reactive observer-based state management |
+| **Styling** | Vanilla SCSS, BEM methodology, Glassmorphism | Responsive layout, dark/light themes, high FPS animations |
+| **Bot Engine** | Google Blockly | Visual drag-and-drop trading bot skeleton |
+| **Charts** | `@deriv-com/smartcharts-champion`, TradingView | Real-time tick charts, digit statistics, dynamic container resizing |
+| **Auth Protocol** | Legacy Deriv WS API tokens (`a1-xxx`) + Ory Hydra PKCE OAuth2 (`ory_at_xxx`) | Multi-account token bridge with automatic OTP session token resolution |
+| **Inter-Iframe Bridge** | Custom `ParentBridgeClient` & `SessionManager` | Cross-origin `postMessage` synchronization for analysis tools |
+
+---
+
+## 3. Official Deriv API Integration Rules (from `https://developers.deriv.com/llms.txt`)
+
+1. **Public Market Data**: Connect directly to `wss://api.derivws.com/trading/v1/options/ws/public` or `wss://ws.derivws.com/websockets/v3?app_id=114292` (no OTP/auth required for public ticks).
+2. **WebSocket Authenticated Trading**:
+   - For Bearer tokens (`ory_at_...`), execute `POST /trading/v1/options/accounts/{accountId}/otp` with `Deriv-App-ID: 114292` and `Authorization: Bearer <token>`.
+   - The endpoint returns a single-use authenticated WebSocket URL (`wss://ws.derivws.com/websockets/v3?app_id=114292&token=...`).
+   - Connect to that WebSocket URL and send WS API messages directly.
+3. **Token Resolution in ProfitHub**: Always use `resolveValidDerivWSToken(loginid)` in `@/utils/token-bridge` which implements this exact flow.
+
+---
+
+## 4. Directory Layout & Module Organization
+
+```
+Profithubexpertnew-main/
+├── brand.config.json                  # White-label brand settings (Pfhub, App ID, Redirect URIs)
+├── llms.txt                           # LLM documentation (Root)
+├── public/llms.txt                    # Public LLM documentation (HTTP accessible)
+├── CLAUDE.md                          # Quick guidance for AI pair programmers
+├── src/
+│   ├── app/                           # App root provider & CoreStore initialization
+│   ├── adapters/                      # SmartCharts Champion transport layer (`transport.ts`)
+│   ├── components/
+│   │   ├── iframe-bridge/             # ParentBridgeClient, SessionManager, BridgeStateMachine, Protocol
+│   │   ├── iframe-wrapper/            # IframeWrapper React component with postMessage retry loops
+│   │   ├── layout/                    # Header, AppLogo, CustomNotifications, Navigation
+│   │   ├── run-panel/                 # Live trading execution panel & drawer
+│   │   └── shared/                    # Utility components, dialogs, config (`config.ts`)
+│   ├── external/
+│   │   └── bot-skeleton/              # Blockly engine, tradeEngine, active-symbols, chart-api
+│   ├── hooks/                         # React hooks (`useStore`, `useDevice`, `useSmartChartAdaptor`)
+│   ├── pages/                         # 20 Functional Modules (Tabs)
+│   ├── services/                      # OAuth, DerivWS Accounts, Symbol Processors, Network Interceptors
+│   ├── stores/                        # MobX State Management Stores
+│   ├── types/                         # TypeScript interfaces & API payload schemas
+│   └── utils/                         # Token bridge (`token-bridge.ts`), market data, trade purchase
+```
+
+---
+
+## 5. Subsystems & Key Components Guide
+
+### 5.1 Trading Engines
+- **Bot Builder (`src/pages/bot-builder`)**: Google Blockly canvas connected to `tradeEngine` (`src/external/bot-skeleton/services/tradeEngine`). Executes XML bot strategies with automated Martingale, compounding, and stop-loss rules.
+- **Manual Trading (`src/pages/manual-trading`)**: High-speed native execution terminal bypassing all iframes. Executes trades in `<50ms` directly via `api_base`.
+- **Smart Trading (`src/pages/smart-trading`)**: Multi-contract automated trading engine backed by `smart-trading-store.ts`.
+- **Copy Trading (`src/pages/copy-trading`)**: Replicates primary account transactions to slave demo/real accounts.
+
+### 5.2 Embedded Iframe Bridge Architecture
+- **Files**: `src/components/iframe-wrapper/iframe-wrapper.tsx` & `src/components/iframe-bridge/`
+- **Handshake Protocol**:
+  - `ParentBridgeClient` sanitizes origins using `new URL(url).origin` to prevent dropping `postMessage` events from whitelisted analysis domains.
+  - Broadcasts `AUTH_TOKEN`, `DERIV_AUTH`, `SESSION_DATA`, `setToken`, `BRIDGE_READY`, and `AUTH_SUCCESS` postMessages at scheduled intervals (`[100, 300, 500, 1000, 2000, 3000, 5000, 8000, 10000]`ms).
+
+### 5.3 SmartCharts Champion & Responsiveness
+- **Location**: `src/pages/chart/chart.tsx` & `src/adapters/smartcharts-champion/transport.ts`
+- **Drawer Responsiveness**: Uses `ResizeObserver` and continuous `requestAnimationFrame` canvas redrawing during the 400ms CSS drawer expansion/collapse animation (`.dashboard__chart-wrapper--expanded`).
+- **Error Protection**: `transport.ts` gracefully catches `ticks_history` subscription failures without throwing unhandled promise rejections.
+
+---
+
+## 6. MobX Store Hierarchy
+
+| Store Name | File Path | Responsibilities |
+| :--- | :--- | :--- |
+| `RootStore` | `src/stores/root-store.ts` | Central store container holding references to all sub-stores |
+| `ClientStore` | `src/stores/client-store.ts` | Manages active account ID, balance, currencies, account switching |
+| `RunPanelStore` | `src/stores/run-panel-store.ts` | Bot execution lifecycle, trade statistics, drawer toggle state |
+| `TransactionsStore` | `src/stores/transactions-store.ts` | Transaction history, PnL tracking, win/loss stats |
+| `SmartTradingStore` | `src/stores/smart-trading-store.ts` | Smart trading strategy state machine |
+| `ScannerStore` | `src/stores/scanner-store.ts` | Real-time market volatility scanning |
+| `AnalysisStore` | `src/stores/analysis-store.ts` | Statistical digit distribution & circle analysis |
+| `CopyTraderStore` | `src/stores/copy-trader-store.ts` | Master-slave token replication |
+
+---
+
+## 7. Developer & AI Assistant Guidelines
+
+When modifying this repository:
+1. **Never pass `ory_at_...` to WebSocket `authorize` calls**. Always use `resolveValidDerivWSToken()`.
+2. **Preserve `app_id` consistency**: Ensure `114292` or `121856` is correctly passed depending on the target system.
+3. **CSS Scoping**: Top-level CSS classes like `.dashboard__chart-wrapper--expanded` must remain unscoped from nested `.bot { ... }` blocks in `chart.scss`.
+4. **Always run TypeScript validation**: `npm run build` or `npx tsc --noEmit` before committing code.
+
+---
+
+## 8. Common Commands
+
+```bash
+# Install dependencies
+npm install
+
+# Run local development server
+npm run dev
+
+# TypeScript type checking
+npx tsc --noEmit
+
+# Production build
+npm run build
+```

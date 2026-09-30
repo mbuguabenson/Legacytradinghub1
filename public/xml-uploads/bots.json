@@ -1,0 +1,149 @@
+[
+  {
+    "name": "Speed Bot",
+    "file": "Speed Bot.xml",
+    "description": "ProfitHub Fast Lite Speed Bot powered by SV1 architecture with synchronized zero-latency execution.",
+    "difficulty": "Advanced",
+    "strategy": "Speed Run"
+  },
+  {
+    "name": "Auto Differ",
+    "file": "Auto Differ.xml",
+    "description": "High-probability Differs bot powered by the Poverty Hunter 3-tick confirmation strategy. Safe middle digit targeting with auto-recovery.",
+    "difficulty": "Intermediate",
+    "strategy": "Poverty Hunter Differs"
+  },
+  {
+    "name": "Elite Pro",
+    "file": "Elite Pro.xml",
+    "description": "ProfitHub Elite Pro AI Engine with dynamic Over 3 / Under 6 momentum split and adaptive risk management.",
+    "difficulty": "Advanced",
+    "strategy": "Elite Pro"
+  },
+  {
+    "name": "Auto X",
+    "file": "Auto X.xml",
+    "description": "High-velocity Auto X Even/Odd algorithmic engine powered by consecutive reversal pattern recognition.",
+    "difficulty": "Intermediate",
+    "strategy": "Auto X E/O"
+  },
+  {
+    "name": "🤑UNSTOPPABLE DIFFER BOT🤑",
+    "file": "🤑UNSTOPPABLE DIFFER BOT🤑.xml",
+    "description": "Unstoppable Differs trading bot with aggressive digit matching and high-frequency execution.",
+    "difficulty": "Advanced",
+    "strategy": "Differs"
+  },
+  {
+    "name": "Auto Under 7 over 3 Pro ",
+    "file": "Auto Under 7 over 3 Pro .xml",
+    "description": "Advanced trading strategy: Auto Under 7 over 3 Pro . Optimized for consistent returns and automated execution.",
+    "difficulty": "Intermediate",
+    "strategy": "Multi-Strategy"
+  },
+  {
+    "name": "Brixxie Auto",
+    "file": "Brixxie Auto.xml",
+    "description": "LDP Over 2 and Under 7 strategy with 25-tick analysis, 4-digit pattern confirmation, 5-trade pause cycle, and Martingale 2.",
+    "difficulty": "Intermediate",
+    "strategy": "Over 2 / Under 7"
+  },
+  {
+    "name": "Deriv auto X",
+    "file": "Deriv auto X.xml",
+    "description": "LDP Over 1 and Under 8 strategy with 25-tick analysis, 4-digit pattern confirmation, 5-trade pause cycle, and Martingale 2.",
+    "difficulty": "Intermediate",
+    "strategy": "Over 1 / Under 8"
+  },
+  {
+    "name": "Differs Bulk",
+    "file": "Differs Bulk.xml",
+    "description": "Advanced trading strategy: Differs Bulk. Optimized for consistent returns and automated execution.",
+    "difficulty": "Intermediate",
+    "strategy": "Multi-Strategy"
+  },
+  {
+    "name": "G3 Auto",
+    "file": "G3 Auto.xml",
+    "description": "Advanced trading strategy: G3 Auto. Optimized for consistent returns and automated execution.",
+    "difficulty": "Intermediate",
+    "strategy": "Multi-Strategy"
+  },
+  {
+    "name": "HUNTER SPEED BOT",
+    "file": "HUNTER SPEED BOT.xml",
+    "description": "High-speed precision bot designed for rapid market entries and quick profit captures.",
+    "difficulty": "Advanced",
+    "strategy": "Speed Run"
+  },
+  {
+    "name": "LAS VEGAS 💵💵 PRO ENGLISH",
+    "file": "LAS VEGAS 💵💵 PRO ENGLISH..xml",
+    "description": "Premium high-stakes trading bot with aggressive profit-targeting strategies for experienced traders.",
+    "difficulty": "Advanced",
+    "strategy": "High Stakes"
+  },
+  {
+    "name": "Over 2 Rec Over 5 With Entry Point",
+    "file": "Over 2 Rec Over 5 With Entry Point.xml",
+    "description": "Advanced trading strategy: Over 2 Rec Over 5 With Entry Point. Optimized for consistent returns and automated execution.",
+    "difficulty": "Intermediate",
+    "strategy": "Multi-Strategy"
+  },
+  {
+    "name": "Over 2 Under 7",
+    "file": "Over 2 Under 7.xml",
+    "description": "Advanced trading strategy: Over 2 Under 7. Optimized for consistent returns and automated execution.",
+    "difficulty": "Intermediate",
+    "strategy": "Multi-Strategy"
+  },
+  {
+    "name": "OVER UNDER AUTO SWITCHER",
+    "file": "OVER UNDER AUTO SWITCHER.xml",
+    "description": "Intelligent Over/Under bot that auto-switches between strategies based on market conditions.",
+    "difficulty": "Intermediate",
+    "strategy": "Over/Under"
+  },
+  {
+    "name": "OVER UNDER AUTOMATIC X",
+    "file": "OVER UNDER AUTOMATIC X .xml",
+    "description": "Advanced automated Over/Under trading with optimized entry points and risk management.",
+    "difficulty": "Intermediate",
+    "strategy": "Over/Under"
+  },
+  {
+    "name": "PROFITHUB RISE FALL AUTO",
+    "file": "PROFITHUB RISE FALL AUTO.xml",
+    "description": "Automated Rise/Fall trading bot with smart trend detection and optimal entry timing.",
+    "difficulty": "Beginner",
+    "strategy": "Rise/Fall"
+  },
+  {
+    "name": "Profithub SV1",
+    "file": "Profithub SV1.xml",
+    "description": "ProfitHub Server V1 — optimized multi-strategy bot with balanced risk and consistent performance.",
+    "difficulty": "Beginner",
+    "strategy": "Multi-Strategy"
+  },
+  {
+    "name": "RISE AND FALL AUTOMATIC X",
+    "file": "RISE AND FALL AUTOMATIC X .xml",
+    "description": "Fully automated Rise and Fall bot with enhanced signal detection and dynamic stake adjustment.",
+    "difficulty": "Intermediate",
+    "strategy": "Rise/Fall"
+  },
+  {
+    "name": "Sniper A.I",
+    "file": "Sniper A.I.xml",
+    "description": "Advanced trading strategy: Sniper A.I. Optimized for consistent returns and automated execution.",
+    "difficulty": "Intermediate",
+    "strategy": "Multi-Strategy"
+  },
+  {
+    "name": "Under 7 Bulk",
+    "file": "Under 7 Bulk.xml",
+    "description": "Advanced trading strategy: Under 7 Bulk. Optimized for consistent returns and automated execution.",
+    "difficulty": "Intermediate",
+    "strategy": "Multi-Strategy"
+  }
+]

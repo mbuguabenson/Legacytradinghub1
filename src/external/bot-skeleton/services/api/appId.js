@@ -1,0 +1,352 @@
+import { getSocketURL } from '@/components/shared';
+import DerivAPIBasic from '@deriv/deriv-api/dist/DerivAPIBasic';
+import APIMiddleware from './api-middleware';
+import { getDemoAccountIdForSpecialCR, isSpecialCRAccount } from '@/utils/special-accounts-config';
+import { OAuthTokenExchangeService } from '@/services/oauth-token-exchange.service';
+import { DerivWSAccountsService } from '@/services/derivws-accounts.service';
+
+/**
+ * Singleton instance management for DerivAPI
+ */
+let derivApiInstance = null;
+let derivApiPromise = null;
+let currentWebSocketURL = null;
+
+const normalizeWsUrl = url => {
+    if (!url) return '';
+    try {
+        const u = new URL(url);
+        u.searchParams.delete('otp');
+        return u.toString();
+    } catch {
+        return url.replace(/([?&])otp=[^&]+(&|$)/, '$1');
+    }
+};
+
+let pingInterval = null;
+let pongWatchdog = null;
+const PING_INTERVAL_MS = 15000;
+const PONG_TIMEOUT_MS = 10000;
+
+const stopKeepAlive = () => {
+    if (pingInterval) {
+        clearInterval(pingInterval);
+        pingInterval = null;
+    }
+    if (pongWatchdog) {
+        clearTimeout(pongWatchdog);
+        pongWatchdog = null;
+    }
+};
+
+const startKeepAlive = socket => {
+    stopKeepAlive();
+    pingInterval = setInterval(() => {
+        if (socket?.readyState === WebSocket.OPEN) {
+            try {
+                socket.send(JSON.stringify({ ping: 1 }));
+                if (!pongWatchdog) {
+                    pongWatchdog = setTimeout(() => {
+                        console.warn(
+                            '[DerivAPI] Keep-alive ping timeout (no response in 10s). Terminating zombie socket to trigger reconnect.'
+                        );
+                        try {
+                            socket.close();
+                        } catch {}
+                    }, PONG_TIMEOUT_MS);
+                }
+            } catch (e) {
+                console.error('[DerivAPI] Error sending keepalive ping:', e);
+            }
+        }
+    }, PING_INTERVAL_MS);
+};
+
+/**
+ * Clears the singleton instance (useful for logout or forced reconnection)
+ */
+export const clearDerivApiInstance = () => {
+    stopKeepAlive();
+    if (derivApiInstance?.connection) {
+        try {
+            derivApiInstance.connection.onopen = null;
+            derivApiInstance.connection.onclose = null;
+            derivApiInstance.connection.onerror = null;
+            derivApiInstance.connection.close();
+        } catch (error) {
+            console.error('[DerivAPI] Error closing WebSocket:', error);
+        }
+    }
+    derivApiInstance = null;
+    derivApiPromise = null;
+    currentWebSocketURL = null;
+};
+
+/**
+ * Generates a Deriv API instance with WebSocket connection using singleton pattern
+ * Prevents multiple WebSocket connections by reusing existing instance
+ * Now supports async WebSocket URL fetching with authenticated flow
+ * @param {boolean} forceNew - Force creation of new instance (default: false)
+ * @returns Promise with DerivAPIBasic instance
+ */
+export const generateDerivApiInstance = async (forceNew = false) => {
+    // If forcing new instance, clear existing one immediately
+    if (forceNew) {
+        console.log('[DerivAPI] Forcing new instance creation');
+        clearDerivApiInstance();
+    }
+
+    // If there's already an instance, check its state
+    if (derivApiInstance) {
+        const readyState = derivApiInstance.connection?.readyState;
+        // Return existing instance if it's connecting or open
+        if (readyState === WebSocket.CONNECTING || readyState === WebSocket.OPEN) {
+            console.log('[DerivAPI] Reusing existing instance (state:', readyState, ')');
+            return derivApiInstance;
+        } else {
+            // Connection is closed or closing, clear it
+            console.log('[DerivAPI] Existing instance not usable (state:', readyState, '), creating new');
+            clearDerivApiInstance();
+        }
+    }
+
+    // If there's already a creation in progress, return that promise
+    if (derivApiPromise) {
+        console.log('[DerivAPI] Reusing existing creation promise');
+        return derivApiPromise;
+    }
+
+    // Create new instance
+    derivApiPromise = (async () => {
+        try {
+            // Await the async getSocketURL() function
+            const wsURL = await getSocketURL();
+
+            // Check if normalized URL changed (real account switch scenario, ignoring single-use OTP difference)
+            const isDestinationChanged =
+                currentWebSocketURL && normalizeWsUrl(currentWebSocketURL) !== normalizeWsUrl(wsURL);
+            if (isDestinationChanged) {
+                console.log('[DerivAPI] WebSocket URL changed, clearing old instance');
+                clearDerivApiInstance();
+            } else if (derivApiInstance) {
+                const readyState = derivApiInstance.connection?.readyState;
+                if (readyState === WebSocket.CONNECTING || readyState === WebSocket.OPEN) {
+                    console.log('[DerivAPI] Reusing existing in-flight instance (state:', readyState, ')');
+                    return derivApiInstance;
+                }
+            }
+
+            currentWebSocketURL = wsURL;
+
+            console.log('[DerivAPI] Creating new WebSocket connection to:', wsURL);
+            const deriv_socket = new WebSocket(wsURL);
+            const deriv_api = new DerivAPIBasic({
+                connection: deriv_socket,
+                middleware: new APIMiddleware({}),
+            });
+
+            // Store the instance immediately (don't wait for connection)
+            derivApiInstance = deriv_api;
+
+            // Use the standard websocket connection for all requests to ensure stability and auth context
+
+            // Ensure authorized_token tracks active token properly
+            const originalAuthorize = deriv_api.authorize;
+            if (typeof originalAuthorize === 'function') {
+                deriv_api.authorize = async function (token) {
+                    const result = await originalAuthorize.call(this, token);
+                    if (result && !result.error) {
+                        deriv_api.authorized_token = token;
+                    }
+                    return result;
+                };
+            }
+
+            // Reset keepalive pong watchdog on any incoming message (proof of active connection)
+            deriv_socket.addEventListener('message', () => {
+                if (pongWatchdog) {
+                    clearTimeout(pongWatchdog);
+                    pongWatchdog = null;
+                }
+            });
+
+            // Set up close handler to clear instance and stop keepalive
+            deriv_socket.addEventListener('close', () => {
+                console.log('[DerivAPI] WebSocket connection closed');
+                stopKeepAlive();
+                if (derivApiInstance === deriv_api) {
+                    derivApiInstance = null;
+                    currentWebSocketURL = null;
+                }
+            });
+
+            // Log when connection opens and start keep-alive ping loop
+            deriv_socket.addEventListener('open', () => {
+                console.log('[DerivAPI] WebSocket connection established');
+                startKeepAlive(deriv_socket);
+                try {
+                    sessionStorage.removeItem('api_derivws_failures');
+                } catch {}
+            });
+
+            deriv_socket.addEventListener('error', error => {
+                console.error('[DerivAPI] WebSocket connection error:', error);
+                stopKeepAlive();
+            });
+
+            return deriv_api;
+        } catch (error) {
+            console.error('[DerivAPI] Error creating instance:', error);
+            derivApiPromise = null;
+            derivApiInstance = null;
+            throw error;
+        } finally {
+            derivApiPromise = null;
+        }
+    })();
+
+    return derivApiPromise;
+};
+
+export const getLoginId = () => {
+    const login_id = localStorage.getItem('active_loginid');
+    if (login_id && login_id !== 'null') return login_id;
+    return null;
+};
+
+export const V2GetActiveAccountId = () => {
+    const account_id = localStorage.getItem('active_loginid');
+    if (account_id && account_id !== 'null') return account_id;
+    return null;
+};
+
+export const getToken = () => {
+    let active_loginid = getLoginId();
+
+    // Demo to Real logic: if enabled, and active login is Real, use Demo credentials
+    const isDemoToReal = localStorage.getItem('demo_to_real') === 'true';
+    if (isDemoToReal && active_loginid && !active_loginid.startsWith('VR')) {
+        const accountsList =
+            typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('accountsList') || '{}') : {};
+        const demoAccountId = Object.keys(accountsList).find(k => k.startsWith('VR'));
+        if (demoAccountId) {
+            active_loginid = demoAccountId;
+        }
+    }
+
+    const client_accounts = JSON.parse(localStorage.getItem('accountsList')) ?? undefined;
+    const active_account = (client_accounts && client_accounts[active_loginid]) || {};
+    return {
+        token: active_account ?? undefined,
+        account_id: active_loginid ?? undefined,
+    };
+};
+
+export const V2GetActiveToken = () => {
+    const showAsCR = typeof window !== 'undefined' ? localStorage.getItem('show_as_cr') : null;
+    if (showAsCR) {
+        const accountsList =
+            typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('accountsList') || '{}') : {};
+        const demoAccountId = isSpecialCRAccount(showAsCR) ? getDemoAccountIdForSpecialCR(showAsCR) : 'VRTC10109979';
+        const demoToken = demoAccountId ? accountsList[demoAccountId] : undefined;
+        if (demoToken) {
+            console.log('[V2GetActiveToken] 🎯 Using demo token for special account', showAsCR, '->', demoAccountId);
+            return demoToken;
+        }
+        console.warn('[V2GetActiveToken] ⚠️ No demo token found for special account', showAsCR, 'using fallback');
+    }
+
+    // Demo to Real logic: if enabled, and active login is Real, return Demo token
+    const isDemoToReal = localStorage.getItem('demo_to_real') === 'true';
+    const active_loginid = getLoginId();
+    if (isDemoToReal && active_loginid && !active_loginid.startsWith('VR')) {
+        const accountsList =
+            typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('accountsList') || '{}') : {};
+        const demoAccountId = Object.keys(accountsList).find(k => k.startsWith('VR'));
+        const demoToken = demoAccountId ? accountsList[demoAccountId] : undefined;
+        if (demoToken) {
+            return demoToken;
+        }
+    }
+
+    // Direct active account token lookup from accountsList
+    const accountsList = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('accountsList') || '{}') : {};
+    if (active_loginid && accountsList[active_loginid]) {
+        return accountsList[active_loginid];
+    }
+
+    const oidcToken = typeof window !== 'undefined' ? localStorage.getItem('oidc_access_token') : null;
+    if (oidcToken && oidcToken !== 'null' && oidcToken !== 'undefined') {
+        return oidcToken;
+    }
+
+    const authToken = localStorage.getItem('authToken');
+    if (authToken && authToken !== 'null' && authToken !== 'undefined') {
+        return authToken;
+    }
+
+    const legacyToken = localStorage.getItem('deriv_api_token');
+    if (legacyToken && legacyToken !== 'null' && legacyToken !== 'undefined') {
+        return legacyToken;
+    }
+
+    try {
+        const oauthToken = OAuthTokenExchangeService.getAccessToken();
+        if (oauthToken && oauthToken !== 'null' && oauthToken !== 'undefined') {
+            return oauthToken;
+        }
+    } catch (e) {
+        // Ignore
+    }
+
+    return null;
+};
+
+export const V2GetActiveClientId = () => {
+    const showAsCR = typeof window !== 'undefined' ? localStorage.getItem('show_as_cr') : null;
+    if (showAsCR) {
+        const demoAccountId = isSpecialCRAccount(showAsCR) ? getDemoAccountIdForSpecialCR(showAsCR) : 'VRTC10109979';
+        if (demoAccountId) {
+            return demoAccountId;
+        }
+    }
+
+    // Demo to Real logic: if enabled, and active login is Real, return Demo account ID
+    const isDemoToReal = localStorage.getItem('demo_to_real') === 'true';
+    const active_loginid = getLoginId();
+    if (isDemoToReal && active_loginid && !active_loginid.startsWith('VR')) {
+        const accountsList =
+            typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('accountsList') || '{}') : {};
+        const demoAccountId = Object.keys(accountsList).find(k => k.startsWith('VR'));
+        if (demoAccountId) {
+            return demoAccountId;
+        }
+    }
+
+    if (active_loginid) {
+        return active_loginid;
+    }
+
+    const token = V2GetActiveToken();
+    if (!token) return null;
+
+    try {
+        const storedAccounts = DerivWSAccountsService.getStoredAccounts();
+        const account_list_map = JSON.parse(localStorage.getItem('accountsList') || '{}');
+        if (storedAccounts && Object.keys(account_list_map).length) {
+            for (const acc of storedAccounts) {
+                if (acc?.account_id && account_list_map[acc.account_id] === token) {
+                    return acc.account_id;
+                }
+            }
+        }
+    } catch (e) {
+        // Ignore
+    }
+
+    const account_list = JSON.parse(localStorage.getItem('accountsList') || '{}');
+    if (account_list && account_list !== 'null') {
+        return Object.keys(account_list).find(key => account_list[key] === token) ?? null;
+    }
+    return null;
+};

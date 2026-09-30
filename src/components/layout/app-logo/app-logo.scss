@@ -1,0 +1,175 @@
+@use 'components/shared/styles/mixins' as *;
+
+.app-header {
+    &__logo {
+        padding-inline-start: 3.2rem;
+        padding-inline-end: 2rem;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+
+        @include mobile-or-tablet-screen {
+            padding-inline-start: 0.4rem;
+            padding-inline-end: 0.6rem;
+        }
+
+        &-text {
+            margin-left: 8px;
+        }
+    }
+
+    // ─── Mobile Logo Card ──────────────────────────────────────────────
+    &__mobile-logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        &-card {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+            flex-shrink: 0;
+        }
+
+        &-symbol {
+            font-size: 13px;
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            line-height: 1;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        &-text {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            line-height: 1;
+        }
+
+        &-name {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--text-prominent);
+            letter-spacing: 0.3px;
+            line-height: 1.2;
+        }
+
+        &-powered {
+            font-size: 8px;
+            font-weight: 600;
+            color: var(--text-less-prominent);
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            line-height: 1.2;
+            margin-top: 1px;
+        }
+    }
+}
+
+// ─── Universal Brand Logo Component Styles (User Brand Identity) ───
+.lth-brand-logo {
+    display: flex;
+    align-items: center;
+    user-select: none;
+    cursor: pointer;
+    text-decoration: none;
+    border-radius: 12px;
+    padding: 2px 6px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(8px);
+        transform: translateY(-1px);
+
+        .lth-brand-logo__icon {
+            transform: scale(1.08) rotate(-1.5deg);
+            filter: drop-shadow(0 6px 16px rgba(16, 185, 129, 0.5));
+        }
+    }
+
+    &__row {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+    }
+
+    &__icon {
+        display: block;
+        object-fit: contain;
+        flex-shrink: 0;
+        filter: drop-shadow(0 4px 10px rgba(16, 185, 129, 0.3));
+        transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    &__text-col {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        line-height: 1.15;
+        gap: 2px;
+    }
+
+    &__title,
+    &__legacy {
+        font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+        font-size: 1.65rem;
+        font-weight: 900;
+        letter-spacing: 1.2px;
+        line-height: 1.05;
+        text-transform: uppercase;
+        display: block;
+        color: var(--text-prominent, #0f172a);
+        transition: color 0.2s ease;
+
+        body.theme--dark &,
+        .theme--dark &,
+        :global(.theme--dark) & {
+            color: #ffffff !important;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+        }
+
+        body:not(.theme--dark) &,
+        body.theme--light &,
+        .theme--light &,
+        :global(.theme--light) & {
+            color: #0f172a !important;
+            text-shadow: none;
+        }
+    }
+
+    &__subtitle,
+    &__trading-hub {
+        font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+        font-size: 1.15rem;
+        font-weight: 800;
+        letter-spacing: 2.2px;
+        line-height: 1.05;
+        text-transform: uppercase;
+        display: block;
+        color: #047857;
+        transition: color 0.2s ease;
+
+        body.theme--dark &,
+        .theme--dark &,
+        :global(.theme--dark) & {
+            color: #10b981 !important;
+            text-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+        }
+
+        body:not(.theme--dark) &,
+        body.theme--light &,
+        .theme--light &,
+        :global(.theme--light) & {
+            color: #047857 !important;
+            text-shadow: none;
+        }
+    }
+}

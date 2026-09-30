@@ -1,0 +1,348 @@
+import { isMultiplierContract } from '@/components/shared';
+import cloneThorough from '@/utils/clone';
+import JSInterpreter from '@deriv/js-interpreter';
+import { unrecoverable_errors } from '../../../constants/messages';
+import { observer as globalObserver } from '../../../utils/observer';
+import { api_base } from '../../api/api-base';
+import Interface from '../Interface';
+import { createScope } from './cliTools';
+
+JSInterpreter.prototype.takeStateSnapshot = function () {
+    const newStateStack = cloneThorough(this.stateStack, undefined, undefined, undefined, true);
+    return newStateStack;
+};
+
+JSInterpreter.prototype.restoreStateSnapshot = function (snapshot) {
+    this.stateStack = cloneThorough(snapshot, undefined, undefined, undefined, true);
+    this.global = this.stateStack[0].scope.object || this.stateStack[0].scope;
+    this.initFunc_(this, this.global);
+};
+
+const botInitialized = bot => bot && bot.tradeEngine.options;
+const botStarted = bot => botInitialized(bot) && bot.tradeEngine.tradeOptions;
+const shouldRestartOnError = (bot, errorName = '') =>
+    !unrecoverable_errors.includes(errorName) && botInitialized(bot) && bot.tradeEngine.options.shouldRestartOnError;
+
+const shouldStopOnError = (bot, errorName = '') => {
+    const stopErrors = ['SellNotAvailableCustom', 'ContractCreationFailure', 'InvalidtoBuy'];
+    if (stopErrors.includes(errorName) && botInitialized(bot)) {
+        return true;
+    }
+    return false;
+};
+
+const timeMachineEnabled = bot => botInitialized(bot) && bot.tradeEngine.options.timeMachineEnabled;
+
+// TODO chek beforState & duringState & startState
+const Interpreter = () => {
+    let $scope = createScope();
+    let bot = Interface($scope);
+    let interpreter = {};
+    let onFinish;
+
+    $scope.observer.register('REVERT', watchName =>
+        revert(watchName === 'before' ? $scope.beforeState : $scope.duringState)
+    );
+
+    function init() {
+        $scope = createScope();
+        bot = Interface($scope);
+        interpreter = {};
+        onFinish = () => {};
+    }
+
+    function revert(state) {
+        interpreter.restoreStateSnapshot(state);
+        interpreter.paused_ = false;
+        loop();
+    }
+
+    function loop() {
+        if ($scope.stopped || !interpreter.run()) {
+            onFinish(interpreter.pseudoToNative(interpreter.value));
+        }
+    }
+
+    function createAsync(js_interpreter, func) {
+        const asyncFunc = (...args) => {
+            const callback = args.pop();
+
+            // Workaround for unknown number of args
+            const reversed_args = args.slice().reverse();
+            const first_defined_arg_idx = reversed_args.findIndex(arg => arg !== undefined);
+
+            // Remove extra undefined args from end of the args
+            const function_args = first_defined_arg_idx < 0 ? [] : reversed_args.slice(first_defined_arg_idx).reverse();
+            // End of workaround
+
+            func(...function_args.map(arg => js_interpreter.pseudoToNative(arg)))
+                .then(rv => {
+                    callback(js_interpreter.nativeToPseudo(rv));
+                    loop();
+                })
+                .catch(e => {
+                    const err = e?.error || e;
+                    const msg =
+                        err?.message || err?.error?.message || (typeof err === 'string' ? err : 'Operation failed');
+                    globalObserver.emit('ui.log.error', msg);
+                    $scope.observer.emit('Error', err);
+                });
+        };
+
+        // TODO: This is a workaround, create issue on original repo, once fixed
+        // remove this. We don't know how many args are going to be passed, so we
+        // assume a max of 100.
+        const MAX_ACCEPTABLE_FUNC_ARGS = 100;
+        Object.defineProperty(asyncFunc, 'length', { value: MAX_ACCEPTABLE_FUNC_ARGS + 1 });
+        return js_interpreter.createAsyncFunction(asyncFunc);
+    }
+
+    function initFunc(js_interpreter, scope) {
+        const bot_interface = bot.getInterface();
+        const { getTicksInterface, alert, prompt, sleep, console: custom_console } = bot_interface;
+        const ticks_interface = getTicksInterface;
+
+        js_interpreter.setProperty(scope, 'console', js_interpreter.nativeToPseudo(custom_console));
+        js_interpreter.setProperty(scope, 'alert', js_interpreter.nativeToPseudo(alert));
+        js_interpreter.setProperty(scope, 'prompt', js_interpreter.nativeToPseudo(prompt));
+        js_interpreter.setProperty(
+            scope,
+            'getPurchaseReference',
+            js_interpreter.nativeToPseudo(bot_interface.getPurchaseReference)
+        );
+
+        const checkIsDemo = loginid => {
+            const id =
+                (typeof loginid === 'string' ? loginid : '') ||
+                (typeof localStorage !== 'undefined' ? localStorage.getItem('active_loginid') : '') ||
+                '';
+            return (
+                id.startsWith('VR') ||
+                id.startsWith('VRT') ||
+                id.startsWith('VRTC') ||
+                id.startsWith('VRW') ||
+                id.startsWith('DEM') ||
+                id.startsWith('DOT')
+            );
+        };
+        const checkIsReal = loginid => {
+            const id =
+                (typeof loginid === 'string' ? loginid : '') ||
+                (typeof localStorage !== 'undefined' ? localStorage.getItem('active_loginid') : '') ||
+                '';
+            const isDemo =
+                id.startsWith('VR') ||
+                id.startsWith('VRT') ||
+                id.startsWith('VRTC') ||
+                id.startsWith('VRW') ||
+                id.startsWith('DEM') ||
+                id.startsWith('DOT');
+            return !isDemo && Boolean(id);
+        };
+
+        js_interpreter.setProperty(scope, 'isDemoAccount', js_interpreter.nativeToPseudo(checkIsDemo));
+        js_interpreter.setProperty(scope, 'isRealAccount', js_interpreter.nativeToPseudo(checkIsReal));
+        js_interpreter.setProperty(scope, 'isVirtualAccount', js_interpreter.nativeToPseudo(checkIsDemo));
+        js_interpreter.setProperty(scope, 'isVirtual', js_interpreter.nativeToPseudo(checkIsDemo));
+
+        const pseudo_bot_interface = js_interpreter.nativeToPseudo(bot_interface);
+
+        Object.entries(ticks_interface).forEach(([name, f]) =>
+            js_interpreter.setProperty(pseudo_bot_interface, name, createAsync(js_interpreter, f))
+        );
+
+        js_interpreter.setProperty(
+            pseudo_bot_interface,
+            'start',
+            js_interpreter.nativeToPseudo((...args) => {
+                const { start } = bot_interface;
+                if (shouldRestartOnError(bot)) {
+                    $scope.startState = js_interpreter.takeStateSnapshot();
+                }
+                start(...args);
+            })
+        );
+
+        js_interpreter.setProperty(
+            pseudo_bot_interface,
+            'purchase',
+            createAsync(js_interpreter, bot_interface.purchase)
+        );
+        js_interpreter.setProperty(
+            pseudo_bot_interface,
+            'bulkPurchase',
+            createAsync(js_interpreter, bot_interface.bulkPurchase)
+        );
+        js_interpreter.setProperty(
+            pseudo_bot_interface,
+            'setBulkPurchaseCount',
+            js_interpreter.nativeToPseudo(bot_interface.setBulkPurchaseCount)
+        );
+        js_interpreter.setProperty(
+            pseudo_bot_interface,
+            'sellAtMarket',
+            createAsync(js_interpreter, bot_interface.sellAtMarket)
+        );
+        js_interpreter.setProperty(scope, 'Bot', pseudo_bot_interface);
+        js_interpreter.setProperty(
+            scope,
+            'watch',
+            createAsync(js_interpreter, async watchName => {
+                if ($scope.stopped) {
+                    return false;
+                }
+
+                const { watch } = bot.getInterface();
+
+                if (watchName === 'before' && typeof window !== 'undefined' && window.is_bot_paused) {
+                    await new Promise(resolve => {
+                        let resolved = false;
+                        const onResume = () => {
+                            if (resolved) return;
+                            resolved = true;
+                            globalObserver.unregister('bot.resume', onResume);
+                            resolve();
+                        };
+                        globalObserver.register('bot.resume', onResume);
+
+                        if (!window.is_bot_paused) {
+                            onResume();
+                        }
+                    });
+
+                    if ($scope.stopped) {
+                        return false;
+                    }
+                }
+
+                if (timeMachineEnabled(bot)) {
+                    const snapshot = interpreter.takeStateSnapshot();
+                    if (watchName === 'before') {
+                        $scope.beforeState = snapshot;
+                    } else {
+                        $scope.duringState = snapshot;
+                    }
+                }
+
+                return watch(watchName);
+            })
+        );
+
+        js_interpreter.setProperty(scope, 'sleep', createAsync(js_interpreter, sleep));
+    }
+
+    async function stop() {
+        $scope.stopped = true;
+        api_base.is_stopping = false;
+        api_base.setIsRunning(false);
+
+        try {
+            const global_timeouts = globalObserver.getState('global_timeouts') ?? [];
+            Object.keys(global_timeouts).forEach(timeout => {
+                try {
+                    clearTimeout(global_timeouts[timeout]);
+                } catch {}
+            });
+        } catch {}
+
+        globalObserver.emit('bot.stop');
+
+        // Clean up session in background asynchronously without blocking stop
+        terminateSession().catch(() => {});
+        return Promise.resolve();
+    }
+
+    async function terminateSession() {
+        return new Promise(resolve => {
+            try {
+                $scope.stopped = true;
+                $scope.is_error_triggered = false;
+                globalObserver.emit('bot.stop');
+                const { ticksService } = $scope;
+                api_base.clearSubscriptions();
+
+                ticksService.unsubscribeFromTicksService().finally(() => {
+                    resolve();
+                });
+            } catch (error) {
+                resolve();
+            }
+        });
+    }
+
+    async function unsubscribeFromTicksService() {
+        const { ticksService } = $scope;
+        return new Promise((resolve, reject) => {
+            try {
+                ticksService.unsubscribeFromTicksService().then(() => {
+                    resolve();
+                });
+            } catch (e) {
+                reject(e);
+            }
+        });
+    }
+
+    function run(code) {
+        return new Promise((resolve, reject) => {
+            const onError = e => {
+                if ($scope.stopped) {
+                    return;
+                }
+                const errObj = e?.error || e;
+                const errMsg =
+                    errObj?.message ||
+                    errObj?.error?.message ||
+                    (typeof errObj === 'string' ? errObj : 'Trading Error');
+
+                // Always log the error to Journal so user sees the notification
+                globalObserver.emit('ui.log.error', errMsg);
+
+                // DBot handles 'InvalidToken' internally
+                if (errObj?.code === 'InvalidToken') {
+                    globalObserver.emit('client.invalid_token');
+                    globalObserver.emit('bot.stop');
+                    return;
+                }
+                if (shouldStopOnError(bot, errObj?.code)) {
+                    globalObserver.emit('bot.click_stop');
+                    globalObserver.emit('bot.stop');
+                    return;
+                }
+
+                $scope.is_error_triggered = true;
+                if (!shouldRestartOnError(bot, errObj?.code) || !botStarted(bot)) {
+                    globalObserver.emit('Error', errObj);
+                    globalObserver.emit('bot.click_stop');
+                    globalObserver.emit('bot.stop');
+                    reject(errObj);
+                    return;
+                }
+
+                globalObserver.emit('Error', errObj);
+                const { initArgs, tradeOptions } = bot.tradeEngine;
+                terminateSession();
+                init();
+                $scope.observer.register('Error', onError);
+                bot.tradeEngine.init(...initArgs);
+                bot.tradeEngine.start(tradeOptions);
+                const canRestoreState = $scope.startState && interpreter?.restoreStateSnapshot instanceof Function;
+                if (canRestoreState) {
+                    revert($scope.startState);
+                }
+            };
+
+            $scope.observer.register('Error', onError);
+
+            interpreter = new JSInterpreter(code, initFunc);
+            onFinish = resolve;
+
+            loop();
+        });
+    }
+
+    return { stop, run, terminateSession, bot, unsubscribeFromTicksService };
+};
+export default Interpreter;
+
+export const createInterpreter = () => new Interpreter();

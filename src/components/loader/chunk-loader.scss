@@ -1,0 +1,179 @@
+// ═══════════════════════════════════════════════════════════════
+// ✦ LEGACY TRADING HUB — 3D CYBER GYRO CHUNK LOADER SCSS
+// ═══════════════════════════════════════════════════════════════
+
+/* ── COMPACT GYROSCOPIC LOADER (IN-APP TAB SWITCHES) ── */
+.lth-compact-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    width: 100%;
+    height: 100%;
+    min-height: 220px;
+    padding: 30px;
+    font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+    color: #f8fafc;
+    user-select: none;
+
+    .lth-gyro-wrapper {
+        position: relative;
+        width: 62px;
+        height: 62px;
+        perspective: 800px;
+
+        .lth-orbit {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            box-sizing: border-box;
+
+            .lth-orbit-dot {
+                position: absolute;
+                top: -3px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+            }
+        }
+
+        .lth-orbit-outer {
+            border-top-color: #00f5ff;
+            border-right-color: #00ff88;
+            filter: drop-shadow(0 0 10px rgba(0, 245, 255, 0.7));
+            animation: lthGyroRotate 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+
+            .lth-orbit-dot {
+                background: #00f5ff;
+                box-shadow: 0 0 12px #00f5ff;
+            }
+        }
+
+        .lth-orbit-mid {
+            inset: 8px;
+            border-bottom-color: #7000ff;
+            border-left-color: #a855f7;
+            filter: drop-shadow(0 0 8px rgba(112, 0, 255, 0.6));
+            animation: lthGyroReverse 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+
+            .lth-orbit-dot {
+                background: #c084fc;
+                box-shadow: 0 0 10px #c084fc;
+            }
+        }
+
+        .lth-orbit-inner {
+            inset: 16px;
+            border-top-color: #00ff88;
+            border-left-color: #34d399;
+            filter: drop-shadow(0 0 6px rgba(0, 255, 136, 0.6));
+            animation: lthGyroRotate 0.8s linear infinite;
+        }
+
+        .lth-core-orb {
+            position: absolute;
+            inset: 21px;
+            background: radial-gradient(circle, #ffffff 15%, #00f5ff 60%, #7000ff 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 18px #00f5ff;
+            animation: lthCorePulse 1.4s ease-in-out infinite alternate;
+
+            .lth-core-icon {
+                color: #070a13;
+                filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.8));
+            }
+        }
+    }
+
+    .lth-loader-telemetry {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(10, 16, 32, 0.8);
+        border: 1px solid rgba(0, 245, 255, 0.25);
+        padding: 6px 16px;
+        border-radius: 9999px;
+        backdrop-filter: blur(12px);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 245, 255, 0.1);
+
+        .lth-loader-label {
+            font-size: 0.82rem;
+            font-weight: 800;
+            letter-spacing: 0.07em;
+            color: #e2e8f0;
+            text-transform: uppercase;
+        }
+
+        .lth-loader-pulses {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+
+            .p-dot {
+                width: 5px;
+                height: 5px;
+                border-radius: 50%;
+                background: #00f5ff;
+                animation: lthPulseWave 1s infinite ease-in-out;
+
+                &:nth-child(2) {
+                    animation-delay: 0.2s;
+                    background: #7000ff;
+                }
+                &:nth-child(3) {
+                    animation-delay: 0.4s;
+                    background: #00ff88;
+                }
+            }
+        }
+    }
+}
+
+// ── KEYFRAME ANIMATIONS ──
+@keyframes lthGyroRotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes lthGyroReverse {
+    0% {
+        transform: rotate(360deg);
+    }
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+@keyframes lthCorePulse {
+    0% {
+        transform: scale(0.85);
+        box-shadow: 0 0 6px #00f2fe;
+    }
+    100% {
+        transform: scale(1.1);
+        box-shadow: 0 0 16px #00f2fe;
+    }
+}
+
+@keyframes lthPulseWave {
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}

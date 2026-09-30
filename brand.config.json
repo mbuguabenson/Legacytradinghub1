@@ -1,0 +1,123 @@
+{
+    "brand_name": "Legacy Trading Hub",
+    "admin_loginid": "LegacyAdmin",
+    "brand_domain": "hazelhub.vercel.app",
+    "brand_hostname": {
+        "staging": "staging.hazelhub.vercel.app/dashboard",
+        "production": "hazelhub.vercel.app/dashboard"
+    },
+    "domain_name": "hazelhub.vercel.app",
+    "colors": {
+        "primary": "#ff444f",
+        "secondary": "#858d9d",
+        "tertiary": "#ff9c1a",
+        "success": "#00a79e",
+        "danger": "#ff444f",
+        "warning": "#ff9c1a",
+        "info": "#00a79e",
+        "neutral": "#676a6f",
+        "black": "#181c25",
+        "white": "#ffffff",
+        "grey": {
+            "50": "#f8fafc",
+            "100": "#f1f5f9",
+            "200": "#e2e8f0",
+            "300": "#cbd5e1",
+            "400": "#858d9d",
+            "500": "#676a6f",
+            "600": "#3f4756",
+            "700": "#2c313d",
+            "800": "#222632",
+            "900": "#181c25"
+        }
+    },
+    "typography": {
+        "font_family": {
+            "primary": "'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+            "secondary": "Georgia, 'Times New Roman', Times, serif",
+            "monospace": "'JetBrains Mono', 'Courier New', Courier, monospace"
+        },
+        "font_sizes": {
+            "xs": "0.75rem",
+            "sm": "0.875rem",
+            "base": "1rem",
+            "lg": "1.125rem",
+            "xl": "1.25rem",
+            "2xl": "1.5rem",
+            "3xl": "1.875rem",
+            "4xl": "2.25rem"
+        }
+    },
+    "color_variants": {
+        "light_variants": [100, 200, 300, 400, 500],
+        "dark_variants": [600, 700, 800, 900],
+        "opacity_variants": [10, 20, 30, 40, 50, 60, 70, 80, 90]
+    },
+    "theme_config": {
+        "enable_dynamic_themes": true,
+        "auto_generate_variants": true,
+        "css_variable_prefix": "--brand"
+    },
+    "platform": {
+        "name": "LTH",
+        "logo": {
+            "type": "component",
+            "component_name": "BrandLogo",
+            "alt_text": "Legacy Trading Hub",
+            "link_url": "/",
+            "show_text": false,
+            "text": "Legacy Trading Hub"
+        },
+        "footer": {
+            "enable_language_settings": false,
+            "enable_theme_toggle": true
+        },
+        "hostname": {
+            "production": {
+                "com": "www.legacytradinghub.com"
+            },
+            "staging": {
+                "com": "staging.legacytradinghub.com"
+            }
+        },
+        "auth2_url": {
+            "production": "https://auth.deriv.com/oauth2/",
+            "staging": "https://staging-auth.deriv.com/oauth2/"
+        },
+        "derivws": {
+            "url": {
+                "staging": "https://staging-api.derivws.com/trading/v1/",
+                "production": "https://api.derivws.com/trading/v1/"
+            },
+            "directories": {
+                "options": "options/",
+                "derivatives": "derivatives/"
+            }
+        }
+    },
+    "legal_entities": {
+        "fx": "Deriv (FX) Ltd",
+        "malta": "Deriv (Europe) Ltd",
+        "maltainvest": "Deriv Investments (Europe) Limited",
+        "mx": "Deriv (MX) Ltd",
+        "samoa": "Deriv (Samoa) Ltd",
+        "svg": "Deriv (SVG) LLC",
+        "v": "Deriv (V) Ltd"
+    },
+    "platforms": {
+        "ctrader": { "name": "cTrader", "icon": "" },
+        "trader": { "name": "DTrader", "icon": "IcBrandDtrader" },
+        "dbot": { "name": "DBot", "icon": "IcBrandDbot" },
+        "mt5": { "name": "Deriv MT5", "icon": "IcBrandDmt5" },
+        "dxtrade": { "name": "Deriv X", "icon": "IcBrandDxtrade" },
+        "smarttrader": { "name": "SmartTrader", "icon": "IcBrandSmarttrader" },
+        "go": { "name": "Deriv GO", "icon": "IcBrandDerivGo" }
+    },
+    "platforms_appstore": {
+        "ctrader": { "name": "cTrader", "icon": "", "availability": "all" },
+        "trader": { "name": "DTrader", "icon": "IcBrandDtrader", "availability": "all" },
+        "dbot": { "name": "DBot", "icon": "IcBrandDbot", "availability": "all" },
+        "smarttrader": { "name": "SmartTrader", "icon": "IcBrandSmarttrader", "availability": "all" },
+        "go": { "name": "Deriv GO", "icon": "IcBrandDerivGo", "availability": "all" }
+    }
+}

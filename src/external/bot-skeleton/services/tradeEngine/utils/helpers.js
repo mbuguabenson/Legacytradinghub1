@@ -1,0 +1,518 @@
+import { findValueByKeyRecursively, formatTime, getRoundedNumber, isEmptyObject } from '@/components/shared';
+import { getLocalizedErrorMessage } from '@/constants/backend-error-messages';
+import { config } from '@/external/bot-skeleton/constants';
+import { localize } from '@deriv-com/translations';
+import { observer as globalObserver } from '../../../utils/observer';
+import { error as logError } from './broadcast';
+
+const CONTRACTS_WITH_PREDICTION = ['DIGITMATCH', 'DIGITDIFF', 'DIGITOVER', 'DIGITUNDER'];
+const CONTRACTS_WITH_BARRIER = [
+    'HIGHER',
+    'LOWER',
+    'ONETOUCH',
+    'NOTOUCH',
+    'RANGE',
+    'UPORDOWN',
+    'EXPIRYRANGE',
+    'EXPIRYMISS',
+    'EXPIRYRANGEE',
+    'EXPIRYMISSE',
+    'VANILLALONGCALL',
+    'VANILLALONGPUT',
+    'TURBOSLONG',
+    'TURBOSSHORT',
+];
+const CONTRACTS_WITH_TWO_BARRIERS = [
+    'RANGE',
+    'UPORDOWN',
+    'EXPIRYRANGE',
+    'EXPIRYMISS',
+    'EXPIRYRANGEE',
+    'EXPIRYMISSE',
+];
+
+export const tradeOptionToProposal = (trade_option, purchase_reference) =>
+    trade_option.contractTypes.map(type => {
+        const symbolCode = trade_option.underlying_symbol || trade_option.symbol || 'R_100';
+        const amountNum = !isNaN(Number(trade_option.amount)) ? Number(trade_option.amount) : 1;
+        const activeCurrency =
+            (trade_option.currency && trade_option.currency !== 'undefined' && trade_option.currency !== 'null' ? trade_option.currency : '') ||
+            DBotStore.instance?.client?.currency ||
+            (typeof localStorage !== 'undefined' && (localStorage.getItem('currency') || localStorage.getItem('active_currency'))) ||
+            'USD';
+
+        const proposal = {
+            amount: amountNum,
+            basis: trade_option.basis || 'stake',
+            contract_type: type,
+            currency: activeCurrency,
+            duration: Math.round(Number(trade_option.duration || 1)),
+            duration_unit: trade_option.duration_unit || 't',
+            passthrough: {
+                contract_type: type,
+                purchase_reference,
+            },
+            proposal: 1,
+            underlying_symbol: symbolCode,
+        };
+
+        if (['TICKLOW', 'TICKHIGH'].includes(type)) {
+            const hasValidTick =
+                trade_option.prediction !== undefined &&
+                trade_option.prediction !== null &&
+                trade_option.prediction !== -1 &&
+                trade_option.prediction !== '-1' &&
+                trade_option.prediction !== '';
+            if (hasValidTick) {
+                proposal.selected_tick = Number(trade_option.prediction);
+            }
+        } else if (CONTRACTS_WITH_PREDICTION.includes(type)) {
+            const hasValidPrediction =
+                trade_option.prediction !== undefined &&
+                trade_option.prediction !== null &&
+                trade_option.prediction !== -1 &&
+                trade_option.prediction !== '-1' &&
+                trade_option.prediction !== '';
+            if (hasValidPrediction) {
+                proposal.barrier = String(trade_option.prediction);
+            }
+        } else if (CONTRACTS_WITH_BARRIER.includes(type)) {
+            if (trade_option.barrierOffset !== undefined && trade_option.barrierOffset !== null && trade_option.barrierOffset !== '') {
+                proposal.barrier = String(trade_option.barrierOffset);
+            }
+        }
+
+        if (CONTRACTS_WITH_TWO_BARRIERS.includes(type)) {
+            if (trade_option.secondBarrierOffset !== undefined && trade_option.secondBarrierOffset !== null && trade_option.secondBarrierOffset !== '') {
+                proposal.barrier2 = String(trade_option.secondBarrierOffset);
+            }
+        }
+
+        if (['MULTUP', 'MULTDOWN'].includes(type)) {
+            delete proposal.duration;
+            delete proposal.duration_unit;
+            proposal.multiplier = Number(trade_option.multiplier || 10);
+        }
+
+        if (['ACCU'].includes(type)) {
+            delete proposal.duration;
+            delete proposal.duration_unit;
+            proposal.growth_rate = Number(trade_option.growth_rate || 0.01);
+        }
+
+        if (!isEmptyObject(trade_option.limit_order)) {
+            proposal.limit_order = trade_option.limit_order;
+        }
+
+        // Remove any undefined keys to avoid schema validation errors
+        Object.keys(proposal).forEach(key => {
+            if (proposal[key] === undefined) {
+                delete proposal[key];
+            }
+        });
+
+        return proposal;
+    });
+
+export const tradeOptionToBuy = (contract_type, trade_option) => {
+    const symbolCode = trade_option.underlying_symbol || trade_option.symbol || 'R_100';
+    const amountNum = !isNaN(Number(trade_option.amount)) ? Number(trade_option.amount) : 1;
+    const activeCurrency =
+        (trade_option.currency && trade_option.currency !== 'undefined' && trade_option.currency !== 'null' ? trade_option.currency : '') ||
+        DBotStore.instance?.client?.currency ||
+        (typeof localStorage !== 'undefined' && (localStorage.getItem('currency') || localStorage.getItem('active_currency'))) ||
+        'USD';
+
+    const buy = {
+        buy: '1',
+        price: amountNum,
+        parameters: {
+            amount: amountNum,
+            basis: trade_option.basis || 'stake',
+            contract_type,
+            currency: activeCurrency,
+            duration: Math.round(Number(trade_option.duration || 1)),
+            duration_unit: trade_option.duration_unit || 't',
+            underlying_symbol: symbolCode,
+        },
+    };
+
+    if (['TICKLOW', 'TICKHIGH'].includes(contract_type)) {
+        const hasValidTick =
+            trade_option.prediction !== undefined &&
+            trade_option.prediction !== null &&
+            trade_option.prediction !== -1 &&
+            trade_option.prediction !== '-1' &&
+            trade_option.prediction !== '';
+        if (hasValidTick) {
+            buy.parameters.selected_tick = Number(trade_option.prediction);
+        }
+    } else if (CONTRACTS_WITH_PREDICTION.includes(contract_type)) {
+        const hasValidPrediction =
+            trade_option.prediction !== undefined &&
+            trade_option.prediction !== null &&
+            trade_option.prediction !== -1 &&
+            trade_option.prediction !== '-1' &&
+            trade_option.prediction !== '';
+        if (hasValidPrediction) {
+            buy.parameters.barrier = String(trade_option.prediction);
+        }
+    } else if (CONTRACTS_WITH_BARRIER.includes(contract_type)) {
+        if (trade_option.barrierOffset !== undefined && trade_option.barrierOffset !== null && trade_option.barrierOffset !== '') {
+            buy.parameters.barrier = String(trade_option.barrierOffset);
+        }
+    }
+
+    if (CONTRACTS_WITH_TWO_BARRIERS.includes(contract_type)) {
+        if (trade_option.secondBarrierOffset !== undefined && trade_option.secondBarrierOffset !== null && trade_option.secondBarrierOffset !== '') {
+            buy.parameters.barrier2 = String(trade_option.secondBarrierOffset);
+        }
+    }
+
+    if (typeof trade_option.app_markup_percentage === 'number') {
+        buy.parameters.app_markup_percentage = trade_option.app_markup_percentage;
+    }
+
+    if (!isEmptyObject(trade_option.limit_order)) {
+        buy.parameters.limit_order = trade_option.limit_order;
+    }
+
+    // This will be required only in the case of multiplier contracts
+    if (['MULTUP', 'MULTDOWN'].includes(contract_type)) {
+        delete buy.parameters.duration;
+        delete buy.parameters.duration_unit;
+        buy.parameters.multiplier = Number(trade_option.multiplier || 10);
+    }
+    // This will be required only in the case of accumulator contracts
+    if (['ACCU'].includes(contract_type)) {
+        delete buy.parameters.duration;
+        delete buy.parameters.duration_unit;
+        buy.parameters.growth_rate = Number(trade_option.growth_rate || 0.01);
+    }
+
+    // Remove any undefined keys to avoid schema validation errors
+    Object.keys(buy.parameters).forEach(key => {
+        if (buy.parameters[key] === undefined) {
+            delete buy.parameters[key];
+        }
+    });
+
+    return buy;
+};
+
+export const getDirection = ticks => {
+    const { length } = ticks;
+    const [tickOld, tickNew] = ticks.slice(-2);
+
+    let direction = '';
+    if (length >= 2) {
+        direction = tickOld.quote < tickNew.quote ? 'rise' : direction;
+        direction = tickOld.quote > tickNew.quote ? 'fall' : direction;
+    }
+
+    return direction;
+};
+
+export const getLastDigit = tick => {
+    let number_string = tick;
+    if (typeof number_string === 'number') {
+        number_string = String(number_string);
+    }
+    return Number(number_string[number_string.length - 1]);
+};
+
+export const getLastDigitForList = (tick, pip_size = 0) => {
+    const safe_pip_size = Math.max(0, Math.min(Number(pip_size) || 0, 20));
+    const value = Number(tick).toFixed(safe_pip_size);
+    return value[value.length - 1];
+};
+
+const getBackoffDelayInMs = (error_obj, delay_index) => {
+    const base_delay = 2.5;
+    const max_delay = 15;
+    const next_delay_in_seconds = Math.min(base_delay * delay_index, max_delay);
+
+    const { error = {}, msg_type = '', echo_req = {} } = error_obj;
+    const { code = '', message = '' } = error;
+    let message_to_print = '';
+    const trade_type_block = Blockly.derivWorkspace
+        .getAllBlocks(true)
+        .find(block => block.type === 'trade_definition_tradetype');
+    const selected_trade_type = trade_type_block?.getFieldValue('TRADETYPECAT_LIST') || '';
+    const { TRADE_TYPE_CATEGORY_NAMES } = config();
+
+    if (code) {
+        const resolved_msg_type =
+            error.msg_type ||
+            msg_type ||
+            echo_req?.msg_type ||
+            (echo_req ? Object.keys(echo_req).find(k => !['req_id', 'passthrough', 'subscribe'].includes(k)) : '') ||
+            'trade request';
+
+        const error_details = {
+            message_type: resolved_msg_type,
+            delay: next_delay_in_seconds,
+            request: echo_req?.req_id || 'api',
+            message: message || localize('The market is closed'),
+            trade_type: TRADE_TYPE_CATEGORY_NAMES?.[selected_trade_type] ?? '',
+        };
+
+        switch (code) {
+            case 'RateLimit':
+                message_to_print = getLocalizedErrorMessage('RateLimit', error_details);
+                break;
+            case 'DisconnectError':
+                message_to_print = getLocalizedErrorMessage('DisconnectError', error_details);
+                break;
+            case 'MarketIsClosed':
+                message_to_print = getLocalizedErrorMessage('MarketIsClosed', error_details);
+                break;
+
+            default:
+                message_to_print = getLocalizedErrorMessage('RequestFailed', {
+                    message_type: msg_type || localize('unknown'),
+                    delay: next_delay_in_seconds,
+                });
+                break;
+        }
+    } else {
+        message_to_print = getLocalizedErrorMessage('RequestFailed', {
+            message_type: msg_type || localize('unknown'),
+            delay: next_delay_in_seconds,
+        });
+    }
+
+    logError(message_to_print);
+
+    return next_delay_in_seconds * 1000;
+};
+
+export const updateErrorMessage = error => {
+    if (error.error?.code === 'InputValidationFailed') {
+        if (error.error.details?.duration) {
+            error.error.message = getLocalizedErrorMessage('DurationValidationFailed');
+        }
+        if (error.error.details?.amount) {
+            error.error.message = getLocalizedErrorMessage('AmountValidationFailed');
+        }
+    }
+};
+
+export const shouldThrowError = (error, errors_to_ignore = []) => {
+    const error_code = error?.error?.code ?? error?.code ?? error?.name;
+
+    // Non-recoverable auth and critical validation errors must never trigger endless retry loops in the journal
+    const fatal_errors = [
+        'AuthorizationRequired',
+        'InvalidToken',
+        'DisabledToken',
+        'ExpiredToken',
+        'InvalidAppID',
+        'Unauthorized',
+        'InsufficientBalance',
+        'CustomContractValidationError',
+    ];
+    if (fatal_errors.includes(error_code)) {
+        return true;
+    }
+
+    if (!error?.error && !error_code) {
+        return true;
+    }
+
+    const default_errors_to_ignore = [
+        'CallError',
+        'WrongResponse',
+        'GetProposalFailure',
+        'RateLimit',
+        'DisconnectError',
+        'MarketIsClosed',
+        'AlreadySubscribed',
+    ];
+    updateErrorMessage(error);
+    const is_ignorable_error = errors_to_ignore
+        .concat(default_errors_to_ignore)
+        .includes(error_code);
+
+    return !is_ignorable_error;
+};
+
+export const recoverFromError = (promiseFn, recoverFn, errors_to_ignore, delay_index, api_base) => {
+    return new Promise((resolve, reject) => {
+        const promise = promiseFn();
+
+        if (promise) {
+            promise.then(resolve).catch(error => {
+                /**
+                 * if bot is not running there is no point of recovering from error
+                 * `!api_base.is_running` will check the bot status if it is not running it will kick out the control from loop
+                 */
+                if (shouldThrowError(error, errors_to_ignore) || (api_base && !api_base.is_running)) {
+                    // Check if this is a position limit exceeded error
+                    if (error?.error?.code === 'OpenPositionLimitExceeded') {
+                        // Emit click_stop event to trigger the stopBot method in run-panel-store
+                        setTimeout(() => {
+                            globalObserver.emit('bot.stop_button_click');
+                        }, 500);
+                    }
+
+                    reject(error);
+                    return;
+                }
+                recoverFn(
+                    error?.error?.code ?? error?.name,
+                    () =>
+                        new Promise(recoverResolve => {
+                            const getGlobalTimeouts = () => globalObserver.getState('global_timeouts') ?? [];
+
+                            const timeout = setTimeout(
+                                () => {
+                                    const global_timeouts = getGlobalTimeouts();
+                                    delete global_timeouts[timeout];
+                                    globalObserver.setState(global_timeouts);
+                                    recoverResolve();
+                                },
+                                getBackoffDelayInMs(error, delay_index)
+                            );
+
+                            const global_timeouts = getGlobalTimeouts();
+                            const cancellable_timeouts = ['buy'];
+                            const msg_type = findValueByKeyRecursively(error, 'msg_type');
+
+                            global_timeouts[timeout] = {
+                                is_cancellable: cancellable_timeouts.includes(msg_type),
+                                msg_type,
+                            };
+
+                            globalObserver.setState({ global_timeouts });
+                        })
+                );
+            });
+        } else {
+            resolve();
+        }
+    });
+};
+
+/**
+ * @param {*} promiseFn api call - it could be api call or subscription
+ * @param {*} errors_to_ignore list of errors to ignore
+ * @param {*} api_base instance of APIBase class to check if the bot is running or not
+ * @param {*} maxRetries maximum number of retry attempts before giving up (default: 20).
+ *   Without this cap, ignorable errors like RateLimit/DisconnectError cause infinite
+ *   retry loops that grow exponentially — the engine never unblocks and the bot freezes.
+ * @returns a new promise
+ */
+export const doUntilDone = (promiseFn, errors_to_ignore, api_base, maxRetries = 20) => {
+    let delay_index = 1;
+
+    return new Promise((resolve, reject) => {
+        const recoverFn = (error_code, makeDelay) => {
+            if (delay_index > maxRetries) {
+                // Cap reached — reject with a clear error so the run-panel's
+                // onError handler can display it and unfreeze the panel.
+                reject({
+                    error: {
+                        code: 'MaxRetriesExceeded',
+                        message: `Operation failed after ${maxRetries} retries (last error: ${error_code}). Bot stopped to prevent freeze.`,
+                    },
+                });
+                return;
+            }
+            delay_index++;
+            makeDelay().then(repeatFn);
+        };
+
+        const repeatFn = () => {
+            recoverFromError(promiseFn, recoverFn, errors_to_ignore, delay_index, api_base).then(resolve).catch(reject);
+        };
+
+        repeatFn();
+    });
+};
+
+
+export const createDetails = contract => {
+    if (!contract) {
+        return ['', 0, 0, 0, '', '', 0, '', 0, 0, 'loss'];
+    }
+
+    const currency = contract.currency || 'USD';
+    const buyPrice = Number(contract.buy_price || 0);
+
+    let sellPrice;
+    if (contract.sell_price !== undefined && contract.sell_price !== null && !isNaN(Number(contract.sell_price))) {
+        sellPrice = Number(contract.sell_price);
+    } else if (contract.profit !== undefined && contract.profit !== null && !isNaN(Number(contract.profit))) {
+        sellPrice = buyPrice + Number(contract.profit);
+    } else if (contract.status === 'won' || contract.status === 'win') {
+        sellPrice = Number(contract.payout || buyPrice * 1.95);
+    } else if (contract.status === 'lost' || contract.status === 'loss') {
+        sellPrice = 0;
+    } else {
+        sellPrice = buyPrice;
+    }
+
+    let profit;
+    if (contract.profit !== undefined && contract.profit !== null && !isNaN(Number(contract.profit))) {
+        profit = getRoundedNumber(Number(contract.profit), currency);
+    } else {
+        profit = getRoundedNumber(sellPrice - buyPrice, currency);
+    }
+
+    let result;
+    if (contract.status === 'won' || contract.status === 'win') {
+        result = 'win';
+    } else if (contract.status === 'lost' || contract.status === 'loss') {
+        result = 'loss';
+    } else if (profit < 0) {
+        result = 'loss';
+    } else {
+        result = 'win';
+    }
+
+    return [
+        contract.transaction_ids?.buy || '',
+        buyPrice,
+        sellPrice,
+        profit,
+        contract.contract_type || '',
+        contract.entry_tick_time ? formatTime(parseInt(`${contract.entry_tick_time}000`), 'HH:mm:ss') : '',
+        +(contract.entry_tick || 0),
+        contract.exit_tick_time ? formatTime(parseInt(`${contract.exit_tick_time}000`), 'HH:mm:ss') : '',
+        +(contract.exit_tick || 0),
+        +(contract.barrier ? contract.barrier : 0),
+        result,
+    ];
+};
+
+export const getUUID = () => `${new Date().getTime() * Math.random()}`;
+
+const hasBlockOfType = (targetType, workspace) => {
+    if (!workspace || typeof workspace.getAllBlocks !== 'function') return false;
+    const allBlocks = workspace.getAllBlocks();
+    return allBlocks.some(block => block.type === targetType && !!block.parentBlock_);
+};
+
+export const checkBlocksForProposalRequest = () => {
+    const workspace = window.Blockly?.derivWorkspace || window.Blockly?.getMainWorkspace?.();
+    if (!workspace) {
+        return {
+            has_payout_block: false,
+            is_basis_payout: false,
+        };
+    }
+    const has_payout_block = hasBlockOfType('payout', workspace);
+
+    return {
+        has_payout_block,
+        is_basis_payout: false,
+    };
+};
+
+export const socket_state = {
+    [WebSocket.CONNECTING]: 'Connecting',
+    [WebSocket.OPEN]: 'Connected',
+    [WebSocket.CLOSING]: 'Closing',
+    [WebSocket.CLOSED]: 'Closed',
+};

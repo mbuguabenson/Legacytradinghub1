@@ -1,0 +1,158 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none">
+  <style>
+    /* Light Mode Defaults */
+    :root {
+      --base-1: #064e3b;
+      --base-2: #022c1e;
+      --base-3: #011a12;
+      --accent-1: #10b981;
+      --text-glow: #00000033;
+    }
+
+    /* Dark Mode Overrides */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --base-1: #f8fafc;
+        --base-2: #cbd5e1;
+        --base-3: #94a3b8;
+        --accent-1: #34d399;
+        --text-glow: #ffffff33;
+      }
+    }
+
+    .base-stop-1 { stop-color: var(--base-1); }
+    .base-stop-2 { stop-color: var(--base-2); }
+    .base-stop-3 { stop-color: var(--base-3); }
+    
+    .base-fill { fill: url(#baseGrad); }
+    .base-stroke { stroke: url(#baseGrad); }
+    
+    .logo-glow {
+      filter: drop-shadow(0px 4px 5px var(--text-glow));
+    }
+  </style>
+  <defs>
+    <!-- Dynamic Base Gradient (Adapts to Light/Dark) -->
+    <linearGradient id="baseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" class="base-stop-1" />
+      <stop offset="50%" class="base-stop-2" />
+      <stop offset="100%" class="base-stop-3" />
+    </linearGradient>
+
+    <!-- Vibrant Lime / Emerald Bar Gradients -->
+    <linearGradient id="limeGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#a3e635" />
+      <stop offset="100%" stop-color="#65a30d" />
+    </linearGradient>
+
+    <linearGradient id="limeGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#bef264" />
+      <stop offset="50%" stop-color="#84cc16" />
+      <stop offset="100%" stop-color="#4d7c0f" />
+    </linearGradient>
+
+    <linearGradient id="limeGrad3" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#86efac" />
+      <stop offset="50%" stop-color="#22c55e" />
+      <stop offset="100%" stop-color="#15803d" />
+    </linearGradient>
+
+    <!-- Dynamic Neon Arrow Gradient -->
+    <linearGradient id="arrowGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#047857" />
+      <stop offset="40%" stop-color="#059669" />
+      <stop offset="75%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#34d399" />
+    </linearGradient>
+
+    <!-- Subtle Gold Horizon Accent -->
+    <linearGradient id="goldAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047" />
+      <stop offset="100%" stop-color="#eab308" />
+    </linearGradient>
+
+    <!-- Drop Shadow / Glow Filters -->
+    <filter id="barShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000000" flood-opacity="0.2" />
+    </filter>
+  </defs>
+
+  <g class="logo-glow">
+    <!-- ─── 1. Background Rising Volume Pillars (Chart Bars) ─── -->
+    <!-- Bar 1 -->
+    <rect x="52" y="58" width="13" height="60" rx="3" fill="url(#limeGrad1)" filter="url(#barShadow)" />
+    <rect x="53" y="59" width="11" height="4" rx="1.5" fill="#ffffff" fill-opacity="0.4" />
+
+    <!-- Bar 2 (Master Peak) -->
+    <rect x="71" y="36" width="14" height="82" rx="3" fill="url(#limeGrad2)" filter="url(#barShadow)" />
+    <rect x="72" y="37" width="12" height="5" rx="1.5" fill="#ffffff" fill-opacity="0.5" />
+
+    <!-- Bar 3 -->
+    <rect x="91" y="62" width="13" height="56" rx="3" fill="url(#limeGrad1)" filter="url(#barShadow)" />
+    <rect x="92" y="63" width="11" height="4" rx="1.5" fill="#ffffff" fill-opacity="0.4" />
+
+    <!-- Bar 4 -->
+    <rect x="110" y="70" width="13" height="48" rx="3" fill="url(#limeGrad3)" filter="url(#barShadow)" />
+    <rect x="111" y="71" width="11" height="4" rx="1.5" fill="#ffffff" fill-opacity="0.4" />
+
+    <!-- Bar 5 -->
+    <rect x="129" y="54" width="13" height="64" rx="3" fill="url(#limeGrad2)" filter="url(#barShadow)" />
+    <rect x="130" y="55" width="11" height="4" rx="1.5" fill="#ffffff" fill-opacity="0.4" />
+
+    <!-- ─── 2. Adaptive Architectural Base ─── -->
+    <!-- Left Vertical Bracket Stem -->
+    <path d="M28 54 
+             C28 50 31 48 35 48 
+             L45 48 
+             C47 48 48 49 48 51 
+             L48 108 
+             L28 108 
+             Z" 
+          class="base-fill" />
+
+    <!-- Solid Horizontal Foundation Base -->
+    <path d="M28 116 
+             L152 116 
+             C155 116 157 118 157 121 
+             L157 130 
+             C157 133 155 135 152 135 
+             L28 135 
+             C25 135 23 133 23 130 
+             L23 121 
+             C23 118 25 116 28 116 
+             Z" 
+          class="base-fill" />
+
+    <!-- Gold Precision Micro-Grid Base Line -->
+    <line x1="28" y1="116" x2="152" y2="116" stroke="url(#goldAccent)" stroke-width="1.5" stroke-linecap="round" />
+
+    <!-- ─── 3. Majestic Ascending Breakout Trajectory Arrow ─── -->
+    <!-- Main Adaptive Arrow Path -->
+    <path d="M28 104 
+             L75 52 
+             L94 74 
+             L136 32" 
+          class="base-stroke" 
+          stroke-width="12" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" />
+
+    <!-- Neon Emerald High-Precision Core Centerline -->
+    <path d="M30 103 
+             L75 53 
+             L94 75 
+             L134 33" 
+          stroke="url(#arrowGrad)" 
+          stroke-width="4.5" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" />
+
+    <!-- Dynamic Aerodynamic Arrowhead -->
+    <polygon points="120,16 158,22 144,56 136,38 116,38" fill="url(#arrowGrad)" filter="url(#barShadow)" />
+    <polygon points="124,20 154,25 142,51 136,38 120,38" class="base-fill" />
+    <polygon points="132,24 150,26 142,42 138,36" fill="url(#arrowGrad)" />
+
+    <!-- Micro Apex Core Node -->
+    <circle cx="154" cy="24" r="2.5" fill="#ffffff" />
+  </g>
+</svg>
