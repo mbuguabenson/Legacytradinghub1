@@ -36,7 +36,6 @@ const TAB_ICONS: Record<string, TQuillIcon> = {
     auto_x_eo: LabelPairedBarsFilterSmRegularIcon,
     overlord_ai: LabelPairedBarsFilterSmRegularIcon,
     copy_trading: LabelPairedCircleUserSmRegularIcon,
-    rise_fall: LabelPairedChartLineSmRegularIcon,
     account_center: LabelPairedCircleUserSmRegularIcon,
     pro_journal: LabelPairedBookCircleQuestionSmRegularIcon,
     reports: LabelPairedBookCircleQuestionSmRegularIcon,
@@ -485,22 +484,7 @@ export const TabIcon: React.FC<TTabIconProps> = ({ iconKey, label }) => {
                         <circle cx='12' cy='12' r='2' fill='#00f5ff' />
                     </svg>
                 );
-            case 'b254':
-                return (
-                    <svg
-                        width='18'
-                        height='18'
-                        viewBox='0 0 24 24'
-                        fill='none'
-                        stroke='currentColor'
-                        strokeWidth='1.8'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                    >
-                        <path d='M13 2L3 14h9l-1 8 10-12h-9l1-8z' stroke='#ff007a' />
-                        <circle cx='12' cy='12' r='3' fill='#00f5ff' />
-                    </svg>
-                );
+
             case 'autoflipper':
                 return (
                     <svg
@@ -520,22 +504,7 @@ export const TabIcon: React.FC<TTabIconProps> = ({ iconKey, label }) => {
                         <polygon points='12 8 10 12 14 12 12 16' fill='#00e5ff' stroke='#00e5ff' strokeWidth='1' />
                     </svg>
                 );
-            case 'rise_fall':
-                return (
-                    <svg
-                        width='18'
-                        height='18'
-                        viewBox='0 0 24 24'
-                        fill='none'
-                        stroke='currentColor'
-                        strokeWidth='2'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                    >
-                        <polyline points='22 7 13.5 15.5 8.5 10.5 2 17' stroke='#38bdf8' />
-                        <polyline points='16 7 22 7 22 13' stroke='#22c55e' />
-                    </svg>
-                );
+
             default:
                 return (
                     <svg

@@ -5,6 +5,7 @@ import { secureSessionService } from '@/services/secure-session.service';
 import { getAppId } from '@/components/shared/utils/config/config';
 import { makeBridgeLogger, generateInstanceId } from './bridge-diagnostics';
 import { getAccountsList, getActiveToken, getLegacyDTraderToken, resolveValidDerivWSToken } from '@/utils/token-bridge';
+import { OAuthTokenExchangeService } from '@/services/oauth-token-exchange.service';
 
 export interface BridgeDiagnosticInfo {
     state: BridgeState;
@@ -80,11 +81,14 @@ export class ParentBridgeClient {
         }
     }
 
-    public attach(iframe: HTMLIFrameElement, expectedOrigin: string) {
+    public attach(iframe: HTMLIFrameElement, expectedOrigin: string, initialOtpUrl?: string) {
         const targetOrigin = expectedOrigin && expectedOrigin !== '*' ? expectedOrigin : 'https://profhubdtrader.vercel.app';
         this.iframeWindow = iframe.contentWindow;
         this.iframeOrigin = targetOrigin;
         this.diagnostics.iframeOrigin = targetOrigin;
+        if (initialOtpUrl) {
+            this.cachedOtpUrl = initialOtpUrl;
+        }
         this.logger.debug('IFRAME_ATTACH', { iframeOrigin: targetOrigin });
 
         this.stateMachine.transitionTo(BridgeState.LOADING_IFRAME);
@@ -99,11 +103,17 @@ export class ParentBridgeClient {
             localStorage.getItem('active_loginid') ||
             localStorage.getItem('client.loginid') ||
             '';
-        const targetToken = getActiveToken(targetLoginId) || getActiveToken() || '';
-        if (targetToken) {
+        const targetToken =
+            getActiveToken(targetLoginId) ||
+            getActiveToken() ||
+            OAuthTokenExchangeService.getAccessToken() ||
+            localStorage.getItem('bot_new_api_token') ||
+            '';
+        if (targetToken && !this.cachedOtpUrl) {
             import('@/services/derivws-accounts.service')
                 .then(({ DerivWSAccountsService }) => {
-                    DerivWSAccountsService.getAuthenticatedWebSocketURL(targetToken)
+                    DerivWSAccountsService.fetchOTPWebSocketURL(targetToken, targetLoginId)
+                        .catch(() => DerivWSAccountsService.getAuthenticatedWebSocketURL(targetToken))
                         .then(url => {
                             if (url) {
                                 this.cachedOtpUrl = url;
@@ -128,14 +138,51 @@ export class ParentBridgeClient {
                 .catch(() => {});
         }
 
-        // Proactively send auth handshakes to iframe continuously for 30s
+        // Proactively send auth handshakes to iframe continuously
         this.startProactiveAuthLoop();
+
+        // Also hook iframe load event to immediately push auth when DOM is ready
+        try {
+            iframe.addEventListener('load', () => {
+                this.dispatchAuth();
+            });
+        } catch {}
 
         this.safeTimeout(() => {
             if (this.stateMachine.getState() === BridgeState.LOADING_IFRAME) {
                 this.stateMachine.transitionTo(BridgeState.WAITING_READY);
             }
         }, 500);
+    }
+
+    public dispatchAuth(wsUrlParam?: string) {
+        if (wsUrlParam) {
+            this.cachedOtpUrl = wsUrlParam;
+        }
+        if (this.iframeWindow) {
+            const session = sessionManager.getSession();
+            const loginid =
+                session?.loginid ||
+                localStorage.getItem('active_loginid') ||
+                localStorage.getItem('client.loginid') ||
+                '';
+            const syncToken =
+                getActiveToken(loginid) ||
+                getActiveToken() ||
+                OAuthTokenExchangeService.getAccessToken() ||
+                localStorage.getItem('bot_new_api_token') ||
+                '';
+            const currency = session?.currency || localStorage.getItem('client.currency') || 'USD';
+            const appIdStr = String(session?.appId || getAppId() || '121856');
+            this.sendAuthPayloadToWindow(
+                this.iframeWindow,
+                syncToken,
+                loginid,
+                currency,
+                appIdStr,
+                this.cachedOtpUrl
+            );
+        }
     }
 
     private sendAuthPayloadToWindow(
@@ -387,7 +434,13 @@ export class ParentBridgeClient {
                     localStorage.getItem('active_loginid') ||
                     localStorage.getItem('client.loginid') ||
                     '';
-                const syncToken = getActiveToken(loginid) || getLegacyDTraderToken(loginid) || '';
+                const syncToken =
+                    getActiveToken(loginid) ||
+                    getActiveToken() ||
+                    OAuthTokenExchangeService.getAccessToken() ||
+                    getLegacyDTraderToken(loginid) ||
+                    localStorage.getItem('bot_new_api_token') ||
+                    '';
                 const currency = session?.currency || localStorage.getItem('client.currency') || 'USD';
                 const appIdStr = String(session?.appId || getAppId() || '121856');
 

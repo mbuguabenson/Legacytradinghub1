@@ -152,6 +152,48 @@
     }
 }
 
+// ─── Copyright Badge: Green Circled C + Benadesigns ──────────────────────────
+.app-footer__copyright-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.2rem 0.6rem;
+    font-size: 1.15rem;
+    color: var(--text-prominent);
+    white-space: nowrap;
+    user-select: none;
+
+    @include mobile-screen {
+        font-size: 1rem;
+        gap: 0.4rem;
+        padding: 0.1rem 0.3rem;
+    }
+}
+
+.app-footer__copyright-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #25d366;
+    flex-shrink: 0;
+
+    svg {
+        display: block;
+    }
+}
+
+.app-footer__copyright-text {
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--text-prominent);
+    font-size: 1.15rem;
+
+    @include mobile-screen {
+        font-size: 1rem;
+    }
+}
+
+
 .languages-modal__body {
     padding-inline: 1.6rem;
 

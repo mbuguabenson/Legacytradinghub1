@@ -14,25 +14,9 @@ import LanguageSettings from './LanguageSettings';
 import LogoutFooter from './LogoutFooter';
 import NetworkStatus from './NetworkStatus';
 import ServerTime from './ServerTime';
+import { FooterContactPopover } from './footer-contact-popover';
 import './footer.scss';
 
-// ─────────────────────────────────────────────────────────────────────────────
-// WhatsApp icon button (moved from header)
-// ─────────────────────────────────────────────────────────────────────────────
-const WhatsAppFooterLink = () => (
-    <a
-        href='https://wa.me/254757722344'
-        target='_blank'
-        rel='noopener noreferrer'
-        className='app-footer__whatsapp'
-        title='Contact us on WhatsApp'
-        aria-label='Contact on WhatsApp'
-    >
-        <svg viewBox='0 0 24 24' width='16' height='16' fill='currentColor'>
-            <path d='M6.62 10.79a15.15 15.15 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.02-.27 11.4 11.4 0 0 0 3.58.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1 11.4 11.4 0 0 0 .57 3.58 1 1 0 0 1-.27 1.02z' />
-        </svg>
-    </a>
-);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Account icon button
@@ -87,6 +71,8 @@ const Footer = () => {
         <footer className='app-footer'>
             <FullScreen />
             <div className='app-footer__vertical-line' />
+            <FooterContactPopover />
+            <div className='app-footer__vertical-line' />
             <RiskDisclaimerFooterButton />
             {(isAuthorized || isLoggedIn()) && (
                 <>
@@ -97,12 +83,6 @@ const Footer = () => {
                 </>
             )}
             <div className='app-footer__vertical-line' />
-
-            {/* WhatsApp contact link (migrated from header) */}
-            <>
-                <WhatsAppFooterLink />
-                <div className='app-footer__vertical-line' />
-            </>
 
             {/* Language settings */}
             {enableLanguageSettings && (

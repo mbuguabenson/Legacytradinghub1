@@ -10,6 +10,8 @@ import {
 } from '@/utils/token-bridge';
 import { ParentBridgeClient } from '../iframe-bridge';
 import { generateOAuthURL } from '@/components/shared';
+import { DerivWSAccountsService } from '@/services/derivws-accounts.service';
+import { OAuthTokenExchangeService } from '@/services/oauth-token-exchange.service';
 import './dtrader-iframe-container.scss';
 
 export interface DTraderIframeContainerProps {
@@ -58,11 +60,13 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
 }) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const iframeRef = useRef<HTMLIFrameElement>(null);
+    const bridgeRef = useRef<ParentBridgeClient | null>(null);
 
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isIframeLoaded, setIsIframeLoaded] = useState<boolean>(false);
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
     const [iframeKey, setIframeKey] = useState<number>(0);
+    const [wsUrl, setWsUrl] = useState<string>('');
 
     // Robust token resolver checking all local storage sources for tokens (both legacy and modern OAuth2 JWT)
     const resolveToken = useCallback((explicitToken?: string, loginid?: string) => {
@@ -75,6 +79,8 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
             '';
         const active = getActiveToken(targetId);
         if (active && !isInvalidBearerToken(active)) return active;
+        const oauthTok = OAuthTokenExchangeService.getAccessToken();
+        if (oauthTok && !isInvalidBearerToken(oauthTok)) return oauthTok;
         const accounts = getAccountsList();
         if (targetId && accounts[targetId] && !isInvalidBearerToken(accounts[targetId])) {
             return accounts[targetId];
@@ -185,13 +191,41 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
         };
     }, [currentLoginId, currentToken, resolveToken]);
 
-    // Build the query parameter URL for Embedded Mode
+    // Actively prefetch authenticated OTP WebSocket URL for DTrader iframe
+    useEffect(() => {
+        let isCancelled = false;
+        const tok = currentToken || OAuthTokenExchangeService.getAccessToken();
+        const acc = currentLoginId;
+        if (!tok || !acc) return;
+
+        DerivWSAccountsService.fetchOTPWebSocketURL(tok, acc)
+            .catch(() => DerivWSAccountsService.getAuthenticatedWebSocketURL(tok))
+            .then(url => {
+                if (!isCancelled && url) {
+                    setWsUrl(url);
+                    if (bridgeRef.current) {
+                        bridgeRef.current.dispatchAuth(url);
+                    }
+                }
+            })
+            .catch(err => {
+                console.warn('[DTraderIframeContainer] OTP prefetch note:', err);
+            });
+
+        return () => {
+            isCancelled = true;
+        };
+    }, [currentToken, currentLoginId]);
+
+    // Build the query parameter URL for Embedded Mode with complete session tokens & OTP WebSocket URL
     const iframeSrc = useMemo(() => {
         try {
             const url = new URL(baseUrl);
 
             if (currentToken && !isInvalidBearerToken(currentToken)) {
                 const acc = currentLoginId || 'CR100000';
+                const cur = (acc.startsWith('VR') || acc.startsWith('DOT')) ? 'USD' : (localStorage.getItem('client.currency') || 'USD');
+
                 // Supply all standard, OAuth, and legacy parameter names to ensure
                 // seamless authentication regardless of how child stores read them
                 url.searchParams.set('token', currentToken);
@@ -200,8 +234,30 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
                 url.searchParams.set('account', acc);
                 url.searchParams.set('loginid', acc);
                 url.searchParams.set('acct1', acc);
-                url.searchParams.set('cur1', 'USD');
-                url.searchParams.set('currency', 'USD');
+                url.searchParams.set('cur1', cur);
+                url.searchParams.set('currency', cur);
+
+                if (wsUrl) {
+                    url.searchParams.set('ws_url', wsUrl);
+                    url.searchParams.set('otp_url', wsUrl);
+                    url.searchParams.set('otpUrl', wsUrl);
+                }
+
+                // Pass secondary accounts if available (acct2, token2, cur2, etc.)
+                try {
+                    const accountsList = getAccountsList();
+                    let idx = 2;
+                    for (const [id, tok] of Object.entries(accountsList)) {
+                        if (id !== acc && tok && !isInvalidBearerToken(tok)) {
+                            url.searchParams.set(`acct${idx}`, id);
+                            url.searchParams.set(`token${idx}`, tok);
+                            url.searchParams.set(`cur${idx}`, (id.startsWith('VR') || id.startsWith('DOT')) ? 'USD' : 'USD');
+                            idx++;
+                            if (idx > 5) break;
+                        }
+                    }
+                } catch {}
+
                 url.searchParams.set('is_embedded', 'true');
             }
 
@@ -215,7 +271,7 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
         } catch {
             return baseUrl;
         }
-    }, [baseUrl, currentToken, currentLoginId, currentTheme, isMobileApp]);
+    }, [baseUrl, currentToken, currentLoginId, currentTheme, isMobileApp, wsUrl]);
 
     // Safety fallback timeout: ensure loading overlay clears even if iframe onLoad is delayed
     useEffect(() => {
@@ -227,29 +283,33 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
     }, [iframeKey, iframeSrc]);
 
     // Attach ParentBridgeClient to handle postMessage auth handshakes
-    // CRITICAL: Only attach AFTER the iframe has completed its load event (onLoad)
-    // to prevent origin mismatch DOMExceptions before the remote document loads!
     useEffect(() => {
-        if (!isIframeLoaded) return;
         const iframe = iframeRef.current;
-        if (!iframe || !iframeSrc) return;
+        if (!iframe) return;
 
-        let bridge: ParentBridgeClient | null = null;
-        try {
+        let bridge = bridgeRef.current;
+        if (!bridge) {
             bridge = new ParentBridgeClient();
-            bridge.attach(iframe, new URL(baseUrl).origin);
-        } catch (e) {
-            console.warn('[DTraderIframeContainer] Bridge attach warning:', e);
+            bridgeRef.current = bridge;
         }
+        bridge.attach(iframe, new URL(baseUrl).origin, wsUrl || undefined);
 
         return () => {
-            if (bridge) {
+            if (bridgeRef.current) {
                 try {
-                    bridge.detach();
+                    bridgeRef.current.detach();
                 } catch {}
+                bridgeRef.current = null;
             }
         };
-    }, [baseUrl, iframeKey, iframeSrc, isIframeLoaded]);
+    }, [baseUrl, iframeKey]);
+
+    // Sync bridge when tokens or wsUrl update
+    useEffect(() => {
+        if (bridgeRef.current) {
+            bridgeRef.current.dispatchAuth(wsUrl || undefined);
+        }
+    }, [wsUrl, currentToken, currentLoginId]);
 
     const handleIframeLoad = () => {
         setIsLoading(false);

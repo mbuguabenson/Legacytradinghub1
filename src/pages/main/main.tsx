@@ -63,14 +63,9 @@ const EliteProPage = lazyRetry(() => import('../elite-pro/elite-pro'), 'elite_pr
 const PovertyHunterPage = lazyRetry(() => import('../poverty-hunter'), 'poverty_hunter');
 const AutoXEoPage = lazyRetry(() => import('../auto-x-eo'), 'auto_x_eo');
 const OverlordAiPage = lazyRetry(() => import('../overlord-ai'), 'overlord_ai');
-const B254Page = lazyRetry(() => import('../b254'), 'b254');
 const CopyTradingPage = lazyRetry(() => import('../copy-trading/copy-trading'), 'copy_trading');
 const DTraderPage = lazyRetry(() => import('../dtrader'), 'dtrader');
 const AutoflipperPage = lazyRetry(() => import('../autoflipper/autoflipper'), 'autoflipper');
-const RiseFallPage = lazyRetry(
-    () => import('../rise-fall').then(m => ({ default: m.default || (m as any).RiseFallPage })),
-    'rise_fall'
-);
 
 import { TabErrorBoundary } from '@/components/shared/TabErrorBoundary';
 import { copyTradingService } from '@/pages/copy-trading/services/copy-trading.service';
@@ -140,11 +135,9 @@ const AppWrapper = observer(() => {
         'poverty_hunter',
         'auto_x_eo',
         'overlord_ai',
-        'b254',
         'copy_trading',
         'dtrader',
         'autoflipper',
-        'rise_fall',
     ];
     const { isDesktop } = useDevice();
     const location = useLocation();
@@ -651,18 +644,6 @@ const AppWrapper = observer(() => {
                 ),
             },
             {
-                key: 'b254',
-                id: 'id-b254',
-                label: <TabIcon iconKey='b254' label='B254' />,
-                content: (
-                    <TabErrorBoundary tabId='id-b254' tabName='B254'>
-                        <Suspense fallback={<ChunkLoader message={localize('Please wait, loading B254...')} />}>
-                            <B254Page />
-                        </Suspense>
-                    </TabErrorBoundary>
-                ),
-            },
-            {
                 key: 'copy_trading',
                 id: 'id-copy-trading',
                 label: <TabIcon iconKey='copy_trading' label='Copy Trading' />,
@@ -694,18 +675,6 @@ const AppWrapper = observer(() => {
                     <TabErrorBoundary tabId='id-autoflipper' tabName='AutoFlipper'>
                         <Suspense fallback={<ChunkLoader message={localize('Please wait, loading AutoFlipper...')} />}>
                             <AutoflipperPage />
-                        </Suspense>
-                    </TabErrorBoundary>
-                ),
-            },
-            {
-                key: 'rise_fall',
-                id: 'id-rise-fall',
-                label: <TabIcon iconKey='rise_fall' label='Rise & Fall' />,
-                content: (
-                    <TabErrorBoundary tabId='id-rise-fall' tabName='Rise & Fall'>
-                        <Suspense fallback={<ChunkLoader message={localize('Please wait, loading Rise & Fall...')} />}>
-                            <RiseFallPage />
                         </Suspense>
                     </TabErrorBoundary>
                 ),
