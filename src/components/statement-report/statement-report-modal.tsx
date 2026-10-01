@@ -4,9 +4,13 @@ import {
     DerivAccountWalletService,
     DerivStatementTransaction,
 } from '@/services/deriv-account-wallet.service';
+import {
+    DerivLegacyOptionsService,
+    LegacyMigrationStatus,
+} from '@/services/deriv-legacy-options.service';
 import { useApiBase } from '@/hooks/useApiBase';
 import { useStore } from '@/hooks/useStore';
-import { addComma, getCurrencyDisplayCode, getDecimalPlaces } from '@/components/shared';
+import { addComma, generateOAuthURL, getCurrencyDisplayCode, getDecimalPlaces } from '@/components/shared';
 import { isDemoAccount } from '@/utils/account-helpers';
 import { localize } from '@deriv-com/translations';
 import {
@@ -14,14 +18,18 @@ import {
     ArrowUpRight,
     Calendar,
     ChevronDown,
+    Database,
     Download,
     FileSpreadsheet,
     FileText,
     Filter,
     Layers,
     Loader2,
+    LogIn,
+    Radio,
     RefreshCw,
     Search,
+    ShieldAlert,
     X,
 } from 'lucide-react';
 import './statement-report-modal.scss';
@@ -42,6 +50,11 @@ export const StatementReportModal = observer(({ isOpen, onClose, initialLoginId 
     const [transactions, setTransactions] = useState<DerivStatementTransaction[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+    // API Data Source state (Unified, Options Legacy REST, Live WebSocket)
+    const [dataSource, setDataSource] = useState<'unified' | 'legacy_rest' | 'websocket'>('unified');
+    const [resolvedSource, setResolvedSource] = useState<'unified' | 'legacy_rest' | 'websocket'>('unified');
+    const [migrationStatus, setMigrationStatus] = useState<LegacyMigrationStatus | null>(null);
 
     // Filters
     const [actionFilter, setActionFilter] = useState<string>('all');
@@ -77,7 +90,7 @@ export const StatementReportModal = observer(({ isOpen, onClose, initialLoginId 
         return { dateFrom: undefined, dateTo: undefined };
     }, [dateRangeFilter]);
 
-    // Fetch Statement Data
+    // Fetch Statement Data (Real Deriv WebSocket + Options Legacy REST API)
     const fetchStatement = useCallback(async () => {
         const targetLoginId = selectedLoginId || activeLoginid || client?.loginid;
         if (!targetLoginId) return;
@@ -86,17 +99,94 @@ export const StatementReportModal = observer(({ isOpen, onClose, initialLoginId 
         setErrorMessage(null);
 
         try {
-            const response = await DerivAccountWalletService.getStatementReport({
-                loginid: targetLoginId,
-                limit,
-                date_from: dateFrom,
-                date_to: dateTo,
-                action_type: actionFilter !== 'all' ? actionFilter : undefined,
-            });
+            // Also check migration status in background if not yet loaded
+            if (!migrationStatus) {
+                DerivLegacyOptionsService.getMigrationStatus()
+                    .then(res => setMigrationStatus(res?.data?.status || null))
+                    .catch(() => {});
+            }
 
-            setTransactions(response.transactions || []);
-            if (response.error && response.transactions.length === 0) {
-                setErrorMessage(response.error);
+            if (dataSource === 'legacy_rest') {
+                // Direct call to Deriv Options Legacy REST API (https://developers.deriv.com/docs/options-legacy/)
+                const res = await DerivLegacyOptionsService.getLegacyStatement(targetLoginId, { limit });
+                const mapped: DerivStatementTransaction[] = (res.data || []).map(t => ({
+                    transaction_id: t.transaction_id,
+                    action_type: (t.action_type || 'transaction').toLowerCase(),
+                    amount: t.amount,
+                    balance_after: t.balance_after,
+                    transaction_time: t.transaction_time,
+                    contract_id: t.contract_id,
+                    shortcode: t.shortcode,
+                    longcode: t.longcode,
+                    payout: t.payout,
+                    purchase_time: t.purchase_time,
+                    currency: isDemoAccount(targetLoginId) ? 'USD' : (client?.currency || 'USD'),
+                }));
+                setTransactions(mapped);
+                setResolvedSource('legacy_rest');
+                if (!mapped.length && res.meta && (res.meta as any).message) {
+                    setErrorMessage((res.meta as any).message);
+                }
+            } else if (dataSource === 'websocket') {
+                // Direct call to Deriv WebSocket API (statement: 1, description: 1)
+                const wsRes = await DerivAccountWalletService.getStatementReport({
+                    loginid: targetLoginId,
+                    limit,
+                    date_from: dateFrom,
+                    date_to: dateTo,
+                    action_type: actionFilter !== 'all' ? actionFilter : undefined,
+                });
+                setTransactions(wsRes.transactions || []);
+                setResolvedSource('websocket');
+                if (wsRes.error && wsRes.transactions.length === 0) {
+                    setErrorMessage(wsRes.error);
+                }
+            } else {
+                // Unified: query both live WebSocket and Legacy Options REST API, merging unique transactions
+                const wsPromise = DerivAccountWalletService.getStatementReport({
+                    loginid: targetLoginId,
+                    limit,
+                    date_from: dateFrom,
+                    date_to: dateTo,
+                    action_type: actionFilter !== 'all' ? actionFilter : undefined,
+                });
+                const legacyPromise = DerivLegacyOptionsService.getLegacyStatement(targetLoginId, { limit }).catch(() => null);
+
+                const [wsRes, legacyRes] = await Promise.all([wsPromise, legacyPromise]);
+
+                const txMap = new Map<string, DerivStatementTransaction>();
+                // Add WS transactions
+                (wsRes?.transactions || []).forEach(tx => {
+                    txMap.set(String(tx.transaction_id), tx);
+                });
+                // Add legacy transactions if not already present
+                (legacyRes?.data || []).forEach(leg => {
+                    const idStr = String(leg.transaction_id);
+                    if (!txMap.has(idStr)) {
+                        txMap.set(idStr, {
+                            transaction_id: leg.transaction_id,
+                            action_type: (leg.action_type || 'transaction').toLowerCase(),
+                            amount: leg.amount,
+                            balance_after: leg.balance_after,
+                            transaction_time: leg.transaction_time,
+                            contract_id: leg.contract_id,
+                            shortcode: leg.shortcode,
+                            longcode: leg.longcode,
+                            payout: leg.payout,
+                            purchase_time: leg.purchase_time,
+                            currency: isDemoAccount(targetLoginId) ? 'USD' : (client?.currency || 'USD'),
+                        });
+                    }
+                });
+
+                const merged = Array.from(txMap.values());
+                merged.sort((a, b) => b.transaction_time - a.transaction_time);
+                setTransactions(merged);
+                setResolvedSource(legacyRes?.data?.length && wsRes?.transactions?.length ? 'unified' : (wsRes?.source as any) || 'unified');
+
+                if (merged.length === 0 && wsRes?.error) {
+                    setErrorMessage(wsRes.error);
+                }
             }
         } catch (err: any) {
             console.error('[StatementReportModal] Fetch error:', err);
@@ -105,7 +195,7 @@ export const StatementReportModal = observer(({ isOpen, onClose, initialLoginId 
         } finally {
             setIsLoading(false);
         }
-    }, [selectedLoginId, activeLoginid, client?.loginid, limit, dateFrom, dateTo, actionFilter]);
+    }, [selectedLoginId, activeLoginid, client?.loginid, client?.currency, limit, dateFrom, dateTo, actionFilter, dataSource, migrationStatus]);
 
     useEffect(() => {
         if (isOpen) {
@@ -317,6 +407,58 @@ export const StatementReportModal = observer(({ isOpen, onClose, initialLoginId 
                     </div>
                 </div>
 
+                {/* API Source Selector & Options Legacy Integration Status */}
+                <div className='statement-report-modal__source-bar'>
+                    <div className='statement-report-modal__source-tabs'>
+                        <button
+                            type='button'
+                            className={`source-tab-btn ${dataSource === 'unified' ? 'active' : ''}`}
+                            onClick={() => setDataSource('unified')}
+                            title={localize('Combine real-time Deriv WebSocket statement with Options Legacy historical REST transactions')}
+                        >
+                            <span className='source-tab-dot dot-unified' />
+                            <span>{localize('Unified (Live + Legacy)')}</span>
+                        </button>
+                        <button
+                            type='button'
+                            className={`source-tab-btn ${dataSource === 'legacy_rest' ? 'active' : ''}`}
+                            onClick={() => setDataSource('legacy_rest')}
+                            title={localize('Query Deriv Options Legacy REST API (https://developers.deriv.com/docs/options-legacy/)')}
+                        >
+                            <span className='source-tab-dot dot-legacy' />
+                            <span>{localize('Options Legacy REST')}</span>
+                        </button>
+                        <button
+                            type='button'
+                            className={`source-tab-btn ${dataSource === 'websocket' ? 'active' : ''}`}
+                            onClick={() => setDataSource('websocket')}
+                            title={localize('Query Deriv WebSocket API (statement: 1, description: 1)')}
+                        >
+                            <span className='source-tab-dot dot-ws' />
+                            <span>{localize('Live WebSocket')}</span>
+                        </button>
+                    </div>
+
+                    <div className='statement-report-modal__source-meta'>
+                        <div className='statement-report-modal__source-chip'>
+                            <span className='chip-label'>{localize('Active Source:')}</span>
+                            <span className={`chip-value chip-${resolvedSource}`}>
+                                {resolvedSource === 'legacy_rest'
+                                    ? 'Deriv Options Legacy REST'
+                                    : resolvedSource === 'websocket'
+                                    ? 'Deriv WebSocket (statement: 1)'
+                                    : 'Unified (WS & Options Legacy)'}
+                            </span>
+                        </div>
+                        {migrationStatus && (
+                            <div className='statement-report-modal__migration-chip'>
+                                <span className='chip-label'>{localize('Migration:')}</span>
+                                <span className='chip-value'>{migrationStatus}</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
                 {/* Metrics Strip */}
                 <div className='statement-report-modal__metrics-strip'>
                     <div className='metric-card'>
@@ -457,10 +599,36 @@ export const StatementReportModal = observer(({ isOpen, onClose, initialLoginId 
 
                 {/* Table Body */}
                 <div className='statement-report-modal__body'>
-                    {isLoading ? (
+                    {!selectedLoginId && !activeLoginid && !client?.loginid ? (
+                        <div className='statement-report-modal__auth-required'>
+                            <div className='auth-icon'>
+                                <LogIn size={32} />
+                            </div>
+                            <h4>{localize('Deriv Account Authentication Required')}</h4>
+                            <p>
+                                {localize('Please log in with your Deriv account to inspect real-time transaction ledger movements and historical Options Legacy statement data.')}
+                            </p>
+                            <button
+                                className='auth-login-btn'
+                                onClick={async () => {
+                                    const oauthUrl = await generateOAuthURL();
+                                    if (oauthUrl) window.location.href = oauthUrl;
+                                }}
+                            >
+                                <LogIn size={15} />
+                                <span>{localize('Log In to Deriv')}</span>
+                            </button>
+                        </div>
+                    ) : isLoading ? (
                         <div className='statement-report-modal__loading'>
                             <Loader2 size={32} className='animate-spin' />
-                            <p>{localize('Fetching statement via Deriv WebSocket API (statement: 1)...')}</p>
+                            <p>
+                                {dataSource === 'legacy_rest'
+                                    ? localize('Fetching historical transactions from Deriv Options Legacy REST API (https://developers.deriv.com/docs/options-legacy/)...')
+                                    : dataSource === 'websocket'
+                                    ? localize('Fetching live transactions via Deriv WebSocket API (statement: 1)...')
+                                    : localize('Querying live Deriv WebSocket & Options Legacy REST APIs...')}
+                            </p>
                         </div>
                     ) : errorMessage && filteredTransactions.length === 0 ? (
                         <div className='statement-report-modal__error'>
