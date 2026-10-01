@@ -59,7 +59,6 @@ export const StatementReportModal = observer(({ isOpen, onClose, initialLoginId 
     // Filters
     const [actionFilter, setActionFilter] = useState<string>('all');
     const [dateRangeFilter, setDateRangeFilter] = useState<'all' | 'today' | '7d' | '30d'>('all');
-    const [limit, setLimit] = useState<number>(100);
     const [searchQuery, setSearchQuery] = useState<string>('');
 
     // Currency conversion display
@@ -108,7 +107,7 @@ export const StatementReportModal = observer(({ isOpen, onClose, initialLoginId 
 
             if (dataSource === 'legacy_rest') {
                 // Direct call to Deriv Options Legacy REST API (https://developers.deriv.com/docs/options-legacy/)
-                const res = await DerivLegacyOptionsService.getLegacyStatement(targetLoginId, { limit });
+                const res = await DerivLegacyOptionsService.getLegacyStatement(targetLoginId);
                 const mapped: DerivStatementTransaction[] = (res.data || []).map(t => ({
                     transaction_id: t.transaction_id,
                     action_type: (t.action_type || 'transaction').toLowerCase(),
@@ -131,7 +130,6 @@ export const StatementReportModal = observer(({ isOpen, onClose, initialLoginId 
                 // Direct call to Deriv WebSocket API (statement: 1, description: 1)
                 const wsRes = await DerivAccountWalletService.getStatementReport({
                     loginid: targetLoginId,
-                    limit,
                     date_from: dateFrom,
                     date_to: dateTo,
                     action_type: actionFilter !== 'all' ? actionFilter : undefined,
@@ -145,12 +143,11 @@ export const StatementReportModal = observer(({ isOpen, onClose, initialLoginId 
                 // Unified: query both live WebSocket and Legacy Options REST API, merging unique transactions
                 const wsPromise = DerivAccountWalletService.getStatementReport({
                     loginid: targetLoginId,
-                    limit,
                     date_from: dateFrom,
                     date_to: dateTo,
                     action_type: actionFilter !== 'all' ? actionFilter : undefined,
                 });
-                const legacyPromise = DerivLegacyOptionsService.getLegacyStatement(targetLoginId, { limit }).catch(() => null);
+                const legacyPromise = DerivLegacyOptionsService.getLegacyStatement(targetLoginId).catch(() => null);
 
                 const [wsRes, legacyRes] = await Promise.all([wsPromise, legacyPromise]);
 
@@ -195,7 +192,7 @@ export const StatementReportModal = observer(({ isOpen, onClose, initialLoginId 
         } finally {
             setIsLoading(false);
         }
-    }, [selectedLoginId, activeLoginid, client?.loginid, client?.currency, limit, dateFrom, dateTo, actionFilter, dataSource, migrationStatus]);
+    }, [selectedLoginId, activeLoginid, client?.loginid, client?.currency, dateFrom, dateTo, actionFilter, dataSource, migrationStatus]);
 
     useEffect(() => {
         if (isOpen) {
@@ -557,20 +554,6 @@ export const StatementReportModal = observer(({ isOpen, onClose, initialLoginId 
                                 <option value='today'>{localize('Today')}</option>
                                 <option value='7d'>{localize('Last 7 Days')}</option>
                                 <option value='30d'>{localize('Last 30 Days')}</option>
-                            </select>
-                        </div>
-
-                        {/* Limit Filter */}
-                        <div className='toolbar-filter'>
-                            <select
-                                value={limit}
-                                onChange={e => setLimit(Number(e.target.value))}
-                                aria-label='Limit results'
-                            >
-                                <option value={25}>25 rows</option>
-                                <option value={50}>50 rows</option>
-                                <option value={100}>100 rows</option>
-                                <option value={200}>200 rows</option>
                             </select>
                         </div>
                     </div>

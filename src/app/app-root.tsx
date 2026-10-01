@@ -8,10 +8,13 @@ import { useTokenRefresh } from '@/hooks/useTokenRefresh';
 import { sanitizeAccountsList } from '@/utils/token-bridge';
 import { DerivAnalyticsService } from '@/services/deriv-analytics.service';
 import { getBrandLabel } from '@/components/shared/utils/brand/brand';
+import { ForexChartsBackground } from './ForexChartsBackground';
 import {
     Activity,
+    ArrowRight,
     BarChart3,
     Bot,
+    Check,
     Copy,
     Cpu,
     Loader2,
@@ -61,13 +64,63 @@ const ErrorComponentWrapper = observer(() => {
     );
 });
 
-const INIT_STEPS = [
-    { code: 'NET_01', text: 'Connecting to Volatility Markets...' },
-    { code: 'AI_02', text: 'Loading Algorithmic Trading Models...' },
-    { code: 'AUTH_03', text: 'Authenticating Deriv Quantum Gateway...' },
-    { code: 'SCAN_04', text: 'Calibrating Multi-Market Scanner...' },
-    { code: 'SYNC_05', text: 'Synchronizing Live Orderbook...' },
-    { code: 'CORE_06', text: 'Finalizing Trading Suite...' },
+const MILESTONES = [
+    { id: 1, label: 'CONNECTION', threshold: 18, status: 'Establishing secure connection...', sub: 'Connecting to Deriv WebSocket Gateway...' },
+    { id: 2, label: 'MARKET DATA', threshold: 40, status: 'Streaming live market data...', sub: 'Synchronizing Forex & Volatility Ticks...' },
+    { id: 3, label: 'AI ENGINE', threshold: 64, status: 'Initializing AI quantitative models...', sub: 'Calibrating Neural Prediction Engine...' },
+    { id: 4, label: 'TRADING BOTS', threshold: 85, status: 'Mounting automated strategy bots...', sub: 'Configuring Risk Management Blocks...' },
+    { id: 5, label: 'FINAL SETUP', threshold: 100, status: 'Finalizing quantum environment...', sub: 'Trading Platform Ready' },
+];
+
+const FEATURE_CARDS = [
+    {
+        id: 'free-bots',
+        name: 'Free Bots',
+        icon: Bot,
+        color: '#00f5ff',
+        bg: 'rgba(0, 245, 255, 0.14)',
+        borderColor: 'rgba(0, 245, 255, 0.28)',
+    },
+    {
+        id: 'ai-bots',
+        name: 'AI Bots',
+        icon: Cpu,
+        color: '#d946ef',
+        bg: 'rgba(217, 70, 239, 0.14)',
+        borderColor: 'rgba(217, 70, 239, 0.28)',
+    },
+    {
+        id: 'analysis-tool',
+        name: 'Analysis Tool',
+        icon: BarChart3,
+        color: '#10b981',
+        bg: 'rgba(16, 185, 129, 0.14)',
+        borderColor: 'rgba(16, 185, 129, 0.28)',
+    },
+    {
+        id: 'smart-analysis',
+        name: 'Smart Analysis',
+        icon: Sparkles,
+        color: '#f59e0b',
+        bg: 'rgba(245, 158, 11, 0.14)',
+        borderColor: 'rgba(245, 158, 11, 0.28)',
+    },
+    {
+        id: 'copy-trading',
+        name: 'Copy Trading',
+        icon: Copy,
+        color: '#38bdf8',
+        bg: 'rgba(56, 189, 248, 0.14)',
+        borderColor: 'rgba(56, 189, 248, 0.28)',
+    },
+    {
+        id: 'signals',
+        name: 'Signals',
+        icon: Radio,
+        color: '#34d399',
+        bg: 'rgba(52, 211, 153, 0.14)',
+        borderColor: 'rgba(52, 211, 153, 0.28)',
+    },
 ];
 
 const WelcomeScreen = ({
@@ -82,27 +135,35 @@ const WelcomeScreen = ({
     statusMessage: string;
 }) => {
     const [exiting, setExiting] = useState(false);
-    const [activeStep, setActiveStep] = useState(0);
 
-    // Dynamic step cycling for telemetry stream
-    useEffect(() => {
-        const stepTimer = window.setInterval(() => {
-            setActiveStep(prev => (prev + 1) % INIT_STEPS.length);
-        }, 750);
-        return () => window.clearInterval(stepTimer);
-    }, []);
-
-    // Instant smooth exit transition when initialization completes
+    // Cinematic smooth zoom exit transition when initialization completes
     useEffect(() => {
         if (!isComplete) return;
         const exitTimer = window.setTimeout(() => {
             setExiting(true);
-            window.setTimeout(onFinished, 480);
-        }, 50);
+            window.setTimeout(onFinished, 620); // 620ms allows smooth camera zoom-in to complete
+        }, 80);
         return () => window.clearTimeout(exitTimer);
     }, [isComplete, onFinished]);
 
+    const handleSkip = () => {
+        setExiting(true);
+        window.setTimeout(onFinished, 500);
+    };
+
     const roundedProgress = Math.min(100, Math.round(progress));
+
+    // Determine current milestone
+    const currentMilestoneIndex = useMemo(() => {
+        for (let i = 0; i < MILESTONES.length; i++) {
+            if (roundedProgress <= MILESTONES[i].threshold) {
+                return i;
+            }
+        }
+        return MILESTONES.length - 1;
+    }, [roundedProgress]);
+
+    const activeMilestone = MILESTONES[currentMilestoneIndex] || MILESTONES[0];
 
     // Dynamic split brand representation
     const { leftBrand, rightBrand } = useMemo(() => {
@@ -115,55 +176,112 @@ const WelcomeScreen = ({
         return { leftBrand: full.slice(0, mid), rightBrand: full.slice(mid) };
     }, []);
 
-    const currentStepObj = INIT_STEPS[activeStep] || INIT_STEPS[0];
-    const displayStatus = statusMessage || currentStepObj.text;
-
     return (
         <div className={`welcome-screen ${exiting ? 'welcome-screen--exiting' : 'welcome-screen--visible'}`}>
-            {/* Ambient Lighting Spheres */}
-            <div className='ws-ambient-glow ws-ambient-glow--cyan' aria-hidden='true' />
-            <div className='ws-ambient-glow ws-ambient-glow--amber' aria-hidden='true' />
-            <div className='ws-vignette' aria-hidden='true' />
+            {/* Dynamic Animated Forex Candlestick & Technical Charts Background */}
+            <ForexChartsBackground />
 
-            {/* Central Institutional Console Card */}
+            {/* Central Modern Institutional Card matching reference */}
             <div className='welcome-screen__card'>
                 <div className='ws-card-glow-edge' aria-hidden='true' />
 
-                {/* Sleek Orbital Brand Emblem */}
-                <div className='ws-emblem-wrapper'>
-                    <div className='ws-orbit-ring ws-orbit-ring--outer'>
-                        <div className='ws-orbit-dot' />
-                    </div>
-                    <div className='ws-orbit-ring ws-orbit-ring--inner' />
-                    <div className='ws-emblem-core'>
+                {/* Top Brand Header */}
+                <div className='ws-brand-header'>
+                    <div className='ws-brand-emblem'>
                         <img
                             src='/logo_icon.svg'
-                            alt='Legacy Trading Hub'
-                            className='ws-emblem-logo'
+                            alt={brandLabel || 'Legacy Trading Hub'}
+                            className='ws-brand-logo'
                             onError={(e: any) => {
                                 e.currentTarget.style.display = 'none';
                             }}
                         />
                     </div>
+                    <div className='ws-brand-text-block'>
+                        <div className='ws-brand-title'>
+                            <span className='brand-white'>{leftBrand}</span>{' '}
+                            <span className='brand-gold-cyan'>{rightBrand}</span>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Brand Title */}
-                <div className='ws-brand-header'>
-                    <span className='brand-white'>{leftBrand}</span>
-                    <span className='brand-gold-cyan'>{rightBrand}</span>
+                {/* Welcome Heading & Subtitle */}
+                <div className='ws-welcome-heading'>
+                    Welcome to <span className='brand-cyan'>{brandLabel || 'Legacy Trading Hub'}</span>
+                </div>
+                <div className='ws-welcome-sub'>
+                    Automated Precision Trading System
                 </div>
 
-                {/* Institutional Badge */}
-                <div className='ws-hud-badge'>
-                    <span className='live-beacon-dot' />
-                    <span className='badge-text'>INSTITUTIONAL QUANTUM PLATFORM</span>
+                {/* 5-Step Milestone Stepper */}
+                <div className='ws-stepper'>
+                    <div className='ws-stepper-track-bg'>
+                        <div
+                            className='ws-stepper-track-fill'
+                            style={{
+                                width: `${Math.min(100, Math.max(0, (roundedProgress / 100) * 100))}%`,
+                            }}
+                        />
+                    </div>
+                    {MILESTONES.map((step, idx) => {
+                        const isDone = roundedProgress >= step.threshold;
+                        const isActive = !isDone && (idx === 0 || roundedProgress >= MILESTONES[idx - 1].threshold);
+
+                        return (
+                            <div
+                                key={step.id}
+                                className={`ws-step-node ${isDone ? 'done' : ''} ${isActive ? 'active' : ''}`}
+                            >
+                                <div className='ws-step-circle'>
+                                    {isDone ? (
+                                        <Check size={11} strokeWidth={3} className='ws-check-icon' />
+                                    ) : (
+                                        <span className='ws-step-number'>{step.id}</span>
+                                    )}
+                                </div>
+                                <span className='ws-step-label'>{step.label}</span>
+                            </div>
+                        );
+                    })}
                 </div>
 
-                {/* Subtitle */}
-                <p className='ws-subtitle'>Next-Gen Algorithmic Execution & Neural Market Suite</p>
+                {/* 6 Modern Feature Cards (3x2 Grid) */}
+                <div className='ws-cards-grid'>
+                    {FEATURE_CARDS.map((card, idx) => {
+                        const Icon = card.icon;
+                        const isCardLit = roundedProgress >= (idx + 1) * 15;
 
-                {/* Hairline Precision Progress & Telemetry */}
-                <div className='ws-telemetry-container'>
+                        return (
+                            <div
+                                key={card.id}
+                                className={`ws-feature-card ${isCardLit ? 'lit' : ''}`}
+                                style={{
+                                    ['--card-accent' as any]: card.color,
+                                    ['--card-bg' as any]: card.bg,
+                                    ['--card-border' as any]: card.borderColor,
+                                }}
+                            >
+                                <div className='ws-card-icon-bubble'>
+                                    <Icon size={18} style={{ color: card.color }} />
+                                </div>
+                                <span className='ws-card-name'>{card.name}</span>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {/* Status Readout */}
+                <div className='ws-status-line'>
+                    <span className='ws-status-main'>
+                        {activeMilestone.status}
+                    </span>
+                    <span className='ws-status-sub'>
+                        {activeMilestone.sub}
+                    </span>
+                </div>
+
+                {/* Precision Progress Bar & Percentage */}
+                <div className='ws-progress-row'>
                     <div className='ws-progress-track'>
                         <div
                             className='ws-progress-bar'
@@ -172,18 +290,24 @@ const WelcomeScreen = ({
                             <span className='ws-progress-photon' />
                         </div>
                     </div>
-
-                    <div className='ws-telemetry-footer'>
-                        <span className='ws-status-text'>{displayStatus}</span>
-                        <span className='ws-status-percent'>{roundedProgress}%</span>
-                    </div>
+                    <span className='ws-progress-percent'>{roundedProgress}%</span>
                 </div>
 
-                {/* Security Tag */}
-                <div className='ws-security-tag'>
-                    <ShieldCheck size={12} className='ws-security-icon' />
-                    <span>256-Bit Quantum Enclave • End-to-End WebSocket Encryption</span>
+                {/* Card Footer Copyright */}
+                <div className='ws-footer-text'>
+                    © 2026 {brandLabel || 'Legacy Trading Hub'}. Powered by Deriv. All rights reserved.
                 </div>
+
+                {/* Skip / Enter platform button */}
+                <button
+                    type='button'
+                    className='ws-enter-btn'
+                    onClick={handleSkip}
+                    title='Enter platform immediately'
+                >
+                    <span>Enter Platform</span>
+                    <ArrowRight size={12} />
+                </button>
             </div>
         </div>
     );
@@ -226,7 +350,7 @@ const AppRoot = () => {
 
     useEffect(() => {
         statusIntervalRef.current = window.setInterval(() => {
-            setStatusIndex(prev => (prev + 1) % INIT_STEPS.length);
+            setStatusIndex(prev => (prev + 1) % MILESTONES.length);
         }, 900);
         return () => {
             if (statusIntervalRef.current) {
@@ -235,38 +359,43 @@ const AppRoot = () => {
         };
     }, []);
 
-    // Snappy, ultra-fast smooth interpolation curve
+    // Smooth, progressive interpolation curve (takes 2.4s to go 0 -> 100%)
     useEffect(() => {
         let animationFrameId: number;
-        const step = () => {
-            const current = progressRef.current;
-            const target = targetProgressRef.current;
-            const increment = isReducedMotion ? 5 : Math.max(1.6, (target - current) * 0.22);
-            const next = Math.min(100, current + increment);
+        let startTime: number | null = null;
+        const totalDuration = isReducedMotion ? 600 : 2400;
+
+        const step = (timestamp: number) => {
+            if (startTime === null) startTime = timestamp;
+            const elapsed = timestamp - startTime;
+            const next = Math.min(100, Math.round((elapsed / totalDuration) * 100));
+
             progressRef.current = next;
             setProgress(next);
+
             if (next < 100) {
                 animationFrameId = window.requestAnimationFrame(step);
             }
         };
+
         animationFrameId = window.requestAnimationFrame(step);
         return () => window.cancelAnimationFrame(animationFrameId);
     }, [isReducedMotion]);
 
+    // Expose window.__replayWelcome for testing
     useEffect(() => {
-        if (is_api_initialized) {
-            targetProgressRef.current = 100;
-        } else {
-            targetProgressRef.current = 75;
-        }
-    }, [is_api_initialized]);
+        (window as any).__replayWelcome = () => {
+            setShowWelcome(true);
+            setProgress(0);
+            progressRef.current = 0;
+        };
+    }, []);
 
     useEffect(() => {
         const timeoutId = window.setTimeout(() => {
             if (!api_base_initialized.current) {
                 console.warn('API initialization timeout reached; proceeding to app content.');
                 setIsApiInitialized(true);
-                targetProgressRef.current = 100;
             }
         }, 1400);
 
@@ -282,7 +411,6 @@ const AppRoot = () => {
                 api_base_initialized.current = false;
             } finally {
                 setIsApiInitialized(true);
-                targetProgressRef.current = 100;
                 window.clearTimeout(timeoutId);
             }
         };
@@ -293,12 +421,11 @@ const AppRoot = () => {
     useEffect(() => {
         welcomeTimeoutRef.current = window.setTimeout(() => {
             setWelcomeForceExit(true);
-            setShowWelcome(false);
-        }, 1600);
+        }, 3000);
 
         welcomeHardExitRef.current = window.setTimeout(() => {
             setShowWelcome(false);
-        }, 2200);
+        }, 3800);
 
         return () => {
             if (welcomeTimeoutRef.current) {
@@ -311,29 +438,29 @@ const AppRoot = () => {
     }, []);
 
     const statusMessage =
-        INIT_STEPS[statusIndex % INIT_STEPS.length]?.text || 'Connecting to Volatility Markets...';
-    const welcomeComplete = (is_api_initialized && progress >= 95) || welcomeForceExit;
+        MILESTONES[statusIndex % MILESTONES.length]?.status || 'Connecting to Volatility & Forex Markets...';
+    const welcomeComplete = progress >= 100 || welcomeForceExit;
 
-    if (showWelcome) {
-        return (
-            <WelcomeScreen
-                onFinished={() => setShowWelcome(false)}
-                isComplete={welcomeComplete}
-                progress={progress}
-                statusMessage={statusMessage}
-            />
-        );
-    }
-
-    if (!store || !is_api_initialized) return null;
+    if (!store) return null;
 
     return (
-        <Suspense fallback={null}>
-            <ErrorBoundary root_store={store}>
-                <ErrorComponentWrapper />
-                <AppContent />
-            </ErrorBoundary>
-        </Suspense>
+        <>
+            <Suspense fallback={null}>
+                <ErrorBoundary root_store={store}>
+                    <ErrorComponentWrapper />
+                    <AppContent />
+                </ErrorBoundary>
+            </Suspense>
+
+            {showWelcome && (
+                <WelcomeScreen
+                    onFinished={() => setShowWelcome(false)}
+                    isComplete={welcomeComplete}
+                    progress={progress}
+                    statusMessage={statusMessage}
+                />
+            )}
+        </>
     );
 };
 

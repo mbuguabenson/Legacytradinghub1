@@ -125,33 +125,35 @@
     }
 }
 
-// ─── Statement footer button ─────────────────────────────────────────────────
+// ─── Statement footer button (hidden on desktop per user instruction) ─────────
 .app-footer__statement-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.35rem 0.8rem;
-    border-radius: 6px;
-    background: rgba(59, 130, 246, 0.08);
-    border: 1px solid rgba(59, 130, 246, 0.25);
-    color: #60a5fa;
-    font-size: 1.1rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    &:hover {
-        background: rgba(59, 130, 246, 0.18);
-        border-color: rgba(59, 130, 246, 0.5);
-        color: #93c5fd;
-        box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
-    }
-
-    svg {
-        stroke: currentColor;
-    }
+    display: none !important; // Removed on desktop view
 
     @include mobile-screen {
+        display: inline-flex !important;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.35rem 0.8rem;
+        border-radius: 6px;
+        background: rgba(59, 130, 246, 0.08);
+        border: 1px solid rgba(59, 130, 246, 0.25);
+        color: #60a5fa;
+        font-size: 1.1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background: rgba(59, 130, 246, 0.18);
+            border-color: rgba(59, 130, 246, 0.5);
+            color: #93c5fd;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+        }
+
+        svg {
+            stroke: currentColor;
+        }
+
         span {
             display: none;
         }

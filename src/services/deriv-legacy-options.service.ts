@@ -161,9 +161,12 @@ export class DerivLegacyOptionsService {
 
         const baseUrl = this.getBaseURL();
         const headers = this.getHeaders(explicitToken);
+        const shouldFetchAll = options.limit === undefined || options.limit === 0 || options.limit >= 500;
+        const batchLimit = shouldFetchAll ? 500 : options.limit;
+
         const params = new URLSearchParams();
         params.set('loginid', loginid);
-        if (options.limit !== undefined) params.set('limit', String(options.limit));
+        params.set('limit', String(batchLimit));
         if (options.offset !== undefined) params.set('offset', String(options.offset));
 
         const response = await fetch(`${baseUrl}/trading/v1/options/legacy/statement?${params.toString()}`, {
@@ -176,7 +179,7 @@ export class DerivLegacyOptionsService {
                 data: [],
                 meta: {
                     count: 0,
-                    limit: options.limit || 50,
+                    limit: batchLimit,
                     offset: options.offset || 0,
                 },
             };
@@ -187,6 +190,40 @@ export class DerivLegacyOptionsService {
             throw new Error(`Legacy statement request failed (${response.status}): ${errorBody}`);
         }
 
-        return response.json();
+        const initialJson: LegacyStatementResponse = await response.json();
+        if (shouldFetchAll && initialJson.data && initialJson.meta) {
+            let allData = [...initialJson.data];
+            const totalCount = initialJson.meta.count || allData.length;
+            while (allData.length < totalCount) {
+                try {
+                    const nextParams = new URLSearchParams();
+                    nextParams.set('loginid', loginid);
+                    nextParams.set('limit', String(batchLimit));
+                    nextParams.set('offset', String(allData.length));
+                    const nextResp = await fetch(`${baseUrl}/trading/v1/options/legacy/statement?${nextParams.toString()}`, {
+                        method: 'GET',
+                        headers,
+                    });
+                    if (!nextResp.ok) break;
+                    const nextJson: LegacyStatementResponse = await nextResp.json();
+                    if (nextJson.data && nextJson.data.length > 0) {
+                        allData.push(...nextJson.data);
+                    } else {
+                        break;
+                    }
+                } catch {
+                    break;
+                }
+            }
+            return {
+                data: allData,
+                meta: {
+                    ...initialJson.meta,
+                    count: totalCount,
+                },
+            };
+        }
+
+        return initialJson;
     }
 }

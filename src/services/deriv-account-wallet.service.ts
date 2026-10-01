@@ -871,10 +871,12 @@ export class DerivAccountWalletService {
         // ── Step 1: WebSocket Statement API (primary) ──────────────────────
         try {
             const api = await this.getConnectedApi();
+            const shouldFetchAll = params.limit === undefined || params.limit === 0 || params.limit >= 999;
+            const batchLimit = shouldFetchAll ? 999 : Math.min(params.limit || 999, 999);
             const wsReq: any = {
                 statement: 1,
                 description: 1,
-                limit: Math.min(params.limit || 100, 999),  // max 999 per spec
+                limit: batchLimit,
             };
             // Optional filters per API spec
             if (params.date_from) wsReq.date_from = Math.floor(params.date_from);
@@ -890,7 +892,31 @@ export class DerivAccountWalletService {
             const wsRes = (await api.send(wsReq)) as any;
 
             if (wsRes?.statement?.transactions && Array.isArray(wsRes.statement.transactions)) {
-                const transactions: DerivStatementTransaction[] = wsRes.statement.transactions.map((s: any) => ({
+                let allRaw: any[] = [...wsRes.statement.transactions];
+                const totalCount = wsRes.statement.count ?? allRaw.length;
+
+                // If shouldFetchAll and more transactions exist beyond first batch, paginate until all are retrieved
+                if (shouldFetchAll && totalCount > allRaw.length) {
+                    let currentOffset = allRaw.length;
+                    while (currentOffset < totalCount) {
+                        try {
+                            const nextReq = { ...wsReq, offset: currentOffset };
+                            const nextRes = (await api.send(nextReq)) as any;
+                            const nextBatch = nextRes?.statement?.transactions;
+                            if (Array.isArray(nextBatch) && nextBatch.length > 0) {
+                                allRaw.push(...nextBatch);
+                                currentOffset += nextBatch.length;
+                            } else {
+                                break;
+                            }
+                        } catch (err) {
+                            console.warn('[DerivAccountWalletService] Statement pagination batch error:', err);
+                            break;
+                        }
+                    }
+                }
+
+                const transactions: DerivStatementTransaction[] = allRaw.map((s: any) => ({
                     transaction_id:   s.transaction_id,
                     action_type:      (s.action_type || 'transaction').toLowerCase(),
                     amount:           parseFloat(s.amount  ?? '0'),
@@ -911,7 +937,7 @@ export class DerivAccountWalletService {
 
                 return {
                     transactions,
-                    count:  wsRes.statement.count ?? transactions.length,
+                    count:  totalCount,
                     source: 'websocket',
                 };
             }
