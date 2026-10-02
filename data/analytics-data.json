@@ -1,7 +1,7 @@
 {
   "totalPageViews": 85,
   "uniqueVisitors": 0,
-  "eventsCount": 780,
+  "eventsCount": 782,
   "hourlyHistory": {
     "2026-09-30-19": 1,
     "2026-09-30-20": 26,
@@ -43,6 +43,28 @@
     "Chrome": 85
   },
   "recentEvents": [
+    {
+      "id": "ev_1790957568402_b5cgc",
+      "eventType": "heartbeat",
+      "path": "/",
+      "sessionId": "sess_1790939309350_w76uhjbov",
+      "loginid": null,
+      "device": "desktop",
+      "ip": "::1",
+      "timestamp": "2026-10-02T16:12:48.402Z",
+      "metadata": {}
+    },
+    {
+      "id": "ev_1790957523402_tod1m",
+      "eventType": "heartbeat",
+      "path": "/",
+      "sessionId": "sess_1790939309350_w76uhjbov",
+      "loginid": null,
+      "device": "desktop",
+      "ip": "::1",
+      "timestamp": "2026-10-02T16:12:03.401Z",
+      "metadata": {}
+    },
     {
       "id": "ev_1790957478399_u9bfz",
       "eventType": "heartbeat",
@@ -2219,28 +2241,6 @@
       "device": "desktop",
       "ip": "::1",
       "timestamp": "2026-10-02T13:45:50.645Z",
-      "metadata": {}
-    },
-    {
-      "id": "ev_1790948705653_86wxl",
-      "eventType": "heartbeat",
-      "path": "/",
-      "sessionId": "sess_1790939309350_w76uhjbov",
-      "loginid": null,
-      "device": "desktop",
-      "ip": "::1",
-      "timestamp": "2026-10-02T13:45:05.653Z",
-      "metadata": {}
-    },
-    {
-      "id": "ev_1790948660658_tngoy",
-      "eventType": "heartbeat",
-      "path": "/",
-      "sessionId": "sess_1790939309350_w76uhjbov",
-      "loginid": null,
-      "device": "desktop",
-      "ip": "::1",
-      "timestamp": "2026-10-02T13:44:20.658Z",
       "metadata": {}
     }
   ]

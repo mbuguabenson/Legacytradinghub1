@@ -336,6 +336,7 @@ export class OAuthTokenExchangeService {
                                     typeof firstAccount.balance === 'number'
                                         ? firstAccount.balance
                                         : parseFloat(firstAccount.balance) || 10000,
+                                is_virtual: isDemoAccount(activeLoginId) ? 1 : 0,
                                 account_list: formattedAccountList,
                             });
                             setIsAuthorized(true);
