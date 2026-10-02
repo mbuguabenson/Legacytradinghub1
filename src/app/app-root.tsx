@@ -93,6 +93,8 @@ const MILESTONES = [
     { target: 100, status: 'Direct Market Access Enclave Online. Launching Terminal...' },
 ];
 
+const brandLabel = getBrandLabel();
+
 const WelcomeScreen = ({
     onFinished,
     isComplete,
@@ -501,6 +503,37 @@ const WelcomeScreen = ({
         </div>
     );
 };
+
+const AppContent = lazy(() => import('./app-content'));
+
+const ErrorComponentWrapper = observer(() => {
+    const { common } = useStore();
+
+    if (!common.error || !common.has_error) return null;
+
+    const handleClearError = () => {
+        common.setError(false, {});
+    };
+
+    return (
+        <div className='error-wrapper-backdrop'>
+            <div className='error-wrapper-modal'>
+                <h3 className='error-wrapper-title'>{common.error?.header || 'Notice'}</h3>
+                <p className='error-wrapper-msg'>
+                    {common.error?.message || 'A temporary connection update occurred.'}
+                </p>
+                <div className='error-wrapper-actions'>
+                    <button onClick={handleClearError} className='btn-primary'>
+                        Continue to Trading
+                    </button>
+                    <button onClick={() => window.location.reload()} className='btn-secondary'>
+                        Refresh Page
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+});
 
 const AppRoot = () => {
     const store = useStore();
