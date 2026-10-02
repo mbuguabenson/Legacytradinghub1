@@ -317,6 +317,7 @@ export class OAuthTokenExchangeService {
                             currency: acc.currency || 'USD',
                             is_virtual: isDemoAccount(acc.account_id) ? 1 : 0,
                             title: acc.account_id,
+                            balance: typeof acc.balance === 'number' ? acc.balance : parseFloat(acc.balance) || 10000,
                         }));
 
                         try {
@@ -333,8 +334,8 @@ export class OAuthTokenExchangeService {
                                 currency: firstAccount.currency || 'USD',
                                 balance:
                                     typeof firstAccount.balance === 'number'
-                                        ? firstAccount.balance.toFixed(2)
-                                        : String(firstAccount.balance || '10000.00'),
+                                        ? firstAccount.balance
+                                        : parseFloat(firstAccount.balance) || 10000,
                                 account_list: formattedAccountList,
                             });
                             setIsAuthorized(true);
