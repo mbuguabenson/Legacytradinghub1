@@ -15,69 +15,74 @@ import {
     BarChart3,
     Bot,
     Check,
-    Copy,
+    CheckCircle2,
+    Clock,
     Cpu,
-    Loader2,
+    Flame,
+    Gauge,
+    Globe,
+    Layers,
     Lock,
     Radio,
+    Shield,
     ShieldCheck,
     Sparkles,
+    Terminal,
     TrendingUp,
+    Wifi,
     Zap,
 } from 'lucide-react';
-import './app-root.scss';
 
-const AppContent = lazy(() => import('./app-content'));
-
-const brandLabel = getBrandLabel();
-
-const AppRootLoader = () => {
-    return <ChunkLoader message={`Loading ${brandLabel}...`} />;
-};
-
-const ErrorComponentWrapper = observer(() => {
-    const { common } = useStore();
-
-    if (!common.error || !common.has_error) return null;
-
-    const handleClearError = () => {
-        common.setError(false, {});
-    };
-
-    return (
-        <div className='error-wrapper-backdrop'>
-            <div className='error-wrapper-modal'>
-                <h3 className='error-wrapper-title'>{common.error?.header || 'Notice'}</h3>
-                <p className='error-wrapper-msg'>
-                    {common.error?.message || 'A temporary connection update occurred.'}
-                </p>
-                <div className='error-wrapper-actions'>
-                    <button onClick={handleClearError} className='btn-primary'>
-                        Continue to Trading
-                    </button>
-                    <button onClick={() => window.location.reload()} className='btn-secondary'>
-                        Refresh Page
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-});
-
-const MILESTONES = [
-    { id: 1, phase: '01/05', label: 'QUANTUM GATEWAY', threshold: 18, status: 'Connecting to Deriv WebSocket Gateway...', sub: 'Establishing 256-bit encrypted enclave session' },
-    { id: 2, phase: '02/05', label: 'MARKET SYNC', threshold: 40, status: 'Synchronizing Real-Time Market Ticker...', sub: 'Streaming Forex & Synthetic Volatility index feeds' },
-    { id: 3, phase: '03/05', label: 'NEURAL MODELS', threshold: 65, status: 'Calibrating AI Quantitative Models...', sub: 'Pre-caching neural strategy predictors' },
-    { id: 4, phase: '04/05', label: 'STRATEGY NODES', threshold: 85, status: 'Arming Automated Strategy Runners...', sub: 'Zero-latency direct execution pipeline active' },
-    { id: 5, phase: '05/05', label: 'SYSTEM READY', threshold: 100, status: 'Platform Initialized • System Armed', sub: 'Welcome to Legacy Trading Hub' },
+const SYSTEM_ENGINES = [
+    {
+        id: 'ws_gateway',
+        name: 'DERIV QUANTUM GATEWAY',
+        detail: 'Direct WebSocket • 0.3ms Ping',
+        icon: Wifi,
+        color: '#00f5ff',
+        threshold: 15,
+    },
+    {
+        id: 'ultra_engine',
+        name: 'CONTINUOUS TICK REACTOR',
+        detail: 'Ultra Speed • Concurrency Armed',
+        icon: Flame,
+        color: '#ff6b00',
+        threshold: 35,
+    },
+    {
+        id: 'neural_ai',
+        name: 'QUANT PREDICTIVE ENGINE',
+        detail: 'Neural Matrix • 21 Bot Kernels',
+        icon: Cpu,
+        color: '#a855f7',
+        threshold: 65,
+    },
+    {
+        id: 'risk_arbiter',
+        name: 'INSTITUTIONAL RISK ARBITER',
+        detail: 'Autonomous Stop & Margin Enclave',
+        icon: ShieldCheck,
+        color: '#10b981',
+        threshold: 85,
+    },
 ];
 
-const CAPABILITY_PILLS = [
-    { id: 'speed', label: 'Ultra Speed', icon: Zap, color: '#ff2e63', minProgress: 15 },
-    { id: 'ai', label: 'Neural AI', icon: Cpu, color: '#00f5ff', minProgress: 35 },
-    { id: 'bots', label: 'Algo Bots', icon: Bot, color: '#38bdf8', minProgress: 55 },
-    { id: 'charts', label: 'Quant Depth', icon: BarChart3, color: '#10b981', minProgress: 75 },
-    { id: 'shield', label: 'Risk Guard', icon: ShieldCheck, color: '#f59e0b', minProgress: 90 },
+const LIVE_RADAR_PAIRS = [
+    { symbol: 'VOLATILITY 100 (1S)', price: '826.40', change: '+0.94%', up: true, tag: 'SYNTHETIC' },
+    { symbol: 'BOOM 1000 INDEX', price: '9,864.50', change: '+1.12%', up: true, tag: 'CRASH/BOOM' },
+    { symbol: 'XAU/USD (GOLD)', price: '2,686.80', change: '+1.32%', up: true, tag: 'COMMODITY' },
+    { symbol: 'BTC/USD', price: '66,850.0', change: '+3.42%', up: true, tag: 'CRYPTO' },
+    { symbol: 'EUR/USD', price: '1.08456', change: '+0.38%', up: true, tag: 'FOREX' },
+];
+
+const SYSTEM_LOGS = [
+    { min: 5, text: '[SYS_BOOT] Initializing Quantum Core v4.8 kernel...' },
+    { min: 20, text: '[GATEWAY] Connected to Deriv High-Throughput WSS cluster.' },
+    { min: 40, text: '[TICK_FEED] Sub-second continuous tick pipeline synchronized.' },
+    { min: 60, text: '[ALGO_CORE] 21 automated trading bots pre-compiled.' },
+    { min: 80, text: '[DMA_EXEC] Ultra tick-by-tick execution active (0 settlement latency).' },
+    { min: 95, text: '[SYSTEM_READY] All nodes synchronized. Terminal armed.' },
 ];
 
 const WelcomeScreen = ({
@@ -92,35 +97,36 @@ const WelcomeScreen = ({
     statusMessage: string;
 }) => {
     const [exiting, setExiting] = useState(false);
+    const [currentTime, setCurrentTime] = useState(() => {
+        const now = new Date();
+        return now.toISOString().slice(11, 23) + ' UTC';
+    });
+
+    // Real-time live cyber clock ticker
+    useEffect(() => {
+        const timer = window.setInterval(() => {
+            const now = new Date();
+            setCurrentTime(now.toISOString().slice(11, 23) + ' UTC');
+        }, 80);
+        return () => window.clearInterval(timer);
+    }, []);
 
     // Cinematic smooth zoom exit transition when initialization completes
     useEffect(() => {
         if (!isComplete) return;
         const exitTimer = window.setTimeout(() => {
             setExiting(true);
-            window.setTimeout(onFinished, 620); // 620ms allows smooth camera zoom-in to complete
+            window.setTimeout(onFinished, 550);
         }, 80);
         return () => window.clearTimeout(exitTimer);
     }, [isComplete, onFinished]);
 
     const handleSkip = () => {
         setExiting(true);
-        window.setTimeout(onFinished, 500);
+        window.setTimeout(onFinished, 450);
     };
 
     const roundedProgress = Math.min(100, Math.round(progress));
-
-    // Determine current milestone
-    const currentMilestoneIndex = useMemo(() => {
-        for (let i = 0; i < MILESTONES.length; i++) {
-            if (roundedProgress <= MILESTONES[i].threshold) {
-                return i;
-            }
-        }
-        return MILESTONES.length - 1;
-    }, [roundedProgress]);
-
-    const activeMilestone = MILESTONES[currentMilestoneIndex] || MILESTONES[0];
 
     // Dynamic split brand representation
     const { leftBrand, rightBrand } = useMemo(() => {
@@ -133,130 +139,356 @@ const WelcomeScreen = ({
         return { leftBrand: full.slice(0, mid), rightBrand: full.slice(mid) };
     }, []);
 
+    // Arc reactor circular progress calculation (r = 104, circumference = 2 * PI * 104 ≈ 653.45)
+    const arcCircumference = 653.45;
+    const strokeDashoffset = arcCircumference - (arcCircumference * roundedProgress) / 100;
+
+    // Segmented laser bar (24 segments)
+    const totalSegments = 24;
+    const activeSegments = Math.round((roundedProgress / 100) * totalSegments);
+
+    // Spectrum Equalizer bars (28 bars with deterministic dynamic heights)
+    const spectrumBars = useMemo(() => {
+        return Array.from({ length: 28 }, (_, i) => {
+            const base = Math.sin((i / 28) * Math.PI) * 28 + 8;
+            return { id: i, baseHeight: Math.round(base) };
+        });
+    }, []);
+
     return (
         <div className={`welcome-screen ${exiting ? 'welcome-screen--exiting' : 'welcome-screen--visible'}`}>
-            {/* Dynamic Animated Forex Candlestick & Technical Charts Background */}
+            {/* Dynamic Animated Candlestick Background */}
             <ForexChartsBackground />
 
-            {/* Central Modern Institutional Neumorphic Console */}
-            <div className='welcome-screen__card'>
-                <div className='ws-card-glow-edge' aria-hidden='true' />
+            {/* Dark Cyber Mesh Matrix Overlay */}
+            <div className='ws-cyber-grid-mesh' aria-hidden='true' />
 
-                {/* Top Telemetry Header */}
-                <div className='ws-telemetry-topbar'>
-                    <div className='ws-node-pill'>
-                        <span className='ws-node-dot' />
-                        <span className='ws-node-text'>GATEWAY: SECURE 256-BIT</span>
-                    </div>
-                    <div className='ws-latency-pill'>
-                        <Activity size={10} className='ws-latency-icon' />
-                        <span>0.8ms • LD4 NODE</span>
-                    </div>
-                </div>
-
-                {/* Hero Quantum Holographic Emblem */}
-                <div className='ws-gyro-emblem-wrap'>
-                    <div className='ws-gyro-ring ws-gyro-ring--outer'>
-                        <svg viewBox='0 0 100 100' className='ws-gyro-svg'>
-                            <circle cx='50' cy='50' r='46' stroke='currentColor' strokeWidth='1.4' strokeDasharray='6 8' fill='none' />
-                        </svg>
-                    </div>
-                    <div className='ws-gyro-ring ws-gyro-ring--inner'>
-                        <svg viewBox='0 0 100 100' className='ws-gyro-svg'>
-                            <circle cx='50' cy='50' r='38' stroke='currentColor' strokeWidth='1.6' strokeDasharray='22 10 6 10' fill='none' />
-                        </svg>
-                    </div>
-                    <div className='ws-gyro-core'>
-                        <div className='ws-gyro-glow-halo' />
-                        <img
-                            src='/logo_icon.svg'
-                            alt={brandLabel || 'Legacy Trading Hub'}
-                            className='ws-gyro-logo'
-                            onError={(e: any) => {
-                                e.currentTarget.style.display = 'none';
-                            }}
-                        />
-                    </div>
-                </div>
-
-                {/* Institutional Brand Title */}
-                <div className='ws-brand-title'>
-                    <span className='brand-white'>{leftBrand}</span>{' '}
-                    <span className='brand-gold-cyan'>{rightBrand}</span>
-                </div>
-
-                {/* Institutional Badge */}
-                <div className='ws-inst-badge'>
-                    <span className='ws-badge-dot' />
-                    <span>INSTITUTIONAL QUANTUM TERMINAL</span>
-                </div>
-
-                {/* Subtitle */}
-                <div className='ws-welcome-sub'>
-                    Next-Generation Automated Trading & Precision Intelligence
-                </div>
-
-                {/* Dynamic Telemetry Stage Box */}
-                <div className='ws-telemetry-box'>
-                    <div className='ws-telemetry-header'>
-                        <span className='ws-telemetry-phase'>PHASE {activeMilestone.phase}</span>
-                        <span className='ws-telemetry-label'>{activeMilestone.label}</span>
-                    </div>
-                    <div className='ws-telemetry-status'>{activeMilestone.status}</div>
-                    <div className='ws-telemetry-sub'>{activeMilestone.sub}</div>
-                </div>
-
-                {/* Precision Laser Progress Bar */}
-                <div className='ws-progress-row'>
-                    <div className='ws-progress-track'>
-                        <div
-                            className='ws-progress-bar'
-                            style={{ width: `${roundedProgress}%` }}
-                        >
-                            <span className='ws-progress-photon' />
+            {/* Full Panoramic Cockpit Bridge */}
+            <div className='welcome-cockpit'>
+                {/* ═══ 1. TOP AVIONICS / TELEMETRY STATUS HUD BAR ═══ */}
+                <header className='ws-avionics-bar'>
+                    <div className='ws-avionics-left'>
+                        <div className='ws-status-beacon'>
+                            <span className='ws-beacon-pulse' />
+                            <span className='ws-beacon-dot' />
+                        </div>
+                        <div className='ws-avionics-meta'>
+                            <div className='ws-meta-primary'>GATEWAY ONLINE • ENCLAVE 256-BIT</div>
+                            <div className='ws-meta-secondary'>EQUINIX LD4 LONDON • DERIV DIRECT API</div>
                         </div>
                     </div>
-                    <div className='ws-progress-val'>
-                        <span className='ws-progress-percent'>{roundedProgress}</span>
-                        <span className='ws-progress-unit'>%</span>
-                    </div>
-                </div>
 
-                {/* Streamlined Capability Pill Ribbon */}
-                <div className='ws-pills-ribbon'>
-                    {CAPABILITY_PILLS.map(pill => {
-                        const Icon = pill.icon;
-                        const isLit = roundedProgress >= pill.minProgress;
-                        return (
-                            <div
-                                key={pill.id}
-                                className={`ws-cap-pill ${isLit ? 'lit' : ''}`}
-                                style={{
-                                    ['--pill-accent' as any]: pill.color,
-                                }}
-                            >
-                                <Icon size={12} className='ws-pill-icon' />
-                                <span>{pill.label}</span>
+                    <div className='ws-avionics-center'>
+                        <div className='ws-hud-brand-chip'>
+                            <span className='ws-brand-mono-lead'>SYS//</span>
+                            <span className='ws-brand-mono-name'>{brandLabel || 'LEGACY TRADING HUB'}</span>
+                            <span className='ws-brand-mono-ver'>v4.8 DMA</span>
+                        </div>
+                    </div>
+
+                    <div className='ws-avionics-right'>
+                        <div className='ws-clock-chip'>
+                            <Clock size={11} className='ws-clock-icon' />
+                            <span className='ws-clock-digits'>{currentTime}</span>
+                        </div>
+                        <div className='ws-ping-chip'>
+                            <Activity size={11} className='ws-ping-icon' />
+                            <span>0.3ms</span>
+                        </div>
+                        <button
+                            type='button'
+                            className='ws-quick-enter-btn'
+                            onClick={handleSkip}
+                            title='Skip and enter terminal immediately'
+                        >
+                            <span>Enter Platform</span>
+                            <ArrowRight size={12} className='ws-enter-arrow' />
+                        </button>
+                    </div>
+                </header>
+
+                {/* ═══ 2. TRI-PANEL PANORAMIC COMMAND DECK ═══ */}
+                <main className='ws-command-deck'>
+                    {/* ── LEFT WING: Subsystem Telemetry & Terminal Logs ── */}
+                    <section className='ws-deck-wing ws-deck-wing--left'>
+                        <div className='ws-panel-glass'>
+                            <div className='ws-panel-header'>
+                                <div className='ws-panel-title-wrap'>
+                                    <Terminal size={14} className='ws-panel-title-icon' />
+                                    <span className='ws-panel-title'>SYSTEM DIAGNOSTICS</span>
+                                </div>
+                                <span className='ws-panel-badge'>4/4 NODES</span>
                             </div>
-                        );
-                    })}
-                </div>
 
-                {/* Footer Controls & Copyright */}
-                <div className='ws-card-footer'>
-                    <div className='ws-footer-text'>
-                        © 2026 {brandLabel || 'Legacy Trading Hub'} • Powered by Deriv
+                            {/* 4 Cyber Engine Matrix Cards */}
+                            <div className='ws-engine-matrix'>
+                                {SYSTEM_ENGINES.map(engine => {
+                                    const Icon = engine.icon;
+                                    const isArmed = roundedProgress >= engine.threshold;
+                                    return (
+                                        <div
+                                            key={engine.id}
+                                            className={`ws-engine-card ${isArmed ? 'armed' : 'standby'}`}
+                                            style={{ ['--engine-accent' as any]: engine.color }}
+                                        >
+                                            <div className='ws-engine-icon-wrap'>
+                                                <Icon size={14} className='ws-engine-icon' />
+                                            </div>
+                                            <div className='ws-engine-info'>
+                                                <div className='ws-engine-name'>{engine.name}</div>
+                                                <div className='ws-engine-detail'>{engine.detail}</div>
+                                            </div>
+                                            <div className='ws-engine-status-tag'>
+                                                {isArmed ? (
+                                                    <span className='tag-armed'>
+                                                        <Check size={10} /> ARMED
+                                                    </span>
+                                                ) : (
+                                                    <span className='tag-sync'>SYNCING</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Live Terminal Log Feed */}
+                            <div className='ws-terminal-console'>
+                                <div className='ws-terminal-bar'>
+                                    <span className='ws-term-dot ws-term-dot--red' />
+                                    <span className='ws-term-dot ws-term-dot--yellow' />
+                                    <span className='ws-term-dot ws-term-dot--green' />
+                                    <span className='ws-terminal-bar-title'>telemetry.log</span>
+                                </div>
+                                <div className='ws-terminal-logs'>
+                                    {SYSTEM_LOGS.filter(log => roundedProgress >= log.min).map((log, index) => (
+                                        <div key={index} className='ws-term-line'>
+                                            <span className='ws-term-prompt'>&gt;</span>
+                                            <span className='ws-term-text'>{log.text}</span>
+                                        </div>
+                                    ))}
+                                    <div className='ws-term-cursor-line'>
+                                        <span className='ws-term-prompt'>&gt;</span>
+                                        <span className='ws-term-active-status'>{statusMessage}</span>
+                                        <span className='ws-term-caret' />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* ── CENTER WING: The Quantum Arc Reactor Core ── */}
+                    <section className='ws-deck-center'>
+                        <div className='ws-reactor-stage'>
+                            {/* Ambient Flare Behind Reactor */}
+                            <div className='ws-reactor-flare' aria-hidden='true' />
+
+                            {/* 3D Holographic Speedometer / Arc Reactor */}
+                            <div className='ws-reactor-orb'>
+                                <svg viewBox='0 0 240 240' className='ws-reactor-svg'>
+                                    <defs>
+                                        <linearGradient id='reactorGrad' x1='0%' y1='0%' x2='100%' y2='100%'>
+                                            <stop offset='0%' stopColor='#00f5ff' />
+                                            <stop offset='50%' stopColor='#ff6b00' />
+                                            <stop offset='100%' stopColor='#ff2e63' />
+                                        </linearGradient>
+                                        <linearGradient id='ringGrad' x1='0%' y1='0%' x2='100%' y2='0%'>
+                                            <stop offset='0%' stopColor='rgba(0, 245, 255, 0.15)' />
+                                            <stop offset='100%' stopColor='rgba(255, 107, 0, 0.15)' />
+                                        </linearGradient>
+                                        <filter id='neonGlow' x='-20%' y='-20%' width='140%' height='140%'>
+                                            <feGaussianBlur stdDeviation='3.5' result='blur' />
+                                            <feMerge>
+                                                <feMergeNode in='blur' />
+                                                <feMergeNode in='SourceGraphic' />
+                                            </feMerge>
+                                        </filter>
+                                    </defs>
+
+                                    {/* Outer Ticking Compass Track */}
+                                    <circle
+                                        cx='120'
+                                        cy='120'
+                                        r='114'
+                                        stroke='rgba(255, 255, 255, 0.08)'
+                                        strokeWidth='1.5'
+                                        strokeDasharray='3 8'
+                                        fill='none'
+                                        className='ws-reactor-ticks-outer'
+                                    />
+
+                                    {/* Middle Static Guide Ring */}
+                                    <circle
+                                        cx='120'
+                                        cy='120'
+                                        r='104'
+                                        stroke='url(#ringGrad)'
+                                        strokeWidth='6'
+                                        fill='none'
+                                    />
+
+                                    {/* Active Glowing Progress Arc */}
+                                    <circle
+                                        cx='120'
+                                        cy='120'
+                                        r='104'
+                                        stroke='url(#reactorGrad)'
+                                        strokeWidth='7'
+                                        strokeLinecap='round'
+                                        strokeDasharray={arcCircumference}
+                                        strokeDashoffset={strokeDashoffset}
+                                        fill='none'
+                                        filter='url(#neonGlow)'
+                                        className='ws-reactor-progress-arc'
+                                        transform='rotate(-90 120 120)'
+                                    />
+
+                                    {/* Inner Counter-Rotating Reticle */}
+                                    <circle
+                                        cx='120'
+                                        cy='120'
+                                        r='90'
+                                        stroke='rgba(0, 245, 255, 0.3)'
+                                        strokeWidth='1.2'
+                                        strokeDasharray='18 12 4 12'
+                                        fill='none'
+                                        className='ws-reactor-reticle'
+                                    />
+                                </svg>
+
+                                {/* Reactor Core Digital Center */}
+                                <div className='ws-reactor-core'>
+                                    <div className='ws-core-brand-icon-wrap'>
+                                        <img
+                                            src='/logo_icon.svg'
+                                            alt='Logo'
+                                            className='ws-core-logo'
+                                            onError={(e: any) => {
+                                                e.currentTarget.style.display = 'none';
+                                            }}
+                                        />
+                                    </div>
+                                    <div className='ws-core-metric'>
+                                        <span className='ws-core-number'>{roundedProgress}</span>
+                                        <span className='ws-core-percent'>%</span>
+                                    </div>
+                                    <div className='ws-core-label'>QUANTUM BOOT</div>
+                                </div>
+                            </div>
+
+                            {/* High-Frequency Spectrum Equalizer Arc */}
+                            <div className='ws-spectrum-equalizer'>
+                                {spectrumBars.map(bar => {
+                                    const isLit = (bar.id / 28) * 100 <= roundedProgress;
+                                    return (
+                                        <span
+                                            key={bar.id}
+                                            className={`ws-eq-bar ${isLit ? 'lit' : ''}`}
+                                            style={{
+                                                height: `${isLit ? Math.max(6, bar.baseHeight) : 4}px`,
+                                            }}
+                                        />
+                                    );
+                                })}
+                            </div>
+
+                            {/* Core Identity Typography */}
+                            <div className='ws-reactor-brand-title'>
+                                <span className='brand-glow-white'>{leftBrand}</span>{' '}
+                                <span className='brand-glow-gradient'>{rightBrand}</span>
+                            </div>
+                            <div className='ws-reactor-brand-sub'>
+                                INSTITUTIONAL QUANTITATIVE SUITE • ZERO-LATENCY EXECUTION
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* ── RIGHT WING: Live Market Stream & Key Capabilities ── */}
+                    <section className='ws-deck-wing ws-deck-wing--right'>
+                        <div className='ws-panel-glass'>
+                            <div className='ws-panel-header'>
+                                <div className='ws-panel-title-wrap'>
+                                    <Globe size={14} className='ws-panel-title-icon' />
+                                    <span className='ws-panel-title'>MARKET RADAR PULSE</span>
+                                </div>
+                                <span className='ws-panel-badge ws-panel-badge--green'>FEED LIVE</span>
+                            </div>
+
+                            {/* Live Financial Radar Pairs */}
+                            <div className='ws-radar-list'>
+                                {LIVE_RADAR_PAIRS.map((pair, idx) => (
+                                    <div key={idx} className='ws-radar-row'>
+                                        <div className='ws-radar-symbol-info'>
+                                            <span className='ws-radar-symbol'>{pair.symbol}</span>
+                                            <span className='ws-radar-tag'>{pair.tag}</span>
+                                        </div>
+                                        <div className='ws-radar-price-info'>
+                                            <span className='ws-radar-price'>{pair.price}</span>
+                                            <span className={`ws-radar-change ${pair.up ? 'up' : 'down'}`}>
+                                                {pair.change}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Platform Institutional Specs */}
+                            <div className='ws-specs-grid'>
+                                <div className='ws-spec-box'>
+                                    <div className='ws-spec-key'>EXECUTION SPEED</div>
+                                    <div className='ws-spec-val text-fire'>ULTRA • EVERY TICK</div>
+                                </div>
+                                <div className='ws-spec-box'>
+                                    <div className='ws-spec-key'>LATENCY TARGET</div>
+                                    <div className='ws-spec-val text-cyan'>&lt; 0.4ms DIRECT</div>
+                                </div>
+                                <div className='ws-spec-box'>
+                                    <div className='ws-spec-key'>BOT REPERTOIRE</div>
+                                    <div className='ws-spec-val text-white'>21 KERNEL ALGORITHMS</div>
+                                </div>
+                                <div className='ws-spec-box'>
+                                    <div className='ws-spec-key'>AUTHENTICATION</div>
+                                    <div className='ws-spec-val text-emerald'>TLS 1.3 SECURE</div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </main>
+
+                {/* ═══ 3. BOTTOM LASER HUD PROGRESS RAIL & CONTROLS ═══ */}
+                <footer className='ws-bottom-bar'>
+                    <div className='ws-bottom-left'>
+                        <div className='ws-progress-caption'>
+                            <span className='ws-caption-prefix'>STAGE PROTOCOL:</span>
+                            <span className='ws-caption-status'>{statusMessage}</span>
+                        </div>
+                        {/* 24-Segmented Laser LED Track */}
+                        <div className='ws-laser-segmented-track'>
+                            {Array.from({ length: totalSegments }).map((_, i) => (
+                                <div
+                                    key={i}
+                                    className={`ws-laser-segment ${i < activeSegments ? 'active' : ''}`}
+                                />
+                            ))}
+                        </div>
                     </div>
-                    <button
-                        type='button'
-                        className='ws-enter-btn'
-                        onClick={handleSkip}
-                        title='Enter platform immediately'
-                    >
-                        <span>Enter Platform</span>
-                        <ArrowRight size={13} className='ws-arrow' />
-                    </button>
-                </div>
+
+                    <div className='ws-bottom-right'>
+                        <div className='ws-completion-percent'>
+                            <span className='val'>{roundedProgress}</span>
+                            <span className='unit'>% ARMED</span>
+                        </div>
+                        <button
+                            type='button'
+                            className='ws-terminal-enter-btn'
+                            onClick={handleSkip}
+                            title='Enter trading platform immediately'
+                        >
+                            <span>LAUNCH TERMINAL</span>
+                            <ArrowRight size={14} className='ws-launch-icon' />
+                        </button>
+                    </div>
+                </footer>
             </div>
         </div>
     );
