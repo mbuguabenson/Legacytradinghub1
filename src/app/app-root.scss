@@ -782,6 +782,7 @@ $text-muted: #676a6f;
             .brand-glow-gradient {
                 background: linear-gradient(135deg, #ff6b00 0%, #ff2e63 100%);
                 -webkit-background-clip: text;
+                background-clip: text;
                 -webkit-text-fill-color: transparent;
                 filter: drop-shadow(0 0 16px rgba(255, 107, 0, 0.5));
             }

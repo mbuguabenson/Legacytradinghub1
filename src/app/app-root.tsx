@@ -1,7 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import ErrorBoundary from '@/components/error-component/error-boundary';
-import ChunkLoader from '@/components/loader/chunk-loader';
 import { api_base } from '@/external/bot-skeleton';
 import { useStore } from '@/hooks/useStore';
 import { useTokenRefresh } from '@/hooks/useTokenRefresh';
@@ -12,25 +11,14 @@ import { ForexChartsBackground } from './ForexChartsBackground';
 import {
     Activity,
     ArrowRight,
-    BarChart3,
-    Bot,
     Check,
-    CheckCircle2,
     Clock,
     Cpu,
     Flame,
-    Gauge,
     Globe,
-    Layers,
-    Lock,
-    Radio,
-    Shield,
     ShieldCheck,
-    Sparkles,
     Terminal,
-    TrendingUp,
     Wifi,
-    Zap,
 } from 'lucide-react';
 
 const SYSTEM_ENGINES = [
@@ -539,7 +527,7 @@ const AppRoot = () => {
     const store = useStore();
     const api_base_initialized = useRef(false);
     const api_base_initialization_started = useRef(false);
-    const [is_api_initialized, setIsApiInitialized] = useState(false);
+    const [, setIsApiInitialized] = useState(false);
 
     useTokenRefresh();
 
@@ -555,7 +543,6 @@ const AppRoot = () => {
     const [welcomeForceExit, setWelcomeForceExit] = useState(false);
 
     const progressRef = useRef(0);
-    const targetProgressRef = useRef(0);
     const statusIntervalRef = useRef<number | null>(null);
     const welcomeTimeoutRef = useRef<number | null>(null);
     const welcomeHardExitRef = useRef<number | null>(null);
