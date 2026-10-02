@@ -14,7 +14,8 @@
     border-top: 1px solid var(--general-section-1);
     box-shadow: 0 1px 0 0 var(--general-section-1) inset;
     background: var(--general-main-1);
-    z-index: 2;
+    z-index: 99999 !important;
+    overflow: visible !important;
 
     &__icon {
         padding: 0.8rem;

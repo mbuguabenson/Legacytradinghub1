@@ -3,10 +3,20 @@ import './footer-contact-popover.scss';
 
 export const FooterContactPopover: React.FC = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const [copiedKey, setCopiedKey] = useState<string | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
     // Toggle popover
     const togglePopover = () => setIsOpen(prev => !prev);
+
+    // Copy to clipboard helper
+    const handleCopy = (text: string, key: string) => {
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(text);
+            setCopiedKey(key);
+            setTimeout(() => setCopiedKey(null), 2000);
+        }
+    };
 
     // Close on click outside or escape key
     useEffect(() => {
@@ -37,10 +47,10 @@ export const FooterContactPopover: React.FC = () => {
 
     return (
         <div className='footer-contact' ref={containerRef}>
-            {/* Popover Card (Pops Upwards from Footer) */}
+            {/* Popover Card (Pops Upwards from Footer with High Fixed Z-Index) */}
             {isOpen && (
                 <div className='footer-contact__card' role='dialog' aria-modal='true'>
-                    {/* Glowing top line accent */}
+                    {/* Glowing top neon rim accent */}
                     <div className='footer-contact__card-accent' />
 
                     {/* Card Header */}
@@ -48,18 +58,21 @@ export const FooterContactPopover: React.FC = () => {
                         <div className='footer-contact__card-header-left'>
                             <div className='footer-contact__status-pill'>
                                 <span className='footer-contact__status-dot' />
-                                <span className='footer-contact__status-text'>Live Trading Desk</span>
+                                <span className='footer-contact__status-text'>Live Priority Desk</span>
                             </div>
                             <h4 className='footer-contact__card-title'>Direct Contact & Community</h4>
-                            <p className='footer-contact__card-subtitle'>Get priority support, automated bot assistance & signals</p>
+                            <p className='footer-contact__card-subtitle'>
+                                Priority trader support, bot setup assistance & signals
+                            </p>
                         </div>
                         <button
                             type='button'
                             className='footer-contact__card-close'
                             onClick={() => setIsOpen(false)}
                             aria-label='Close Contact Card'
+                            title='Close'
                         >
-                            <svg viewBox='0 0 24 24' width='14' height='14' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
+                            <svg viewBox='0 0 24 24' width='14' height='14' fill='none' stroke='currentColor' strokeWidth='2.2' strokeLinecap='round' strokeLinejoin='round'>
                                 <line x1='18' y1='6' x2='6' y2='18' />
                                 <line x1='6' y1='6' x2='18' y2='18' />
                             </svg>
@@ -71,14 +84,21 @@ export const FooterContactPopover: React.FC = () => {
                         {/* 1. WhatsApp Channel */}
                         <div className='footer-contact__item footer-contact__item--whatsapp'>
                             <div className='footer-contact__item-icon footer-contact__item-icon--whatsapp'>
-                                <svg viewBox='0 0 24 24' width='20' height='20' fill='currentColor'>
+                                <svg viewBox='0 0 24 24' width='22' height='22' fill='currentColor'>
                                     <path d='M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.04 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.59 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.8 13.47 3.8 11.91C3.81 7.37 7.5 3.67 12.05 3.67M9.53 7.37C9.37 7.37 9.1 7.43 8.88 7.67C8.65 7.92 8.02 8.51 8.02 9.72C8.02 10.93 8.91 12.1 9.03 12.27C9.15 12.44 10.74 14.9 13.21 15.96C15.26 16.84 15.68 16.67 16.12 16.63C16.56 16.59 17.55 16.04 17.75 15.46C17.96 14.88 17.96 14.38 17.89 14.28C17.83 14.17 17.67 14.11 17.42 13.99C17.18 13.86 15.98 13.27 15.76 13.19C15.53 13.11 15.37 13.07 15.21 13.31C15.04 13.56 14.56 14.11 14.42 14.28C14.28 14.44 14.13 14.46 13.89 14.34C13.65 14.22 12.87 13.96 11.94 13.13C11.22 12.49 10.73 11.69 10.59 11.45C10.45 11.2 10.57 11.07 10.7 10.95C10.81 10.84 10.95 10.66 11.07 10.51C11.19 10.37 11.24 10.27 11.32 10.1C11.4 9.94 11.36 9.8 11.3 9.68C11.24 9.56 10.75 8.35 10.54 7.86C10.34 7.38 10.14 7.45 9.98 7.44C9.84 7.44 9.68 7.37 9.53 7.37Z' />
                                 </svg>
                             </div>
                             <div className='footer-contact__item-content'>
                                 <div className='footer-contact__item-badge footer-contact__item-badge--whatsapp'>Direct Hotline</div>
                                 <div className='footer-contact__item-title'>WhatsApp Support</div>
-                                <div className='footer-contact__item-value'>+254 757 722 344</div>
+                                <div
+                                    className='footer-contact__item-value'
+                                    onClick={() => handleCopy('+254757722344', 'wa')}
+                                    title='Click to copy phone number'
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    {copiedKey === 'wa' ? '✓ Copied to Clipboard!' : '+254 757 722 344'}
+                                </div>
                             </div>
                             <div className='footer-contact__item-actions'>
                                 <a
@@ -111,14 +131,21 @@ export const FooterContactPopover: React.FC = () => {
                         {/* 2. Telegram Channel */}
                         <div className='footer-contact__item footer-contact__item--telegram'>
                             <div className='footer-contact__item-icon footer-contact__item-icon--telegram'>
-                                <svg viewBox='0 0 24 24' width='20' height='20' fill='currentColor'>
+                                <svg viewBox='0 0 24 24' width='22' height='22' fill='currentColor'>
                                     <path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z' />
                                 </svg>
                             </div>
                             <div className='footer-contact__item-content'>
                                 <div className='footer-contact__item-badge footer-contact__item-badge--telegram'>Signals & Bots</div>
                                 <div className='footer-contact__item-title'>Telegram Community</div>
-                                <div className='footer-contact__item-value'>@Legacytradinghub</div>
+                                <div
+                                    className='footer-contact__item-value'
+                                    onClick={() => handleCopy('@Legacytradinghub', 'tg')}
+                                    title='Click to copy handle'
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    {copiedKey === 'tg' ? '✓ Copied to Clipboard!' : '@Legacytradinghub'}
+                                </div>
                             </div>
                             <div className='footer-contact__item-actions'>
                                 <a
@@ -148,7 +175,14 @@ export const FooterContactPopover: React.FC = () => {
                             <div className='footer-contact__item-content'>
                                 <div className='footer-contact__item-badge footer-contact__item-badge--email'>Engineering Support</div>
                                 <div className='footer-contact__item-title'>Developer Email</div>
-                                <div className='footer-contact__item-value' title='Profithubdeveloper@gmail.com'>Profithubdeveloper@gmail.com</div>
+                                <div
+                                    className='footer-contact__item-value'
+                                    onClick={() => handleCopy('Profithubdeveloper@gmail.com', 'email')}
+                                    title='Click to copy email address'
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    {copiedKey === 'email' ? '✓ Copied to Clipboard!' : 'Profithubdeveloper@gmail.com'}
+                                </div>
                             </div>
                             <div className='footer-contact__item-actions'>
                                 <a

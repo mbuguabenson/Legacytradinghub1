@@ -50,7 +50,6 @@ const Signals = lazyRetry(() => import('../signals'), 'signals');
 const ScannerPage = lazyRetry(() => import('../scanner/scanner'), 'scanner');
 
 const EasyTool = lazyRetry(() => import('../easy-tool'), 'easy_tool');
-const MultiTrader = lazyRetry(() => import('../multi-trader'), 'multi_trader');
 const Marketkiller = lazyRetry(() => import('../marketkiller'), 'marketkiller');
 const MarketHunterPro = lazyRetry(() => import('../market-hunter-pro'), 'market_hunter_pro');
 const TradingBots = lazyRetry(() => import('../free-bots/trading-bots'), 'trading_bots');
@@ -127,7 +126,6 @@ const AppWrapper = observer(() => {
         'scanner',
         'easy_tool',
         'marketkiller',
-        'multi_trader',
         'market_hunter_pro',
         'ai_trading_engine',
         'digitflow',
@@ -537,18 +535,6 @@ const AppWrapper = observer(() => {
                     <TabErrorBoundary tabId='id-marketkiller' tabName='Marketkiller'>
                         <Suspense fallback={<ChunkLoader message={localize('Please wait, loading Marketkiller...')} />}>
                             <Marketkiller />
-                        </Suspense>
-                    </TabErrorBoundary>
-                ),
-            },
-            {
-                key: 'multi_trader',
-                id: 'id-multi-trader',
-                label: <TabIcon iconKey='multi_trader' label='Multi Trader' />,
-                content: (
-                    <TabErrorBoundary tabId='id-multi-trader' tabName='Multi Trader'>
-                        <Suspense fallback={<ChunkLoader message={localize('Please wait, loading Multi Trader...')} />}>
-                            <MultiTrader />
                         </Suspense>
                     </TabErrorBoundary>
                 ),

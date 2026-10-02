@@ -27,7 +27,6 @@ const TAB_ICONS: Record<string, TQuillIcon> = {
     manual_trading: LabelPairedChartLineSmRegularIcon,
     easy_tool: LabelPairedBarsFilterSmRegularIcon,
     marketkiller: LabelPairedBarsFilterSmRegularIcon,
-    multi_trader: LabelPairedChartAreaSmRegularIcon,
     market_hunter_pro: LabelPairedBarsFilterSmRegularIcon,
     ai_trading_engine: LabelPairedBarsFilterSmRegularIcon,
     digitflow: LabelPairedChartLineSmRegularIcon,
@@ -252,24 +251,6 @@ export const TabIcon: React.FC<TTabIconProps> = ({ iconKey, label }) => {
                         <path d='M12 2L2 7l10 5 10-5-10-5z' />
                         <path d='M2 17l10 5 10-5' />
                         <path d='M2 12l10 5 10-5' />
-                    </svg>
-                );
-            case 'multi_trader':
-                return (
-                    <svg
-                        width='18'
-                        height='18'
-                        viewBox='0 0 24 24'
-                        fill='none'
-                        stroke='currentColor'
-                        strokeWidth='1.8'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                    >
-                        <rect x='2' y='2' width='9' height='9' rx='2' />
-                        <rect x='13' y='2' width='9' height='9' rx='2' />
-                        <rect x='2' y='13' width='9' height='9' rx='2' />
-                        <rect x='13' y='13' width='9' height='9' rx='2' />
                     </svg>
                 );
             case 'ai_compounding_engine':

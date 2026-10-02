@@ -138,20 +138,32 @@ const WelcomeScreen = ({
             {/* Dynamic Animated Forex Candlestick & Technical Charts Background */}
             <ForexChartsBackground />
 
-            {/* Central Modern Institutional Card */}
+            {/* Central Modern Institutional Neumorphic Console */}
             <div className='welcome-screen__card'>
                 <div className='ws-card-glow-edge' aria-hidden='true' />
+
+                {/* Top Telemetry Header */}
+                <div className='ws-telemetry-topbar'>
+                    <div className='ws-node-pill'>
+                        <span className='ws-node-dot' />
+                        <span className='ws-node-text'>GATEWAY: SECURE 256-BIT</span>
+                    </div>
+                    <div className='ws-latency-pill'>
+                        <Activity size={10} className='ws-latency-icon' />
+                        <span>0.8ms • LD4 NODE</span>
+                    </div>
+                </div>
 
                 {/* Hero Quantum Holographic Emblem */}
                 <div className='ws-gyro-emblem-wrap'>
                     <div className='ws-gyro-ring ws-gyro-ring--outer'>
                         <svg viewBox='0 0 100 100' className='ws-gyro-svg'>
-                            <circle cx='50' cy='50' r='46' stroke='currentColor' strokeWidth='1.4' strokeDasharray='5 7' fill='none' />
+                            <circle cx='50' cy='50' r='46' stroke='currentColor' strokeWidth='1.4' strokeDasharray='6 8' fill='none' />
                         </svg>
                     </div>
                     <div className='ws-gyro-ring ws-gyro-ring--inner'>
                         <svg viewBox='0 0 100 100' className='ws-gyro-svg'>
-                            <circle cx='50' cy='50' r='37' stroke='currentColor' strokeWidth='1.6' strokeDasharray='20 10 5 10' fill='none' />
+                            <circle cx='50' cy='50' r='38' stroke='currentColor' strokeWidth='1.6' strokeDasharray='22 10 6 10' fill='none' />
                         </svg>
                     </div>
                     <div className='ws-gyro-core'>

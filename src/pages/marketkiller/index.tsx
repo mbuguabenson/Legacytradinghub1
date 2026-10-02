@@ -4,14 +4,15 @@ import { observer } from 'mobx-react-lite';
 import { useStore } from '@/hooks/useStore';
 import { getGroupedMarkets } from '@/constants/markets';
 import MatchesKiller from './components/matches-killer';
-import Onetrader from './components/onetrader';
 import './marketkiller.scss';
 
 const Marketkiller = observer(() => {
     const { marketkiller } = useStore();
-    const { active_subtab, current_price, last_digit, symbol, is_connected, is_running } = marketkiller;
+    const { current_price, last_digit, symbol, is_connected, is_running } = marketkiller;
 
     useEffect(() => {
+        // Ensure active subtab is dedicated to matches killer
+        marketkiller.setActiveSubtab('matches');
         // Kickstart streaming ticks & stats on mount
         marketkiller.subscribeToTicks();
         marketkiller.subscribeToRibbon();
@@ -32,7 +33,7 @@ const Marketkiller = observer(() => {
                     <div className='mk-header-title-wrap'>
                         <span className='mk-header-icon'>🔪</span>
                         <div className='mk-header-title-text'>
-                            <h2>MARKETKILLER</h2>
+                            <h2>MATCHES KILLER</h2>
                             <span className='mk-connection-status'>
                                 {is_connected ? '● LIVE CONNECTION' : '○ RECONNECTING...'}
                             </span>
@@ -71,27 +72,12 @@ const Marketkiller = observer(() => {
                 </div>
             </div>
 
-            <div className='mk-sub-nav'>
-                <button
-                    className={classNames({ active: active_subtab === 'onetrader' })}
-                    onClick={() => marketkiller.setActiveSubtab('onetrader')}
-                >
-                    ONETRADER
-                </button>
-                <button
-                    className={classNames({ active: active_subtab === 'matches' })}
-                    onClick={() => marketkiller.setActiveSubtab('matches')}
-                >
-                    MATCHES KILLER
-                </button>
-            </div>
-
             <div className='mk-content'>
-                {active_subtab === 'onetrader' && <Onetrader />}
-                {active_subtab === 'matches' && <MatchesKiller />}
+                <MatchesKiller />
             </div>
         </div>
     );
 });
 
 export default Marketkiller;
+

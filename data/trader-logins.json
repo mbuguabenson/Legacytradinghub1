@@ -12,9 +12,34 @@
       "firstSeen": "2026-09-25T10:12:04.292Z",
       "lastLogin": "2026-09-25T10:12:04.292Z",
       "loginCount": 1
+    },
+    "VRTC123456": {
+      "loginid": "VRTC123456",
+      "accountType": "demo",
+      "currency": "USD",
+      "balance": 0,
+      "email": "",
+      "ip": "::1",
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+      "source": "deriv_storage_sync",
+      "firstSeen": "2026-10-02T13:30:50.987Z",
+      "lastLogin": "2026-10-02T13:30:50.987Z",
+      "loginCount": 1,
+      "status": "active",
+      "blockReason": null
     }
   },
   "history": [
+    {
+      "id": "log_1790947851027_5714",
+      "loginid": "VRTC123456",
+      "accountType": "demo",
+      "currency": "USD",
+      "balance": 0,
+      "ip": "::1",
+      "timestamp": "2026-10-02T13:30:50.987Z",
+      "source": "deriv_storage_sync"
+    },
     {
       "id": "log_1790331124292_frrc",
       "loginid": "CR1234567",

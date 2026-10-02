@@ -27,7 +27,7 @@ export default class MarketkillerStore {
     root_store: RootStore;
     stats_engine: DigitStatsEngine;
 
-    @observable accessor active_subtab: TMarketkillerSubtab = 'onetrader';
+    @observable accessor active_subtab: TMarketkillerSubtab = 'matches';
     @observable accessor is_connected = false;
     @observable accessor active_symbols: any[] = [];
     @observable accessor symbol = 'R_100';
