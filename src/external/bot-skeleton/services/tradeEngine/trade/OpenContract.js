@@ -139,60 +139,6 @@ export default Engine =>
                 }
             } catch (e) {}
 
-            const isUltra = isUltraModeActive();
-            if (isUltra) {
-                if (this.contractId === cId) {
-                    const remaining = this.active_contract_ids && Array.from(this.active_contract_ids);
-                    this.contractId = remaining && remaining.length > 0 ? remaining[remaining.length - 1] : '';
-                }
-                if (this.bulk_contract_ids) {
-                    this.bulk_contract_ids.delete(cId);
-                }
-
-                contractStatus({
-                    id: 'contract.sold',
-                    data: enrichedContract.transaction_ids?.sell,
-                    contract: enrichedContract,
-                });
-
-                if (this.afterPromise) {
-                    const ap = this.afterPromise;
-                    this.afterPromise = null;
-                    ap();
-                }
-
-                // ⚡ ZERO-DELAY BALANCE UPDATE:
-                try {
-                    const { client } = DBotStore.instance || {};
-                    const payout = parseFloat(enrichedContract.sell_price ?? enrichedContract.payout ?? 0) || 0;
-                    if (client && typeof client.balance !== 'undefined' && payout > 0) {
-                        const currentBal = parseFloat(String(client.balance).replace(/,/g, '')) || 0;
-                        const targetId = this.accountInfo?.loginid || client.loginid;
-                        if (client.setBalance && currentBal > 0) {
-                            client.setBalance((currentBal + payout).toFixed(2), targetId);
-                        }
-                    }
-                } catch (e) {}
-
-                try {
-                    if (api_base.api) {
-                        api_base.api.send({ balance: 1 }).then(res => {
-                            if (res?.balance && typeof res.balance.balance === 'number') {
-                                const { client } = DBotStore.instance || {};
-                                if (client?.setBalance) {
-                                    client.setBalance(
-                                        res.balance.balance.toString(),
-                                        res.balance.loginid || this.accountInfo?.loginid || client.loginid
-                                    );
-                                }
-                            }
-                        }).catch(() => {});
-                    }
-                } catch (e) {}
-
-                // In Ultra mode: DO NOT dispatch sell() because that would set scope = STOP and halt tick buying!
-                return;
-            }
 
             const isBulk = Boolean(this.bulk_contract_ids && this.bulk_contract_ids.size > 1);
             const allBulkDone = !isBulk || this.bulk_sold_contract_ids.size >= this.bulk_contract_ids.size;

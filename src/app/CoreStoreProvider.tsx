@@ -152,6 +152,19 @@ const CoreStoreProvider: React.FC<{ children: React.ReactNode }> = observer(({ c
                     }
                 } catch {}
 
+                // If user has an active OAuth session, do NOT logout!
+                // An authorize error on Deriv WS means a legacy token was rejected or not needed,
+                // but the user's primary OAuth session remains valid.
+                const hasValidOAuthSession =
+                    !!localStorage.getItem('active_loginid') &&
+                    (!!localStorage.getItem('auth_info') ||
+                        !!sessionStorage.getItem('auth_info') ||
+                        !!localStorage.getItem('bot_new_api_token'));
+                if (hasValidOAuthSession) {
+                    console.warn('[CoreStoreProvider] WebSocket authorize returned InvalidToken, but active OAuth session is present. Preserving session.');
+                    return;
+                }
+
                 // Clear all URL query parameters for these auth errors
                 clearInvalidTokenParams();
 

@@ -618,27 +618,27 @@ export default class ClientStore {
                 const { DerivWSAccountsService } = await import('@/services/derivws-accounts.service');
                 DerivWSAccountsService.clearCache();
 
-                this.account_list = [];
-
                 // Preserve is_logged_in state during WebSocket regeneration if active credentials exist
                 const hasActiveCredentials =
                     !!active_login_id &&
                     (!!localStorage.getItem('accountsList') ||
                         !!localStorage.getItem('authToken') ||
-                        !!localStorage.getItem('token1'));
+                        !!localStorage.getItem('token1') ||
+                        !!localStorage.getItem('auth_info') ||
+                        !!sessionStorage.getItem('auth_info') ||
+                        !!localStorage.getItem('bot_new_api_token'));
                 if (!hasActiveCredentials) {
                     this.setIsLoggedIn(false);
+                    this.account_list = [];
+                    setIsAuthorized(false);
+                    setAccountList([]);
+                    setAuthData(null);
                 }
 
                 // NOTE: Do NOT remove accountsList, authToken, clientAccounts, or account_type
                 // from localStorage here. Clearing them would permanently log the user out
-                // if the subsequent api_base.init() call fails. The in-memory state above is
-                // enough to reset the UI while preserving the ability to re-authorize.
+                // if the subsequent api_base.init() call fails.
                 removeCookies('client_information');
-
-                setIsAuthorized(false);
-                setAccountList([]);
-                setAuthData(null);
 
                 this.setIsLoggingOut(false);
 

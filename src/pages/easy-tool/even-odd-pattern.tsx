@@ -42,7 +42,8 @@ const EvenOddPattern = observer(() => {
         const third_last = slice[slice.length - 3];
 
         // E.g. Odd, Odd, Even(Most/Least)
-        const two_consecutive_odds = second_last % 2 !== 0 && third_last % 2 !== 0;
+        const two_consecutive_odds =
+            typeof second_last === 'number' && typeof third_last === 'number' && second_last % 2 !== 0 && third_last % 2 !== 0;
         const entry_trigger_digit = last_digit === stats.most_frequent || last_digit === stats.least_frequent;
 
         if (is_most_even && is_2nd_most_even && is_least_even && even_pct >= 55) {
@@ -63,7 +64,8 @@ const EvenOddPattern = observer(() => {
         const is_least_odd = stats.least_frequent % 2 !== 0;
 
         if (is_most_odd && is_2nd_most_odd && is_least_odd && odd_pct >= 55) {
-            const two_consecutive_evens = second_last % 2 === 0 && third_last % 2 === 0;
+            const two_consecutive_evens =
+                typeof second_last === 'number' && typeof third_last === 'number' && second_last % 2 === 0 && third_last % 2 === 0;
             const entry_trigger_digit_odd = last_digit === stats.most_frequent || last_digit === stats.least_frequent;
 
             if (two_consecutive_evens && last_digit % 2 !== 0 && entry_trigger_digit_odd && is_odd_increasing) {

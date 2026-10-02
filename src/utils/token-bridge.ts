@@ -138,8 +138,29 @@ export const STORAGE_KEYS = {
  * Validates whether a token conforms to Deriv Legacy API token format (e.g. "a1-..." or non-JWT).
  * Legacy DTrader and legacy WebSocket authorize only accept legacy tokens, NOT OAuth2 Bearer JWTs.
  */
-export const isLegacyToken = (token: string | null | undefined): boolean =>
-    Boolean(token && !isInvalidBearerToken(token) && !token.startsWith('ey'));
+export const isLegacyToken = (token: string | null | undefined): boolean => {
+    if (!token || typeof token !== 'string') return false;
+    const clean = token.trim();
+    if (isInvalidBearerToken(clean)) return false;
+    // Real Deriv Legacy API tokens:
+    // 1. Length is 10 to 32 alphanumeric characters (typically 15).
+    // 2. Never JWT (doesn't start with 'ey' and has no dots).
+    // 3. Never OAuth2 access token (doesn't start with 'ory_at_', 'bearer', etc.).
+    // 4. Never OTP token (doesn't start with 'otp_').
+    if (
+        clean.startsWith('ey') ||
+        clean.startsWith('ory_') ||
+        clean.toLowerCase().startsWith('bearer') ||
+        clean.startsWith('otp_') ||
+        clean.includes('.')
+    ) {
+        return false;
+    }
+    if (clean.length < 10 || clean.length > 32) {
+        return false;
+    }
+    return /^[a-zA-Z0-9_\-]+$/.test(clean);
+};
 
 export const getBotNewApiToken = (): string | null => {
     return localStorage.getItem(STORAGE_KEYS.BOT_NEW_API_TOKEN);
@@ -298,33 +319,10 @@ export const resolveValidDerivWSToken = async (loginid?: string): Promise<string
         // noop
     }
 
-    // 4. Fetch OTP WebSocket token for PKCE OAuth2 session (only if OTP service is available)
-    try {
-        const authInfo = OAuthTokenExchangeService.getAuthInfo();
-        if (authInfo?.access_token) {
-            const fetchPromise = DerivWSAccountsService.getAuthenticatedWebSocketURL(authInfo.access_token);
-            const timeoutPromise = new Promise<string>((_, reject) =>
-                setTimeout(() => reject(new Error('OTP fetch timeout')), 10000)
-            );
-            const wsUrl = await Promise.race([fetchPromise, timeoutPromise]);
-            if (wsUrl) {
-                const parsedUrl = new URL(wsUrl);
-                const otpToken = parsedUrl.searchParams.get('token') || parsedUrl.searchParams.get('otp');
-                if (otpToken && !isInvalidBearerToken(otpToken)) {
-                    return otpToken;
-                }
-            }
-        }
-    } catch (e) {
-        // OTP backend unreachable or timed out
-        console.warn('[tokenBridge] OTP fetch failed:', e);
-    }
-
-    // 5. Fallback to syncToken if non-empty and not invalid
-    if (syncToken && !isInvalidBearerToken(syncToken)) {
-        return syncToken;
-    }
-
+    // NOTE: OTP tokens and OAuth2 Bearer tokens must NEVER be returned here
+    // because Deriv WebSocket `authorize` rejects them with 'InvalidToken'.
+    // OAuth2 sessions authenticate the WebSocket connection via OTP URL (?otp=...)
+    // or use the authResult fallback in api_base.
     return '';
 };
 
@@ -448,6 +446,14 @@ export const purgeInvalidToken = (tokenOrLoginId?: string): void => {
 
         const target = tokenOrLoginId.trim();
         const isLoginId = /^[A-Za-z]+[0-9]+$/.test(target);
+
+        // Safety guard: NEVER purge account IDs from storage.
+        // Account IDs (e.g. CR..., VRTC...) are user account identifiers, not tokens.
+        // Purging account IDs wipes the user's active session and account lists, causing unexpected logouts.
+        if (isLoginId) {
+            console.warn('[tokenBridge] purgeInvalidToken skipped for account ID:', target);
+            return;
+        }
 
         // 1. Sanitize accountsList
         const rawAccountsList = localStorage.getItem('accountsList');

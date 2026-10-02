@@ -297,6 +297,7 @@ export class OAuthTokenExchangeService {
 
                         const isDemo = isDemoAccount(activeLoginId);
                         localStorage.setItem('account_type', isDemo ? 'demo' : 'real');
+                        localStorage.setItem('bot_new_api_token', data.access_token!);
 
                         // Save accounts mapping for token bridge and iframe sync
                         const accountsMap: Record<string, string> = {};

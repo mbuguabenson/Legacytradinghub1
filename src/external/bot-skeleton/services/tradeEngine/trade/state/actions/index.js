@@ -1,4 +1,3 @@
-import { isUltraModeActive } from '../../../utils/fastMode';
 import * as constants from '../constants';
 
 const dispatchIfScopeIs = ({ dispatch, getState, data, scope }) => {
@@ -10,7 +9,7 @@ const dispatchIfScopeIs = ({ dispatch, getState, data, scope }) => {
 
 export const start = () => (dispatch, getState) => {
     const { scope: currentScope } = getState();
-    if (currentScope === constants.STOP || isUltraModeActive()) {
+    if (currentScope === constants.STOP) {
         dispatch({ type: constants.START });
     }
 };

@@ -104,7 +104,7 @@ export default Engine =>
 
             this.is_contract_buying_in_progress = true;
 
-            if (!isUltra && this.store.getState().scope !== BEFORE_PURCHASE) {
+            if (this.store.getState().scope !== BEFORE_PURCHASE) {
                 this.is_contract_buying_in_progress = false;
                 return Promise.resolve();
             }

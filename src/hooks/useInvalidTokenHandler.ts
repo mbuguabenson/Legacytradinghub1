@@ -43,10 +43,21 @@ export const useInvalidTokenHandler = (): { unregisterHandler: () => void } => {
                 }
             }
 
+            // If the user currently has an unexpired OAuth session, preserve it!
+            if (authInfo?.access_token && (!authInfo.expires_at || authInfo.expires_at > Date.now())) {
+                console.warn('[InvalidTokenHandler] Active OAuth session is still unexpired. Preserving session.');
+                return;
+            }
+
             const tokenContext = String(eventData?.context || eventData?.source || '');
 
             if (tokenContext === 'legacy') {
                 handleInvalidToken('legacy');
+                return;
+            }
+
+            if (tokenContext === 'bot') {
+                handleInvalidToken('bot');
                 return;
             }
 

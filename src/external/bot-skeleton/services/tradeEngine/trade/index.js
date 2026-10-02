@@ -4,7 +4,7 @@ import { getLocalizedErrorMessage } from '@/constants/backend-error-messages';
 import { createError } from '../../../utils/error';
 import { observer as globalObserver } from '../../../utils/observer';
 import { api_base } from '../../api/api-base';
-import { isFastModeActive, isUltraModeActive, syncFastExecutionOverride } from '../utils/fastMode';
+import { isFastModeActive, syncFastExecutionOverride } from '../utils/fastMode';
 import { checkBlocksForProposalRequest, doUntilDone } from '../utils/helpers';
 import { expectInitArg } from '../utils/sanitize';
 import { proposalsReady, start } from './state/actions';
@@ -18,12 +18,7 @@ import Sell from './Sell';
 import Ticks from './Ticks';
 import Total from './Total';
 
-export { isFastModeActive, isUltraModeActive } from '../utils/fastMode';
-
-export let lastUltraPurchasedTickId = null;
-export const resetUltraPurchasedTick = () => {
-    lastUltraPurchasedTickId = null;
-};
+export { isFastModeActive } from '../utils/fastMode';
 
 const watchBefore = store => {
     if (typeof window !== 'undefined' && (window.__dbot_stopped || !api_base.is_running)) {
@@ -58,63 +53,6 @@ const watchBefore = store => {
         });
     }
 
-    // 🚀 ULTRA MODE: Purchase on EVERY tick generated without waiting for previous contract to close!
-    if (isUltraModeActive()) {
-        const currentState = store.getState();
-        // If a purchase was just executed on this tick, exit before-purchase loop immediately
-        // so interpreter can pass during (instant) -> after_purchase (trade_again) -> loop
-        if (currentState.scope === constants.DURING_PURCHASE) {
-            return Promise.resolve(false);
-        }
-
-        const currentTickId = currentState.newTickId || currentState.newTick;
-
-        // If this is a fresh tick that hasn't traded yet, fire immediately!
-        if (currentTickId && currentTickId !== lastUltraPurchasedTickId) {
-            lastUltraPurchasedTickId = currentTickId;
-            return Promise.resolve(true);
-        }
-
-        // Otherwise wait for the NEXT tick to be dispatched by Ticks.js
-        return new Promise(resolve => {
-            let isResolved = false;
-            const cleanup = () => {
-                globalObserver.unregister('bot.stop', onBotStop);
-                unsubscribe();
-            };
-            const onBotStop = () => {
-                if (isResolved) return;
-                isResolved = true;
-                cleanup();
-                resolve(false);
-            };
-            globalObserver.register('bot.stop', onBotStop);
-
-            const unsubscribe = store.subscribe(() => {
-                if (isResolved) return;
-                if (typeof window !== 'undefined' && (window.__dbot_stopped || !api_base.is_running)) {
-                    isResolved = true;
-                    cleanup();
-                    resolve(false);
-                    return;
-                }
-                const state = store.getState();
-                if (state.scope === constants.DURING_PURCHASE || state.scope === constants.STOP) {
-                    isResolved = true;
-                    cleanup();
-                    resolve(false);
-                    return;
-                }
-                const tickId = state.newTickId || state.newTick;
-                if (tickId && tickId !== lastUltraPurchasedTickId) {
-                    isResolved = true;
-                    lastUltraPurchasedTickId = tickId;
-                    cleanup();
-                    resolve(true);
-                }
-            });
-        });
-    }
 
     const currentState = store.getState();
     if (currentState.scope === constants.DURING_PURCHASE || currentState.scope === constants.STOP) {
@@ -144,12 +82,6 @@ const watchDuring = store => {
         return Promise.resolve(false);
     }
 
-    // 🚀 ULTRA MODE: Never block in watchDuring!
-    // Exiting immediately allows after_purchase (trade_again) and next tick purchase
-    // to execute concurrently while previous contracts are still in flight.
-    if (isUltraModeActive()) {
-        return Promise.resolve(false);
-    }
 
     return new Promise(resolve => {
         const currentState = store.getState();

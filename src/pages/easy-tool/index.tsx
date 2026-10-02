@@ -29,8 +29,17 @@ const EasyTool = observer(() => {
     if (!store?.easy_tool) return null;
 
     const { easy_tool, ui } = store;
-    const { current_price, last_digit, ticks = [], stats_sample_size = 1000, setStatsSampleSize, markets = [], fetchMarkets } =
-        easy_tool;
+    const {
+        current_price,
+        formatted_price,
+        last_digit,
+        ticks = [],
+        stats_sample_size = 1000,
+        setStatsSampleSize,
+        markets = [],
+        fetchMarkets,
+        pip_size = 2,
+    } = easy_tool;
 
     const is_dark_mode_on = ui?.is_dark_mode_on ?? true;
 
@@ -45,7 +54,13 @@ const EasyTool = observer(() => {
         if (!ticks || ticks.length === 0) {
             easy_tool.subscribeToActiveSymbol?.();
         }
-    }, [markets, fetchMarkets, ticks, easy_tool]);
+        const interval = setInterval(() => {
+            if (easy_tool.ticks.length === 0) {
+                easy_tool.subscribeToActiveSymbol?.();
+            }
+        }, 3000);
+        return () => clearInterval(interval);
+    }, [easy_tool]);
 
     // Update selected digit when last_digit changes if none selected
     useEffect(() => {
@@ -62,7 +77,7 @@ const EasyTool = observer(() => {
                         <MarketSelector />
                     </div>
                     <div className='v-item'>
-                        <span className='v'>{current_price}</span>
+                        <span className='v'>{formatted_price}</span>
                     </div>
                     <div className='v-item'>
                         <span className='v digit'>{last_digit ?? '-'}</span>
@@ -79,7 +94,7 @@ const EasyTool = observer(() => {
                     <div className='section-card distribution-v2'>
                         <DigitDistributionCircles
                             digits={ticks}
-                            tick={current_price ? { quote: current_price, pip_size: 2, last_digit } : undefined}
+                            tick={current_price !== null && current_price !== undefined ? { quote: current_price, pip_size, last_digit } : undefined}
                             onSelect={setSelectedDigit}
                             selected_digit={selected_digit}
                         />
@@ -165,7 +180,7 @@ const EasyTool = observer(() => {
                                     className={`h-digit-v2 ${last_digit === digit && index === 0 ? 'is-current' : ''}`}
                                     style={
                                         {
-                                            '--digit-color': DIGIT_COLORS[digit],
+                                            '--digit-color': DIGIT_COLORS[digit] || '#10b981',
                                         } as React.CSSProperties
                                     }
                                 >

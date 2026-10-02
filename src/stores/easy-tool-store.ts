@@ -1,7 +1,8 @@
-import { action, makeObservable, observable, reaction, runInAction } from 'mobx';
+import { action, computed, makeObservable, observable, reaction, runInAction } from 'mobx';
 import { api_base, observer as globalObserver } from '@/external/bot-skeleton';
 import { getGroupedMarkets } from '@/constants/markets';
-import { safeSubscribe } from '@/utils/websocket-handler';
+import { subscribeTicks } from '@/services/deriv-tick-manager.service';
+import { getLastDigitFromQuote, getMarketPipSize } from '@/utils/market-data';
 import RootStore from './root-store';
 
 const DEFAULT_MARKETS = getGroupedMarkets();
@@ -24,15 +25,17 @@ export default class EasyToolStore {
     @observable accessor symbol: string = 'R_100';
     @observable accessor current_price: number | null = null;
     @observable accessor last_digit: number | null = null;
-    @observable accessor ticks: number[] = [];
+    @observable accessor ticks: number[] = []; // Array of last digits (0-9)
+    @observable accessor raw_prices: number[] = []; // Array of quote prices
+    @observable accessor pip_size: number = 2;
     @observable accessor stats_sample_size: number = 1000;
-    @observable accessor markets: TMarketGroup[] = [];
+    @observable accessor markets: TMarketGroup[] = DEFAULT_MARKETS;
     @observable accessor is_loading_markets: boolean = false;
     @observable accessor is_loading_ticks: boolean = false;
     @observable accessor is_connected: boolean = false;
 
-    private _tick_sub: any = null;
-    private _is_subscribing: boolean = false;
+    private _tick_sub: { unsubscribe: () => void } | null = null;
+    private _sub_request_id: number = 0;
 
     constructor(root_store: RootStore) {
         makeObservable(this);
@@ -74,6 +77,12 @@ export default class EasyToolStore {
         this.initWebSocketConnection();
     }
 
+    @computed
+    get formatted_price(): string {
+        if (this.current_price === null || this.current_price === undefined) return '---';
+        return this.current_price.toFixed(this.pip_size);
+    }
+
     @action
     private initWebSocketConnection = async () => {
         // If api_base has cached active_symbols from WebSocket, populate immediately
@@ -100,7 +109,9 @@ export default class EasyToolStore {
     setSymbol = (symbol: string) => {
         if (this.symbol === symbol) return;
         this.symbol = symbol;
+        this.pip_size = getMarketPipSize(symbol, 2);
         this.ticks = [];
+        this.raw_prices = [];
         this.current_price = null;
         this.last_digit = null;
         this.subscribeToActiveSymbol();
@@ -108,7 +119,11 @@ export default class EasyToolStore {
 
     @action
     setStatsSampleSize = (size: number) => {
+        if (this.stats_sample_size === size) return;
         this.stats_sample_size = size;
+        if (this.ticks.length < size) {
+            this.subscribeToActiveSymbol();
+        }
     };
 
     /**
@@ -169,6 +184,7 @@ export default class EasyToolStore {
             const allValues = grouped.flatMap(g => g.items.map(i => i.value));
             if (allValues.length > 0 && !allValues.includes(this.symbol)) {
                 this.symbol = allValues[0];
+                this.subscribeToActiveSymbol();
             }
         });
     };
@@ -199,11 +215,9 @@ export default class EasyToolStore {
     @action
     unsubscribe = () => {
         if (this._tick_sub) {
-            if (typeof this._tick_sub === 'function') {
-                this._tick_sub();
-            } else if (typeof this._tick_sub.unsubscribe === 'function') {
+            try {
                 this._tick_sub.unsubscribe();
-            }
+            } catch (e) {}
             this._tick_sub = null;
         }
     };
@@ -213,13 +227,35 @@ export default class EasyToolStore {
      */
     @action
     subscribeToActiveSymbol = async (retryCount = 0) => {
-        if (this._is_subscribing) return;
         this.unsubscribe();
-        this._is_subscribing = true;
+        const reqId = ++this._sub_request_id;
+        const sym = this.symbol;
         this.is_loading_ticks = true;
 
-        const sym = this.symbol;
+        const pip = getMarketPipSize(sym, 2);
+        runInAction(() => {
+            this.pip_size = pip;
+        });
 
+        // 1. Centralized live tick stream subscription (multiplexed & handles reconnection)
+        this._tick_sub = subscribeTicks(sym, (data: any) => {
+            if (this.symbol !== sym || reqId !== this._sub_request_id) return;
+            if (data?.tick && data.tick.symbol === sym) {
+                const quote = Number(data.tick.quote);
+                const tickPip = Number(data.tick.pip_size) ?? this.pip_size ?? pip;
+                const digit = getLastDigitFromQuote(quote, sym, tickPip);
+
+                runInAction(() => {
+                    this.pip_size = tickPip;
+                    this.current_price = quote;
+                    this.last_digit = digit;
+                    this.ticks = [...this.ticks, digit].slice(-2000);
+                    this.raw_prices = [...this.raw_prices, quote].slice(-2000);
+                });
+            }
+        });
+
+        // 2. Fetch history from Deriv WebSocket
         try {
             if (!api_base.api || (api_base.api as any)?.connection?.readyState !== 1) {
                 try {
@@ -228,79 +264,60 @@ export default class EasyToolStore {
             }
 
             if (!api_base.api) {
-                if (retryCount < 5) {
+                if (retryCount < 8) {
                     setTimeout(() => {
-                        this._is_subscribing = false;
-                        this.subscribeToActiveSymbol(retryCount + 1);
+                        if (reqId === this._sub_request_id) {
+                            this.subscribeToActiveSymbol(retryCount + 1);
+                        }
                     }, 1000);
                 } else {
-                    this._is_subscribing = false;
-                    this.is_loading_ticks = false;
-                }
-                return;
-            }
-
-            // 1. Initial tick history straight from WebSocket
-            try {
-                const res: any = await api_base.api.send({
-                    ticks_history: sym,
-                    end: 'latest',
-                    count: this.stats_sample_size || 1000,
-                    style: 'ticks',
-                });
-
-                if (this.symbol !== sym) {
-                    this._is_subscribing = false;
-                    return;
-                }
-
-                const history = res?.history || res?.ticks_history;
-                if (history?.prices && Array.isArray(history.prices) && history.prices.length > 0) {
-                    const prices: number[] = history.prices.map((p: any) => Number(p));
                     runInAction(() => {
-                        this.ticks = prices;
-                        const last = prices[prices.length - 1];
-                        this.current_price = last;
-                        const quoteStr = (last || 0).toString();
-                        const parts = quoteStr.split('.');
-                        const decimalPart = parts[1] || '0';
-                        this.last_digit = parseInt(decimalPart[decimalPart.length - 1] || '0', 10);
                         this.is_loading_ticks = false;
                     });
                 }
-            } catch (e) {
-                console.debug('[EasyToolStore] WS ticks_history notice:', e);
-            }
-
-            if (this.symbol !== sym) {
-                this._is_subscribing = false;
                 return;
             }
 
-            // 2. Real-time tick stream over WebSocket using safeSubscribe
-            const tickObservable = (api_base.api as any)?.subscribe?.({ ticks: sym });
-            if (tickObservable) {
-                this._tick_sub = safeSubscribe(tickObservable, (data: any) => {
-                    if (data?.tick && data.tick.symbol === sym) {
-                        const quote = Number(data.tick.quote);
-                        const quoteStr = (data.tick.quote || 0).toString();
-                        const parts = quoteStr.split('.');
-                        const decimalPart = parts[1] || '0';
-                        const digit = parseInt(decimalPart[decimalPart.length - 1] || '0', 10);
+            const count = Math.max(this.stats_sample_size || 1000, 1000);
+            const res: any = await api_base.api.send({
+                ticks_history: sym,
+                end: 'latest',
+                count,
+                style: 'ticks',
+            });
 
-                        runInAction(() => {
-                            this.current_price = quote;
-                            this.last_digit = digit;
-                            this.ticks.push(quote);
-                            if (this.ticks.length > 2000) {
-                                this.ticks.shift();
-                            }
-                        });
+            if (this.symbol !== sym || reqId !== this._sub_request_id) return;
+
+            const history = res?.history || res?.ticks_history;
+            if (history?.prices && Array.isArray(history.prices) && history.prices.length > 0) {
+                const historyPip = Number(res?.pip_size) || this.pip_size || pip;
+                const prices: number[] = history.prices.map((p: any) => Number(p));
+                const digits: number[] = prices.map(p => getLastDigitFromQuote(p, sym, historyPip));
+
+                runInAction(() => {
+                    this.pip_size = historyPip;
+                    if (this.ticks.length === 0) {
+                        this.raw_prices = prices;
+                        this.ticks = digits;
+                        const last = prices[prices.length - 1];
+                        this.current_price = last;
+                        this.last_digit = digits[digits.length - 1] ?? null;
+                    } else {
+                        // Merge recent live ticks with historical ticks
+                        this.ticks = [...digits, ...this.ticks].slice(-2000);
+                        this.raw_prices = [...prices, ...this.raw_prices].slice(-2000);
                     }
+                    this.is_loading_ticks = false;
                 });
             }
+        } catch (e) {
+            console.debug('[EasyToolStore] ticks_history notice:', e);
         } finally {
-            this._is_subscribing = false;
+            if (reqId === this._sub_request_id) {
+                runInAction(() => {
+                    this.is_loading_ticks = false;
+                });
+            }
         }
     };
 }

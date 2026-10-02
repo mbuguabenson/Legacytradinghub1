@@ -4,8 +4,7 @@ import { getAccountId, getAccountType, isDemoAccount, removeUrlParameter } from 
 import CommonStore from '@/stores/common-store';
 import { DerivWSAccountsService } from '@/services/derivws-accounts.service';
 import { OAuthTokenExchangeService } from '@/services/oauth-token-exchange.service';
-import { clearAuthData } from '@/utils/auth-utils';
-import { purgeInvalidToken, resolveValidDerivWSToken } from '@/utils/token-bridge';
+import { isLegacyToken, purgeInvalidToken, resolveValidDerivWSToken } from '@/utils/token-bridge';
 
 import { handleBackendError, isBackendError } from '@/utils/error-handler';
 import { activeSymbolsProcessorService } from '../../../../services/active-symbols-processor.service';
@@ -564,8 +563,8 @@ class APIBase {
             if (!authResult) {
                 const token = await resolveValidDerivWSToken(expectedId || '');
 
-                // 2. Only invoke WebSocket authorize with valid Deriv API tokens (matching ^[\w\-]{1,128}$), never raw OAuth2 JWTs or invalid strings
-                if (token && /^[\w\-]{1,128}$/.test(token) && !token.startsWith('ey')) {
+                // 2. Only invoke WebSocket authorize with valid Deriv Legacy API tokens, never raw OAuth2 JWTs or invalid strings
+                if (token && isLegacyToken(token)) {
                     try {
                         const res = await this.api.authorize(token);
                         if (res?.authorize) {
@@ -579,29 +578,17 @@ class APIBase {
                             }
                         } else if (res?.error) {
                             console.warn('[APIBase] Token authorize returned error:', res.error.message || res.error);
-                            if (
-                                res.error.code === 'InvalidToken' ||
-                                res.error.code === 'InputValidationFailed' ||
-                                String(res.error.message).includes('authorize')
-                            ) {
+                            if (res.error.code === 'InvalidToken') {
                                 purgeInvalidToken(token);
-                                if (expectedId) purgeInvalidToken(expectedId);
                             }
                         }
                     } catch (tokErr: any) {
                         console.warn('[APIBase] Token authorize failed:', tokErr?.message || tokErr);
                         const code = tokErr?.error?.code || tokErr?.code;
-                        const msg = tokErr?.error?.message || tokErr?.message || '';
-                        if (
-                            code === 'InvalidToken' ||
-                            code === 'InputValidationFailed' ||
-                            String(msg).includes('authorize')
-                        ) {
+                        if (code === 'InvalidToken') {
                             purgeInvalidToken(token);
-                            if (expectedId) purgeInvalidToken(expectedId);
                         }
                     }
-
                 }
             }
 
@@ -615,25 +602,6 @@ class APIBase {
                     }
                 } catch {
                     // Unauthenticated on socket
-                }
-            }
-
-            this.is_socket_authorized = socketIsAuthenticated;
-
-            // If the socket is NOT authenticated on Deriv, but the user has an active OAuth session,
-            // the socket was opened before OTP was acquired (e.g. public socket on initial load).
-            // Automatically upgrade to an OTP-authenticated connection immediately.
-            const currentAuthInfo = OAuthTokenExchangeService.getAuthInfo();
-            if (!socketIsAuthenticated && currentAuthInfo?.access_token && !this._is_reauthorizing) {
-                this._is_reauthorizing = true;
-                try {
-                    console.log('[APIBase] Socket is unauthenticated while OAuth token is active. Upgrading to OTP connection...');
-                    await this.init(true);
-                    return;
-                } catch (reauthErr) {
-                    console.warn('[APIBase] OTP connection upgrade notice:', reauthErr);
-                } finally {
-                    this._is_reauthorizing = false;
                 }
             }
 
@@ -675,6 +643,32 @@ class APIBase {
                 } catch (fallbackErr) {
                     console.warn('[APIBase] PKCE session authResult fallback notice:', fallbackErr);
                 }
+            }
+
+            this.is_socket_authorized = socketIsAuthenticated;
+
+            // 5. If the socket is NOT authenticated on Deriv, but the user has an active OAuth session,
+            // attempt a single background OTP upgrade if not recently attempted (60s cooldown)
+            const currentAuthInfo = OAuthTokenExchangeService.getAuthInfo();
+            const now = Date.now();
+            if (
+                !socketIsAuthenticated &&
+                currentAuthInfo?.access_token &&
+                !this._is_reauthorizing &&
+                now - (this._last_otp_upgrade || 0) > 60000
+            ) {
+                this._is_reauthorizing = true;
+                this._last_otp_upgrade = now;
+                console.log('[APIBase] Socket unauthenticated while OAuth token active. Upgrading to OTP connection in background...');
+                setTimeout(async () => {
+                    try {
+                        await this.init(true);
+                    } catch (reauthErr) {
+                        console.warn('[APIBase] OTP connection upgrade notice:', reauthErr);
+                    } finally {
+                        this._is_reauthorizing = false;
+                    }
+                }, 1000);
             }
 
             const balance = authResult?.balance;
@@ -872,12 +866,12 @@ class APIBase {
             // NOT destroy the user's session — they can recover on reconnect.
             const errorCode = (e as any)?.error?.code || (e as any)?.code || '';
             const permanentAuthErrors = ['InvalidToken', 'ExpiredToken', 'InvalidAppID'];
-            if (permanentAuthErrors.includes(errorCode)) {
-                clearAuthData();
+            const hasOAuthSession = Boolean(OAuthTokenExchangeService.getAuthInfo()?.access_token);
+            if (permanentAuthErrors.includes(errorCode) && !hasOAuthSession) {
                 globalObserver.emit('InvalidToken', { context: 'bot', error: e });
             } else {
                 console.warn(
-                    '[APIBase] Authorization failed with transient error, preserving session:',
+                    '[APIBase] Authorization failed with transient or non-fatal error, preserving session:',
                     errorCode || e
                 );
             }
