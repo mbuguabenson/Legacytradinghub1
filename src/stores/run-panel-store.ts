@@ -15,7 +15,12 @@ import { Buy, ProposalOpenContract } from '@deriv/api-types';
 import { localize } from '@deriv-com/translations';
 import RootStore from './root-store';
 import { proposalsReady as proposalsReadyAction } from '@/external/bot-skeleton/services/tradeEngine/trade/state/actions';
-import { setFastExecutionOverride, syncFastExecutionOverride } from '@/external/bot-skeleton/services/tradeEngine/utils/fastMode';
+import {
+    getExecutionSpeedMode,
+    setExecutionSpeedMode,
+    setFastExecutionOverride,
+    syncFastExecutionOverride,
+} from '@/external/bot-skeleton/services/tradeEngine/utils/fastMode';
 
 type TStores = any;
 type TDbot = any;
@@ -49,9 +54,11 @@ export default class RunPanelStore {
             run_id: observable,
             error_type: observable,
             show_bot_stop_message: observable,
+            speed_mode: observable,
             is_every_tick_mode: observable,
             toggleEveryTickMode: action,
             setEveryTickMode: action,
+            setSpeedMode: action,
             is_stop_button_visible: computed,
             is_stop_button_disabled: computed,
             is_clear_stat_disabled: computed,
@@ -125,10 +132,16 @@ export default class RunPanelStore {
         };
 
         const handleSpeedModeRequest = (event: any) => {
-            if (event?.detail && typeof event.detail.isFast === 'boolean') {
-                runInAction(() => {
-                    this.setEveryTickMode(event.detail.isFast);
-                });
+            if (event?.detail) {
+                if (event.detail.mode && ['normal', 'fast', 'ultra'].includes(event.detail.mode)) {
+                    runInAction(() => {
+                        this.setSpeedMode(event.detail.mode);
+                    });
+                } else if (typeof event.detail.isFast === 'boolean') {
+                    runInAction(() => {
+                        this.setEveryTickMode(event.detail.isFast);
+                    });
+                }
             }
         };
 
@@ -151,26 +164,40 @@ export default class RunPanelStore {
     is_sell_requested = false;
     show_bot_stop_message = false;
     is_contract_buying_in_progress = false;
+    speed_mode: 'normal' | 'fast' | 'ultra' = (() => {
+        if (typeof localStorage === 'undefined') return 'normal';
+        const speed = localStorage.getItem('bot_execution_speed');
+        if (speed === '3') return 'ultra';
+        if (speed === '2' || localStorage.getItem('dbot_every_tick_mode') === 'true') return 'fast';
+        return 'normal';
+    })();
     is_every_tick_mode =
-        typeof localStorage !== 'undefined' ? localStorage.getItem('dbot_every_tick_mode') === 'true' : false;
+        typeof localStorage !== 'undefined'
+            ? localStorage.getItem('bot_execution_speed') === '3' ||
+              localStorage.getItem('bot_execution_speed') === '2' ||
+              localStorage.getItem('dbot_every_tick_mode') === 'true'
+            : false;
+
+    setSpeedMode = (mode: 'normal' | 'fast' | 'ultra') => {
+        this.speed_mode = mode;
+        this.is_every_tick_mode = mode !== 'normal';
+        setExecutionSpeedMode(mode);
+    };
 
     setEveryTickMode = (enabled: boolean) => {
-        if (this.is_every_tick_mode === enabled) return;
-        this.is_every_tick_mode = enabled;
-        if (typeof localStorage !== 'undefined') {
-            localStorage.setItem('dbot_every_tick_mode', String(this.is_every_tick_mode));
-            localStorage.setItem('bot_execution_speed', this.is_every_tick_mode ? '2' : '1');
-        }
-        setFastExecutionOverride(this.is_every_tick_mode);
-        if (typeof window !== 'undefined') {
-            window.dispatchEvent(
-                new CustomEvent('dbot_speed_mode_changed', { detail: { isFast: this.is_every_tick_mode } })
-            );
-        }
+        const targetMode = enabled ? 'fast' : 'normal';
+        this.setSpeedMode(targetMode);
     };
 
     toggleEveryTickMode = () => {
-        this.setEveryTickMode(!this.is_every_tick_mode);
+        // Cycle: normal (1) -> fast (2) -> ultra (3) -> normal (1)
+        const nextMode =
+            this.speed_mode === 'normal'
+                ? 'fast'
+                : this.speed_mode === 'fast'
+                ? 'ultra'
+                : 'normal';
+        this.setSpeedMode(nextMode);
     };
 
     run_id = '';
@@ -295,6 +322,7 @@ export default class RunPanelStore {
             this.is_paused = false;
             if (typeof window !== 'undefined') {
                 (window as any).is_bot_paused = false;
+                (window as any).__dbot_stopped = false;
             }
             ui.setPromptHandler(true);
             this.toggleDrawer(true);
@@ -345,6 +373,7 @@ export default class RunPanelStore {
             this.is_paused = false;
             if (typeof window !== 'undefined') {
                 (window as any).is_bot_paused = false;
+                (window as any).__dbot_stopped = false;
             }
             ui.setPromptHandler(true);
             this.toggleDrawer(true);
@@ -372,6 +401,8 @@ export default class RunPanelStore {
             this.is_paused = false;
             if (typeof window !== 'undefined') {
                 (window as any).is_bot_paused = false;
+                (window as any).__dbot_stopped = false;
+                window.dispatchEvent(new CustomEvent('bot_resumed'));
             }
         });
 
@@ -380,32 +411,17 @@ export default class RunPanelStore {
 
             const tradeEngine = this.dbot?.interpreter?.bot?.tradeEngine;
             if (tradeEngine?.store) {
-                // ─── Bug 2 fix: Instant resume ─────────────────────────────────────
-                // The old code called tradeEngine.start() which re-triggers
-                // makeProposals() → waits for proposal stream responses = 5–7s delay.
-                //
-                // Instead, we dispatch proposalsReady() directly.  This advances the
-                // Redux state machine straight to BEFORE_PURCHASE so the engine picks
-                // up the next trade cycle immediately (< 1 second).
-                //
-                // We only fall back to start() if tradeOptions are genuinely absent,
-                // which would mean the engine was never properly initialised.
-                if (tradeEngine.tradeOptions) {
-                    try {
-                        // Dispatch proposalsReady() directly — this advances the Redux
-                        // state machine to BEFORE_PURCHASE instantly, so the next trade
-                        // fires in < 1s instead of waiting 5-7s for proposal API responses.
-                        tradeEngine.store.dispatch(proposalsReadyAction());
-                    } catch {
-                        // Fallback: dispatch via start() if store dispatch fails
+                try {
+                    tradeEngine.store.dispatch(proposalsReadyAction());
+                    tradeEngine.makeDirectPurchaseDecision?.();
+                } catch {
+                    if (tradeEngine.tradeOptions) {
                         tradeEngine.start(tradeEngine.tradeOptions);
                     }
-                    return;
                 }
                 return;
             }
 
-            // If the interpreter loop is active without a trade engine, emitting bot.resume is sufficient.
             if (this.dbot?.interpreter) {
                 return;
             }
@@ -449,6 +465,12 @@ export default class RunPanelStore {
         const { scanner } = this.root_store;
         const dollarflipper = this.root_store?.dollarflipper || (scanner as any)?.dollarflipper;
 
+        if (typeof window !== 'undefined') {
+            (window as any).__dbot_stopped = true;
+            (window as any).is_bot_paused = false;
+            window.dispatchEvent(new CustomEvent('dbot_stopped'));
+        }
+
         if (this.dbot?.stopBot) {
             this.dbot.stopBot().catch(() => {});
         }
@@ -464,9 +486,7 @@ export default class RunPanelStore {
         this.is_contract_buying_in_progress = false;
         this.is_sell_requested = false;
         this.is_paused = false;
-        if (typeof window !== 'undefined') {
-            (window as any).is_bot_paused = false;
-        }
+
         observer.emit('bot.stop');
 
         // Halt automations & forget sequences when user explicitly stops the bot

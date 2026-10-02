@@ -33,6 +33,8 @@ export interface DTraderIframeContainerProps {
     showToolbar?: boolean;
     /** Custom CSS class name */
     className?: string;
+    /** Whether to crop the redundant embedded DTrader header (56px) to maximize screen space */
+    cropHeader?: boolean;
     /** Callback when user clicks connect/sign in button in fallback state */
     onLoginClick?: () => void;
     /** Callback when the iframe finishes loading */
@@ -54,6 +56,7 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
     isMobileApp = false,
     height = 'calc(100vh - 56px)',
     showToolbar = false,
+    cropHeader = true,
     className,
     onLoginClick,
     onIframeLoaded,
@@ -191,6 +194,32 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
         };
     }, [currentLoginId, currentToken, resolveToken]);
 
+    // Listen for login and session signals from the embedded DTrader iframe
+    useEffect(() => {
+        const handleIframeMessage = (e: MessageEvent) => {
+            if (!e.data || (typeof e.data !== 'object' && typeof e.data !== 'string')) return;
+            let data = e.data;
+            if (typeof data === 'string') {
+                try {
+                    data = JSON.parse(data);
+                } catch {
+                    return;
+                }
+            }
+            const payload = data.payload || data;
+            const token = payload.token1 || payload.token || payload.access_token || data.token1 || data.token;
+            const loginid = payload.acct1 || payload.loginid || payload.account_id || data.acct1 || data.loginid;
+
+            if (token && !isInvalidBearerToken(token) && loginid && typeof loginid === 'string' && !loginid.includes('100000')) {
+                setCurrentToken(token);
+                setCurrentLoginId(loginid);
+            }
+        };
+
+        window.addEventListener('message', handleIframeMessage);
+        return () => window.removeEventListener('message', handleIframeMessage);
+    }, []);
+
     // Actively prefetch authenticated OTP WebSocket URL for DTrader iframe
     useEffect(() => {
         let isCancelled = false;
@@ -222,9 +251,19 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
         try {
             const url = new URL(baseUrl);
 
-            if (currentToken && !isInvalidBearerToken(currentToken)) {
-                const acc = currentLoginId || 'CR100000';
-                const cur = (acc.startsWith('VR') || acc.startsWith('DOT')) ? 'USD' : (localStorage.getItem('client.currency') || 'USD');
+            const hasValidAccount =
+                Boolean(currentLoginId &&
+                !currentLoginId.includes('100000') &&
+                (currentLoginId.startsWith('CR') ||
+                    currentLoginId.startsWith('VR') ||
+                    currentLoginId.startsWith('MF') ||
+                    currentLoginId.startsWith('MX')));
+
+            const hasValidToken = Boolean(currentToken && !isInvalidBearerToken(currentToken));
+
+            if (hasValidToken && hasValidAccount) {
+                const acc = currentLoginId;
+                const cur = acc.startsWith('VR') ? 'USD' : (localStorage.getItem('client.currency') || 'USD');
 
                 // Supply all standard, OAuth, and legacy parameter names to ensure
                 // seamless authentication regardless of how child stores read them
@@ -251,7 +290,7 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
                         if (id !== acc && tok && !isInvalidBearerToken(tok)) {
                             url.searchParams.set(`acct${idx}`, id);
                             url.searchParams.set(`token${idx}`, tok);
-                            url.searchParams.set(`cur${idx}`, (id.startsWith('VR') || id.startsWith('DOT')) ? 'USD' : 'USD');
+                            url.searchParams.set(`cur${idx}`, id.startsWith('VR') ? 'USD' : 'USD');
                             idx++;
                             if (idx > 5) break;
                         }
@@ -356,7 +395,10 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
             className={classNames(
                 'dtrader-container',
                 `dtrader-container--${currentTheme}`,
-                { 'dtrader-container--fullscreen': isFullscreen },
+                {
+                    'dtrader-container--fullscreen': isFullscreen,
+                    'dtrader-container--cropped-header': cropHeader,
+                },
                 className
             )}
             style={{ height }}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { observer } from 'mobx-react-lite';
 import { generateOAuthURL } from '@/components/shared';
@@ -73,41 +73,117 @@ const CurrencyDropdown = () => {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Header Speed Toggle (Desktop: ⚡ Fast Switch | Mobile: ⚡ Icon Alone)
+// Header Speed Dropdown (Minimal: Normal - Red, Fast - Green, Ultra - Orange)
 // ─────────────────────────────────────────────────────────────────────────────
-const HeaderSpeedToggle = observer(() => {
+const HeaderSpeedDropdown = observer(() => {
     const { run_panel } = useStore() ?? {};
     const { isDesktop } = useDevice();
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isOpen]);
 
     if (!run_panel) return null;
 
-    const isActive = run_panel.is_every_tick_mode;
+    const mode = run_panel.speed_mode || (run_panel.is_every_tick_mode ? 'fast' : 'normal');
+
+    const speeds = [
+        {
+            id: 'normal' as const,
+            name: 'Normal',
+            color: '#ef4444',
+            icon: '⏱️',
+        },
+        {
+            id: 'fast' as const,
+            name: 'Fast',
+            color: '#10b981',
+            icon: '⚡',
+        },
+        {
+            id: 'ultra' as const,
+            name: 'Ultra',
+            color: '#f97316',
+            icon: '🔥',
+        },
+    ];
+
+    const currentSpeed = speeds.find(s => s.id === mode) || speeds[0];
+
+    const handleSelect = (selectedId: 'normal' | 'fast' | 'ultra') => {
+        run_panel.setSpeedMode(selectedId);
+        setIsOpen(false);
+    };
 
     return (
-        <button
-            type='button'
-            id='header-speed-toggle'
-            className={clsx('app-header__speed-toggle', {
-                'app-header__speed-toggle--active': isActive,
-                'app-header__speed-toggle--mobile': !isDesktop,
-            })}
-            title={
-                isActive
-                    ? 'FAST MODE ON — Instant purchase cycle, skips proposal negotiation (max speed)'
-                    : 'NORMAL MODE — Proposal-based tick-paced trading (default). Click to enable Fast Mode.'
-            }
-            onClick={() => run_panel.toggleEveryTickMode()}
-        >
-            <span className='speed-toggle__icon'>⚡</span>
-            {isDesktop && (
-                <>
-            <span className='speed-toggle__text'>{isActive ? 'FAST' : 'Normal'}</span>
-                    <div className='speed-toggle__track'>
-                        <div className='speed-toggle__thumb' />
-                    </div>
-                </>
+        <div className='speed-dropdown-wrapper' ref={dropdownRef}>
+            <button
+                type='button'
+                id='header-speed-dropdown-btn'
+                className={clsx('app-header__speed-btn', `app-header__speed-btn--${mode}`, {
+                    'app-header__speed-btn--open': isOpen,
+                    'app-header__speed-btn--mobile': !isDesktop,
+                })}
+                onClick={() => setIsOpen(!isOpen)}
+                aria-haspopup='true'
+                aria-expanded={isOpen}
+                title={`Execution Speed: ${currentSpeed.name}`}
+            >
+                <span className='speed-btn__icon'>{currentSpeed.icon}</span>
+                {isDesktop && <span className='speed-btn__text'>{currentSpeed.name}</span>}
+                <svg
+                    className={clsx('speed-btn__chevron', { 'speed-btn__chevron--open': isOpen })}
+                    width='10'
+                    height='10'
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='currentColor'
+                    strokeWidth='2.5'
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                >
+                    <path d='M6 9l6 6 6-6' />
+                </svg>
+            </button>
+
+            {isOpen && (
+                <div className='speed-dropdown-menu speed-dropdown-menu--minimal'>
+                    {speeds.map(s => {
+                        const isSelected = s.id === mode;
+                        return (
+                            <button
+                                key={s.id}
+                                type='button'
+                                className={clsx('speed-dropdown-item', `speed-dropdown-item--${s.id}`, {
+                                    'speed-dropdown-item--active': isSelected,
+                                })}
+                                onClick={() => handleSelect(s.id)}
+                            >
+                                <span className='speed-dropdown-item__icon'>{s.icon}</span>
+                                <span className='speed-dropdown-item__name'>{s.name}</span>
+                                {isSelected && (
+                                    <svg className='speed-dropdown-item__check-svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke={s.color} strokeWidth='3' strokeLinecap='round' strokeLinejoin='round'>
+                                        <polyline points='20 6 9 17 4 12' />
+                                    </svg>
+                                )}
+                            </button>
+                        );
+                    })}
+                </div>
             )}
-        </button>
+        </div>
     );
 });
 
@@ -352,7 +428,7 @@ const AppHeader = observer(() => {
                 </Wrapper>
                 <Wrapper variant='right'>
                     <div style={{ display: 'flex', alignItems: 'center', gap: isDesktop ? '8px' : '4px', paddingRight: isDesktop ? '1.6rem' : '0.4rem' }}>
-                        <HeaderSpeedToggle />
+                        <HeaderSpeedDropdown />
                         {!isDesktop && (
                             <button
                                 type='button'

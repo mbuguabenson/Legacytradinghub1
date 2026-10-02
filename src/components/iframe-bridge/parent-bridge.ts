@@ -207,15 +207,21 @@ export class ParentBridgeClient {
             const effectiveOtpUrl = otpUrlParam || this.cachedOtpUrl || '';
 
             const hasToken =
-                Boolean(tokenToUse && tokenToUse !== 'null' && tokenToUse !== 'undefined' && tokenToUse !== 'a1-guest' && tokenToUse !== 'dummy_token');
+                Boolean(tokenToUse && !isInvalidBearerToken(tokenToUse));
+
+            // CRITICAL FIX: If there is no real token or no valid account (or fake DOT100000/CR100000), NEVER send auth payloads!
+            // Sending fake/empty auth payloads breaks DTrader's WebSocket and triggers "Proposal error" on every trade!
+            if (!hasToken || !loginid || loginid.includes('100000')) {
+                return;
+            }
+
             const authMode = hasToken ? 'derivws_otp' : 'none';
-            const effectiveToken = hasToken ? tokenToUse : '';
+            const effectiveToken = tokenToUse;
 
             const accountsList = getAccountsList();
             const isDemo =
                 loginid.startsWith('VR') ||
                 loginid.startsWith('VRT') ||
-                loginid.startsWith('DOT') ||
                 loginid.startsWith('DEM');
 
             const accounts =
@@ -224,7 +230,6 @@ export class ParentBridgeClient {
                           account_id: id,
                           account_type: (id.startsWith('VR') ||
                           id.startsWith('VRT') ||
-                          id.startsWith('DOT') ||
                           id.startsWith('DEM')
                               ? 'demo'
                               : 'real') as 'demo' | 'real',
@@ -234,7 +239,7 @@ export class ParentBridgeClient {
                       }))
                     : [
                           {
-                              account_id: loginid || 'DOT100000',
+                              account_id: loginid,
                               account_type: isDemo ? ('demo' as const) : ('real' as const),
                               currency: currency || 'USD',
                               balance: '10000.00',
@@ -242,7 +247,7 @@ export class ParentBridgeClient {
                           },
                       ];
 
-            const activeAccId = loginid || accounts[0].account_id;
+            const activeAccId = loginid;
             const profileCountry =
                 localStorage.getItem('residence') ||
                 localStorage.getItem('country') ||
@@ -537,6 +542,103 @@ export class ParentBridgeClient {
         }
     }
 
+    public ingestSessionFromIframe(data: any): boolean {
+        if (!data || typeof data !== 'object') return false;
+
+        const payload = data.payload || data;
+        const incomingToken =
+            payload.token1 ||
+            payload.token ||
+            payload.access_token ||
+            payload.authToken ||
+            payload.auth?.access_token ||
+            data.token1 ||
+            data.token ||
+            data.access_token;
+
+        const incomingLoginId =
+            payload.acct1 ||
+            payload.loginid ||
+            payload.loginId ||
+            payload.account_id ||
+            payload.account ||
+            payload.activeAccountId ||
+            data.acct1 ||
+            data.loginid ||
+            data.loginId ||
+            data.account_id;
+
+        if (
+            incomingToken &&
+            !isInvalidBearerToken(incomingToken) &&
+            incomingLoginId &&
+            typeof incomingLoginId === 'string' &&
+            !incomingLoginId.includes('100000')
+        ) {
+            console.log('[ParentBridge] Ingested authenticated session from DTrader:', incomingLoginId);
+
+            localStorage.setItem('active_loginid', incomingLoginId);
+            localStorage.setItem('client.loginid', incomingLoginId);
+            localStorage.setItem('token1', incomingToken);
+            localStorage.setItem('acct1', incomingLoginId);
+            localStorage.setItem('token', incomingToken);
+            localStorage.setItem('authToken', incomingToken);
+            localStorage.setItem('active_token', incomingToken);
+            localStorage.setItem('legacy_dtrader_token', incomingToken);
+
+            const accounts = payload.accounts || payload.accountsList || payload['client.accounts'] || data.accounts;
+            if (accounts && typeof accounts === 'object') {
+                if (typeof accounts === 'string') {
+                    localStorage.setItem('client.accounts', accounts);
+                } else if (Array.isArray(accounts)) {
+                    const accMap: Record<string, string> = {};
+                    accounts.forEach((acc: any) => {
+                        if (acc.account_id && acc.token) accMap[acc.account_id] = acc.token;
+                    });
+                    if (Object.keys(accMap).length > 0) {
+                        localStorage.setItem('accountsList', JSON.stringify(accMap));
+                    }
+                } else {
+                    localStorage.setItem('accountsList', JSON.stringify(accounts));
+                }
+            } else {
+                const currentList = getAccountsList();
+                currentList[incomingLoginId] = incomingToken;
+                localStorage.setItem('accountsList', JSON.stringify(currentList));
+            }
+
+            const currency = payload.currency || payload.cur1 || 'USD';
+            localStorage.setItem('client.currency', currency);
+            const isDemo = incomingLoginId.startsWith('VR') || incomingLoginId.startsWith('VRT');
+            localStorage.setItem('account_type', isDemo ? 'demo' : 'real');
+
+            sessionManager.setSession({
+                loginid: incomingLoginId,
+                token: incomingToken,
+                currency,
+                appId: getAppId() || '121856',
+            });
+
+            window.dispatchEvent(
+                new CustomEvent('account_switched', {
+                    detail: { loginid: incomingLoginId, token: incomingToken },
+                })
+            );
+            window.dispatchEvent(new Event('storage'));
+
+            import('@/external/bot-skeleton')
+                .then(({ api_base }) => {
+                    api_base.init(true);
+                })
+                .catch(err => {
+                    console.error('[ParentBridge] Failed to initialize api_base:', err);
+                });
+
+            return true;
+        }
+        return false;
+    }
+
     private handleMessage = (event: MessageEvent) => {
         // Prevent postMessage feedback loops from window itself
         if (!event.source || event.source === window) {
@@ -567,7 +669,10 @@ export class ParentBridgeClient {
             }
         }
 
-        // On ANY message from the iframe, reply with auth payload & auth init
+        // 1. Ingest session from DTrader if it sent auth credentials
+        this.ingestSessionFromIframe(parsedData);
+
+        // On message from the iframe, only reply with auth if we have a real session
         if (event.source && typeof (event.source as Window).postMessage === 'function') {
             const msgType = parsedData?.type || parsedData?.action || '';
             const session = sessionManager.getSession();
@@ -575,12 +680,14 @@ export class ParentBridgeClient {
                 session?.loginid ||
                 localStorage.getItem('active_loginid') ||
                 localStorage.getItem('client.loginid') ||
-                'DOT100000';
-            const syncToken = getActiveToken() || '';
+                '';
+            const syncToken = getActiveToken(loginid) || getActiveToken() || '';
             const currency = session?.currency || localStorage.getItem('client.currency') || 'USD';
             const appIdStr = String(session?.appId || getAppId() || '121856');
 
-            this.sendAuthPayloadToWindow(event.source as Window, syncToken, loginid, currency, appIdStr);
+            if (syncToken && loginid && !loginid.includes('100000')) {
+                this.sendAuthPayloadToWindow(event.source as Window, syncToken, loginid, currency, appIdStr);
+            }
 
             if (msgType === 'REQUEST_TOKEN') {
                 // Iframe is explicitly asking for an OTT — fetch and relay it
@@ -603,7 +710,7 @@ export class ParentBridgeClient {
                 this.diagnostics.lastError = parsedData?.error?.message || 'Bridge Auth Failed';
                 this.stateMachine.transitionTo(BridgeState.FAILED);
                 return;
-            } else {
+            } else if (syncToken && loginid && !loginid.includes('100000')) {
                 this.sendAuthInit();
             }
         }
@@ -654,24 +761,23 @@ export class ParentBridgeClient {
         const session = sessionManager.getSession();
         const loginid =
             session?.loginid || localStorage.getItem('active_loginid') || localStorage.getItem('client.loginid') || '';
-        const token = session?.token || getActiveToken() || localStorage.getItem('token') || '';
+        const token = session?.token || getActiveToken(loginid) || getActiveToken() || localStorage.getItem('token') || '';
         const currency = session?.currency || localStorage.getItem('client.currency') || 'USD';
         const appIdStr = String(session?.appId || getAppId() || '121856');
 
-        if (this.iframeWindow) {
+        if (this.iframeWindow && token && loginid && !loginid.includes('100000')) {
             this.sendAuthPayloadToWindow(this.iframeWindow, token, loginid, currency, appIdStr);
-        }
+            this.sendAuthInit();
+            this.stateMachine.transitionTo(BridgeState.AUTHENTICATING);
+            this.sendMessage(BridgeEvent.AUTH_START, { timestamp: Date.now() });
 
-        this.sendAuthInit();
-        this.stateMachine.transitionTo(BridgeState.AUTHENTICATING);
-        this.sendMessage(BridgeEvent.AUTH_START, { timestamp: Date.now() });
-
-        this.safeTimeout(() => {
-            this.stateMachine.transitionTo(BridgeState.AUTHENTICATED);
             this.safeTimeout(() => {
-                this.stateMachine.transitionTo(BridgeState.CONNECTED);
-            }, 100);
-        }, 300);
+                this.stateMachine.transitionTo(BridgeState.AUTHENTICATED);
+                this.safeTimeout(() => {
+                    this.stateMachine.transitionTo(BridgeState.CONNECTED);
+                }, 100);
+            }, 300);
+        }
     };
 
     private handleSessionChange = (session: any) => {

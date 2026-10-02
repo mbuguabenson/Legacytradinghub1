@@ -65,62 +65,19 @@ const ErrorComponentWrapper = observer(() => {
 });
 
 const MILESTONES = [
-    { id: 1, label: 'CONNECTION', threshold: 18, status: 'Establishing secure connection...', sub: 'Connecting to Deriv WebSocket Gateway...' },
-    { id: 2, label: 'MARKET DATA', threshold: 40, status: 'Streaming live market data...', sub: 'Synchronizing Forex & Volatility Ticks...' },
-    { id: 3, label: 'AI ENGINE', threshold: 64, status: 'Initializing AI quantitative models...', sub: 'Calibrating Neural Prediction Engine...' },
-    { id: 4, label: 'TRADING BOTS', threshold: 85, status: 'Mounting automated strategy bots...', sub: 'Configuring Risk Management Blocks...' },
-    { id: 5, label: 'FINAL SETUP', threshold: 100, status: 'Finalizing quantum environment...', sub: 'Trading Platform Ready' },
+    { id: 1, phase: '01/05', label: 'QUANTUM GATEWAY', threshold: 18, status: 'Connecting to Deriv WebSocket Gateway...', sub: 'Establishing 256-bit encrypted enclave session' },
+    { id: 2, phase: '02/05', label: 'MARKET SYNC', threshold: 40, status: 'Synchronizing Real-Time Market Ticker...', sub: 'Streaming Forex & Synthetic Volatility index feeds' },
+    { id: 3, phase: '03/05', label: 'NEURAL MODELS', threshold: 65, status: 'Calibrating AI Quantitative Models...', sub: 'Pre-caching neural strategy predictors' },
+    { id: 4, phase: '04/05', label: 'STRATEGY NODES', threshold: 85, status: 'Arming Automated Strategy Runners...', sub: 'Zero-latency direct execution pipeline active' },
+    { id: 5, phase: '05/05', label: 'SYSTEM READY', threshold: 100, status: 'Platform Initialized • System Armed', sub: 'Welcome to Legacy Trading Hub' },
 ];
 
-const FEATURE_CARDS = [
-    {
-        id: 'free-bots',
-        name: 'Free Bots',
-        icon: Bot,
-        color: '#00f5ff',
-        bg: 'rgba(0, 245, 255, 0.14)',
-        borderColor: 'rgba(0, 245, 255, 0.28)',
-    },
-    {
-        id: 'ai-bots',
-        name: 'AI Bots',
-        icon: Cpu,
-        color: '#d946ef',
-        bg: 'rgba(217, 70, 239, 0.14)',
-        borderColor: 'rgba(217, 70, 239, 0.28)',
-    },
-    {
-        id: 'analysis-tool',
-        name: 'Analysis Tool',
-        icon: BarChart3,
-        color: '#10b981',
-        bg: 'rgba(16, 185, 129, 0.14)',
-        borderColor: 'rgba(16, 185, 129, 0.28)',
-    },
-    {
-        id: 'smart-analysis',
-        name: 'Smart Analysis',
-        icon: Sparkles,
-        color: '#f59e0b',
-        bg: 'rgba(245, 158, 11, 0.14)',
-        borderColor: 'rgba(245, 158, 11, 0.28)',
-    },
-    {
-        id: 'copy-trading',
-        name: 'Copy Trading',
-        icon: Copy,
-        color: '#38bdf8',
-        bg: 'rgba(56, 189, 248, 0.14)',
-        borderColor: 'rgba(56, 189, 248, 0.28)',
-    },
-    {
-        id: 'signals',
-        name: 'Signals',
-        icon: Radio,
-        color: '#34d399',
-        bg: 'rgba(52, 211, 153, 0.14)',
-        borderColor: 'rgba(52, 211, 153, 0.28)',
-    },
+const CAPABILITY_PILLS = [
+    { id: 'speed', label: 'Ultra Speed', icon: Zap, color: '#ff2e63', minProgress: 15 },
+    { id: 'ai', label: 'Neural AI', icon: Cpu, color: '#00f5ff', minProgress: 35 },
+    { id: 'bots', label: 'Algo Bots', icon: Bot, color: '#38bdf8', minProgress: 55 },
+    { id: 'charts', label: 'Quant Depth', icon: BarChart3, color: '#10b981', minProgress: 75 },
+    { id: 'shield', label: 'Risk Guard', icon: ShieldCheck, color: '#f59e0b', minProgress: 90 },
 ];
 
 const WelcomeScreen = ({
@@ -181,106 +138,63 @@ const WelcomeScreen = ({
             {/* Dynamic Animated Forex Candlestick & Technical Charts Background */}
             <ForexChartsBackground />
 
-            {/* Central Modern Institutional Card matching reference */}
+            {/* Central Modern Institutional Card */}
             <div className='welcome-screen__card'>
                 <div className='ws-card-glow-edge' aria-hidden='true' />
 
-                {/* Top Brand Header */}
-                <div className='ws-brand-header'>
-                    <div className='ws-brand-emblem'>
+                {/* Hero Quantum Holographic Emblem */}
+                <div className='ws-gyro-emblem-wrap'>
+                    <div className='ws-gyro-ring ws-gyro-ring--outer'>
+                        <svg viewBox='0 0 100 100' className='ws-gyro-svg'>
+                            <circle cx='50' cy='50' r='46' stroke='currentColor' strokeWidth='1.4' strokeDasharray='5 7' fill='none' />
+                        </svg>
+                    </div>
+                    <div className='ws-gyro-ring ws-gyro-ring--inner'>
+                        <svg viewBox='0 0 100 100' className='ws-gyro-svg'>
+                            <circle cx='50' cy='50' r='37' stroke='currentColor' strokeWidth='1.6' strokeDasharray='20 10 5 10' fill='none' />
+                        </svg>
+                    </div>
+                    <div className='ws-gyro-core'>
+                        <div className='ws-gyro-glow-halo' />
                         <img
                             src='/logo_icon.svg'
                             alt={brandLabel || 'Legacy Trading Hub'}
-                            className='ws-brand-logo'
+                            className='ws-gyro-logo'
                             onError={(e: any) => {
                                 e.currentTarget.style.display = 'none';
                             }}
                         />
                     </div>
-                    <div className='ws-brand-text-block'>
-                        <div className='ws-brand-title'>
-                            <span className='brand-white'>{leftBrand}</span>{' '}
-                            <span className='brand-gold-cyan'>{rightBrand}</span>
-                        </div>
-                    </div>
                 </div>
 
-                {/* Welcome Heading & Subtitle */}
-                <div className='ws-welcome-heading'>
-                    Welcome to <span className='brand-cyan'>{brandLabel || 'Legacy Trading Hub'}</span>
+                {/* Institutional Brand Title */}
+                <div className='ws-brand-title'>
+                    <span className='brand-white'>{leftBrand}</span>{' '}
+                    <span className='brand-gold-cyan'>{rightBrand}</span>
                 </div>
+
+                {/* Institutional Badge */}
+                <div className='ws-inst-badge'>
+                    <span className='ws-badge-dot' />
+                    <span>INSTITUTIONAL QUANTUM TERMINAL</span>
+                </div>
+
+                {/* Subtitle */}
                 <div className='ws-welcome-sub'>
-                    Automated Precision Trading System
+                    Next-Generation Automated Trading & Precision Intelligence
                 </div>
 
-                {/* 5-Step Milestone Stepper */}
-                <div className='ws-stepper'>
-                    <div className='ws-stepper-track-bg'>
-                        <div
-                            className='ws-stepper-track-fill'
-                            style={{
-                                width: `${Math.min(100, Math.max(0, (roundedProgress / 100) * 100))}%`,
-                            }}
-                        />
+                {/* Dynamic Telemetry Stage Box */}
+                <div className='ws-telemetry-box'>
+                    <div className='ws-telemetry-header'>
+                        <span className='ws-telemetry-phase'>PHASE {activeMilestone.phase}</span>
+                        <span className='ws-telemetry-label'>{activeMilestone.label}</span>
                     </div>
-                    {MILESTONES.map((step, idx) => {
-                        const isDone = roundedProgress >= step.threshold;
-                        const isActive = !isDone && (idx === 0 || roundedProgress >= MILESTONES[idx - 1].threshold);
-
-                        return (
-                            <div
-                                key={step.id}
-                                className={`ws-step-node ${isDone ? 'done' : ''} ${isActive ? 'active' : ''}`}
-                            >
-                                <div className='ws-step-circle'>
-                                    {isDone ? (
-                                        <Check size={11} strokeWidth={3} className='ws-check-icon' />
-                                    ) : (
-                                        <span className='ws-step-number'>{step.id}</span>
-                                    )}
-                                </div>
-                                <span className='ws-step-label'>{step.label}</span>
-                            </div>
-                        );
-                    })}
+                    <div className='ws-telemetry-status'>{activeMilestone.status}</div>
+                    <div className='ws-telemetry-sub'>{activeMilestone.sub}</div>
                 </div>
 
-                {/* 6 Modern Feature Cards (3x2 Grid) */}
-                <div className='ws-cards-grid'>
-                    {FEATURE_CARDS.map((card, idx) => {
-                        const Icon = card.icon;
-                        const isCardLit = roundedProgress >= (idx + 1) * 15;
-
-                        return (
-                            <div
-                                key={card.id}
-                                className={`ws-feature-card ${isCardLit ? 'lit' : ''}`}
-                                style={{
-                                    ['--card-accent' as any]: card.color,
-                                    ['--card-bg' as any]: card.bg,
-                                    ['--card-border' as any]: card.borderColor,
-                                }}
-                            >
-                                <div className='ws-card-icon-bubble'>
-                                    <Icon size={18} style={{ color: card.color }} />
-                                </div>
-                                <span className='ws-card-name'>{card.name}</span>
-                            </div>
-                        );
-                    })}
-                </div>
-
-                {/* Status Readout */}
-                <div className='ws-status-line'>
-                    <span className='ws-status-main'>
-                        {activeMilestone.status}
-                    </span>
-                    <span className='ws-status-sub'>
-                        {activeMilestone.sub}
-                    </span>
-                </div>
-
-                {/* Precision Progress Bar & Percentage */}
+                {/* Precision Laser Progress Bar */}
                 <div className='ws-progress-row'>
                     <div className='ws-progress-track'>
                         <div
@@ -290,24 +204,47 @@ const WelcomeScreen = ({
                             <span className='ws-progress-photon' />
                         </div>
                     </div>
-                    <span className='ws-progress-percent'>{roundedProgress}%</span>
+                    <div className='ws-progress-val'>
+                        <span className='ws-progress-percent'>{roundedProgress}</span>
+                        <span className='ws-progress-unit'>%</span>
+                    </div>
                 </div>
 
-                {/* Card Footer Copyright */}
-                <div className='ws-footer-text'>
-                    © 2026 {brandLabel || 'Legacy Trading Hub'}. Powered by Deriv. All rights reserved.
+                {/* Streamlined Capability Pill Ribbon */}
+                <div className='ws-pills-ribbon'>
+                    {CAPABILITY_PILLS.map(pill => {
+                        const Icon = pill.icon;
+                        const isLit = roundedProgress >= pill.minProgress;
+                        return (
+                            <div
+                                key={pill.id}
+                                className={`ws-cap-pill ${isLit ? 'lit' : ''}`}
+                                style={{
+                                    ['--pill-accent' as any]: pill.color,
+                                }}
+                            >
+                                <Icon size={12} className='ws-pill-icon' />
+                                <span>{pill.label}</span>
+                            </div>
+                        );
+                    })}
                 </div>
 
-                {/* Skip / Enter platform button */}
-                <button
-                    type='button'
-                    className='ws-enter-btn'
-                    onClick={handleSkip}
-                    title='Enter platform immediately'
-                >
-                    <span>Enter Platform</span>
-                    <ArrowRight size={12} />
-                </button>
+                {/* Footer Controls & Copyright */}
+                <div className='ws-card-footer'>
+                    <div className='ws-footer-text'>
+                        © 2026 {brandLabel || 'Legacy Trading Hub'} • Powered by Deriv
+                    </div>
+                    <button
+                        type='button'
+                        className='ws-enter-btn'
+                        onClick={handleSkip}
+                        title='Enter platform immediately'
+                    >
+                        <span>Enter Platform</span>
+                        <ArrowRight size={13} className='ws-arrow' />
+                    </button>
+                </div>
             </div>
         </div>
     );

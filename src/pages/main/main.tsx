@@ -788,7 +788,7 @@ const AppWrapper = observer(() => {
                                 right: '1.6rem',
                                 width: '35.8rem',
                                 height: '5rem',
-                                zIndex: 1100,
+                                zIndex: 990,
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',

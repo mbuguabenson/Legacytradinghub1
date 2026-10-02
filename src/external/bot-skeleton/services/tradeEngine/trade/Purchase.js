@@ -59,11 +59,16 @@ export default Engine =>
             }
 
             // Prevent duplicate parallel purchases or purchases when stopped
-            if (this.is_contract_buying_in_progress || this.$scope?.stopped) {
+            if (
+                this.is_contract_buying_in_progress ||
+                this.$scope?.stopped ||
+                (typeof window !== 'undefined' && window.__dbot_stopped) ||
+                !api_base.is_running
+            ) {
                 return Promise.resolve();
             }
 
-            // If paused, wait for resume before proceeding with purchase
+            // If paused, wait for resume or immediate abort on stop
             if (typeof window !== 'undefined' && window.is_bot_paused) {
                 await new Promise(resolve => {
                     let resolved = false;
@@ -71,14 +76,27 @@ export default Engine =>
                         if (resolved) return;
                         resolved = true;
                         globalObserver.unregister('bot.resume', onResume);
+                        globalObserver.unregister('bot.stop', onStop);
+                        resolve();
+                    };
+                    const onStop = () => {
+                        if (resolved) return;
+                        resolved = true;
+                        globalObserver.unregister('bot.resume', onResume);
+                        globalObserver.unregister('bot.stop', onStop);
                         resolve();
                     };
                     globalObserver.register('bot.resume', onResume);
+                    globalObserver.register('bot.stop', onStop);
                     if (!window.is_bot_paused) onResume();
                 });
-                if (this.$scope?.stopped) {
+                if (this.$scope?.stopped || (typeof window !== 'undefined' && window.__dbot_stopped) || !api_base.is_running) {
                     return Promise.resolve();
                 }
+            }
+
+            if (this.$scope?.stopped || (typeof window !== 'undefined' && window.__dbot_stopped) || !api_base.is_running) {
+                return Promise.resolve();
             }
 
             this.is_contract_buying_in_progress = true;

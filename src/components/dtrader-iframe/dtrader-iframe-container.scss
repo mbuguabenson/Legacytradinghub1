@@ -4,7 +4,7 @@
 
 .dtrader-container {
     width: 100%;
-    min-height: 700px;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     position: relative;
@@ -253,6 +253,27 @@
 
         &--visible {
             opacity: 1;
+        }
+    }
+
+    /* Crop Redundant DTrader Header on mobile only */
+    &--cropped-header {
+        @media (max-width: 926px) {
+            .dtrader-container__stage {
+                overflow: hidden;
+            }
+
+            .dtrader-container__iframe {
+                margin-top: -56px;
+                height: calc(100% + 56px);
+            }
+        }
+
+        @media (min-width: 927px) {
+            .dtrader-container__iframe {
+                margin-top: 0;
+                height: 100%;
+            }
         }
     }
 

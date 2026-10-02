@@ -4,7 +4,7 @@ import { getLocalizedErrorMessage } from '@/constants/backend-error-messages';
 import { createError } from '../../../utils/error';
 import { observer as globalObserver } from '../../../utils/observer';
 import { api_base } from '../../api/api-base';
-import { isFastModeActive, syncFastExecutionOverride } from '../utils/fastMode';
+import { isFastModeActive, isUltraModeActive, syncFastExecutionOverride } from '../utils/fastMode';
 import { checkBlocksForProposalRequest, doUntilDone } from '../utils/helpers';
 import { expectInitArg } from '../utils/sanitize';
 import { proposalsReady, start } from './state/actions';
@@ -18,11 +18,14 @@ import Sell from './Sell';
 import Ticks from './Ticks';
 import Total from './Total';
 
-export { isFastModeActive } from '../utils/fastMode';
+export { isFastModeActive, isUltraModeActive } from '../utils/fastMode';
 
 const watchBefore = store => {
+    if (typeof window !== 'undefined' && (window.__dbot_stopped || !api_base.is_running)) {
+        return Promise.resolve(false);
+    }
     const currentState = store.getState();
-    if (currentState.scope === constants.DURING_PURCHASE) {
+    if (currentState.scope === constants.DURING_PURCHASE || currentState.scope === constants.STOP) {
         return Promise.resolve(false);
     }
 
@@ -33,14 +36,23 @@ const watchBefore = store => {
                 if (resolved) return;
                 resolved = true;
                 globalObserver.unregister('bot.resume', onResume);
+                globalObserver.unregister('bot.stop', onStop);
                 const state = store.getState();
-                if (state.scope === constants.STOP) {
+                if (state.scope === constants.STOP || (typeof window !== 'undefined' && window.__dbot_stopped) || !api_base.is_running) {
                     resolve(false);
                     return;
                 }
                 resolve(watchBefore(store));
             };
+            const onStop = () => {
+                if (resolved) return;
+                resolved = true;
+                globalObserver.unregister('bot.resume', onResume);
+                globalObserver.unregister('bot.stop', onStop);
+                resolve(false);
+            };
             globalObserver.register('bot.resume', onResume);
+            globalObserver.register('bot.stop', onStop);
             if (!window.is_bot_paused) onResume();
         });
     }
@@ -59,14 +71,14 @@ const watchBefore = store => {
         stopScope: constants.DURING_PURCHASE,
         passScope: constants.BEFORE_PURCHASE,
         passFlag: 'proposalsReady',
-        allowImmediate: false,
+        allowImmediate: true,
     });
 };
 
 const watchDuring = store =>
     new Promise(resolve => {
         const currentState = store.getState();
-        if (currentState.scope === constants.STOP) {
+        if (currentState.scope === constants.STOP || (typeof window !== 'undefined' && window.__dbot_stopped) || !api_base.is_running) {
             resolve(false);
             return;
         }
@@ -89,7 +101,7 @@ const watchDuring = store =>
             if (isResolved) return;
             const newState = store.getState();
 
-            if (newState.scope === constants.STOP) {
+            if (newState.scope === constants.STOP || (typeof window !== 'undefined' && window.__dbot_stopped) || !api_base.is_running) {
                 isResolved = true;
                 unsubscribe();
                 window.removeEventListener('dbot_speed_mode_changed', onSpeedChange);
@@ -155,8 +167,11 @@ const watchScope = ({
     fireOnceFlag = null,
     fireOnceAction = null,
 }) => {
+    if (typeof window !== 'undefined' && (window.__dbot_stopped || !api_base.is_running)) {
+        return Promise.resolve(false);
+    }
     const currentState = store.getState();
-    if (currentState.scope === stopScope) {
+    if (currentState.scope === stopScope || currentState.scope === constants.STOP) {
         return Promise.resolve(false);
     }
 
@@ -172,21 +187,69 @@ const watchScope = ({
 
     return new Promise(resolve => {
         let isResolved = false;
+        let ultraTimer = null;
+
+        const cleanup = () => {
+            if (ultraTimer) {
+                clearInterval(ultraTimer);
+                ultraTimer = null;
+            }
+            globalObserver.unregister('bot.stop', onBotStop);
+            globalObserver.unregister('bot.resume', onBotResume);
+            if (typeof window !== 'undefined') {
+                window.removeEventListener('bot_resumed', onBotResume);
+            }
+            unsubscribe();
+        };
+
+        const onBotStop = () => {
+            if (isResolved) return;
+            isResolved = true;
+            cleanup();
+            resolve(false);
+        };
+
+        const onBotResume = () => {
+            if (isResolved) return;
+            prevTick = undefined;
+            const state = store.getState();
+            if (state.scope === stopScope || state.scope === constants.STOP || (typeof window !== 'undefined' && window.__dbot_stopped)) {
+                isResolved = true;
+                cleanup();
+                resolve(false);
+                return;
+            }
+            if (canPassNow(state)) {
+                isResolved = true;
+                cleanup();
+                if (fireOnceAction && fireOnceFlag && !state[fireOnceFlag]) {
+                    store.dispatch({ type: fireOnceAction });
+                }
+                resolve(true);
+            }
+        };
+
+        globalObserver.register('bot.stop', onBotStop);
+        globalObserver.register('bot.resume', onBotResume);
+        if (typeof window !== 'undefined') {
+            window.addEventListener('bot_resumed', onBotResume);
+        }
+
         const unsubscribe = store.subscribe(() => {
             if (isResolved) return;
             const newState = store.getState();
 
-            if (newState.scope === stopScope) {
+            if (newState.scope === stopScope || newState.scope === constants.STOP || (typeof window !== 'undefined' && window.__dbot_stopped) || !api_base.is_running) {
                 isResolved = true;
-                unsubscribe();
+                cleanup();
                 resolve(false);
                 return;
             }
 
-            // Fast / immediate: resolve as soon as the flag is set, do not wait for another tick.
+            // Fast / immediate / ultra / resume: resolve as soon as the flag is set, do not wait for another tick.
             if (allowImmediate && canPassNow(newState)) {
                 isResolved = true;
-                unsubscribe();
+                cleanup();
                 if (fireOnceAction) {
                     store.dispatch({ type: fireOnceAction });
                 }
@@ -199,13 +262,35 @@ const watchScope = ({
 
             if (newState.scope === passScope && newState[passFlag]) {
                 isResolved = true;
-                unsubscribe();
+                cleanup();
                 if (fireOnceAction && fireOnceFlag && !newState[fireOnceFlag]) {
                     store.dispatch({ type: fireOnceAction });
                 }
                 resolve(true);
             }
         });
+
+        // 🚀 ULTRA MODE: Execute purchase evaluation on every second (1000ms cadence)
+        if (isUltraModeActive() && passScope === constants.BEFORE_PURCHASE) {
+            ultraTimer = setInterval(() => {
+                if (isResolved) return;
+                const state = store.getState();
+                if (state.scope === stopScope || state.scope === constants.STOP || (typeof window !== 'undefined' && window.__dbot_stopped) || !api_base.is_running) {
+                    isResolved = true;
+                    cleanup();
+                    resolve(false);
+                    return;
+                }
+                if (state.scope === passScope && state[passFlag]) {
+                    isResolved = true;
+                    cleanup();
+                    if (fireOnceAction && fireOnceFlag && !state[fireOnceFlag]) {
+                        store.dispatch({ type: fireOnceAction });
+                    }
+                    resolve(true);
+                }
+            }, 1000);
+        }
     });
 };
 
@@ -229,6 +314,21 @@ export default class TradeEngine extends Balance(Purchase(Sell(OpenContract(Prop
                 this.makeDirectPurchaseDecision();
             };
             window.addEventListener('dbot_speed_mode_changed', this._speedModeListener);
+
+            this._stopListener = () => {
+                try {
+                    this.store.dispatch({ type: constants.SELL });
+                    this.is_contract_buying_in_progress = false;
+                    this._clearWatchdog?.();
+                } catch {}
+            };
+            globalObserver.register('bot.stop', this._stopListener);
+
+            this._resumeListener = () => {
+                resetPrevTick();
+                this.makeDirectPurchaseDecision();
+            };
+            globalObserver.register('bot.resume', this._resumeListener);
         }
     }
 

@@ -1,4 +1,5 @@
 const FAST_FLAG = '__dbot_fast_execution';
+const ULTRA_FLAG = '__dbot_ultra_execution';
 
 const isTruthyFastField = value =>
     value === 'TRUE' || value === true || value === 'true' || value === 1 || value === '1';
@@ -6,6 +7,12 @@ const isTruthyFastField = value =>
 export const setFastExecutionOverride = enabled => {
     if (typeof window !== 'undefined') {
         window[FAST_FLAG] = Boolean(enabled);
+    }
+};
+
+export const setUltraExecutionOverride = enabled => {
+    if (typeof window !== 'undefined') {
+        window[ULTRA_FLAG] = Boolean(enabled);
     }
 };
 
@@ -26,8 +33,18 @@ export const isPurchaseFastExecutionEnabled = () => {
     }
 };
 
+export const isUltraModeActive = () => {
+    if (typeof window !== 'undefined' && window[ULTRA_FLAG] === true) {
+        return true;
+    }
+    if (typeof localStorage === 'undefined') {
+        return false;
+    }
+    return localStorage.getItem('bot_execution_speed') === '3';
+};
+
 export const isFastModeActive = () => {
-    if (typeof window !== 'undefined' && window[FAST_FLAG] === true) {
+    if (typeof window !== 'undefined' && (window[FAST_FLAG] === true || window[ULTRA_FLAG] === true)) {
         return true;
     }
     if (typeof window !== 'undefined' && isPurchaseFastExecutionEnabled()) {
@@ -36,20 +53,55 @@ export const isFastModeActive = () => {
     if (typeof localStorage === 'undefined') {
         return false;
     }
+    const speed = localStorage.getItem('bot_execution_speed');
     return (
-        localStorage.getItem('dbot_every_tick_mode') === 'true' || localStorage.getItem('bot_execution_speed') === '2'
+        speed === '3' ||
+        speed === '2' ||
+        localStorage.getItem('dbot_every_tick_mode') === 'true'
     );
+};
+
+export const getExecutionSpeedMode = () => {
+    if (isUltraModeActive()) return 'ultra';
+    if (isFastModeActive()) return 'fast';
+    return 'normal';
+};
+
+export const setExecutionSpeedMode = mode => {
+    const isUltra = mode === 'ultra';
+    const isFast = mode === 'fast' || isUltra;
+    setFastExecutionOverride(isFast);
+    setUltraExecutionOverride(isUltra);
+
+    if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('bot_execution_speed', isUltra ? '3' : isFast ? '2' : '1');
+        localStorage.setItem('dbot_every_tick_mode', String(isFast));
+    }
+
+    if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+            new CustomEvent('dbot_speed_mode_changed', {
+                detail: { mode, isFast, isUltra },
+            })
+        );
+    }
 };
 
 export const isHeaderFastModeEnabled = () => {
     if (typeof localStorage === 'undefined') return false;
+    const speed = localStorage.getItem('bot_execution_speed');
     return (
-        localStorage.getItem('dbot_every_tick_mode') === 'true' || localStorage.getItem('bot_execution_speed') === '2'
+        speed === '3' ||
+        speed === '2' ||
+        localStorage.getItem('dbot_every_tick_mode') === 'true'
     );
 };
 
 export const syncFastExecutionOverride = () => {
-    setFastExecutionOverride(isHeaderFastModeEnabled() || isPurchaseFastExecutionEnabled());
+    const isUltra = isUltraModeActive();
+    const isFast = isHeaderFastModeEnabled() || isPurchaseFastExecutionEnabled() || isUltra;
+    setFastExecutionOverride(isFast);
+    setUltraExecutionOverride(isUltra);
 };
 
 let isSyncingWorkspace = false;

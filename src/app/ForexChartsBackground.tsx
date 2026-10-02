@@ -162,6 +162,13 @@ export const ForexChartsBackground: React.FC = () => {
 
     return (
         <div className='forex-charts-bg' aria-hidden='true'>
+            {/* Realistic Open Laptop & Forex Trading Floor Backdrop */}
+            <div
+                className='fc-laptop-backdrop'
+                style={{ backgroundImage: "url('/welcome-trading-laptop.jpg')" }}
+            />
+            <div className='fc-backdrop-overlay' />
+
             {/* Ambient Multi-Hue Radiant Glows */}
             <div className='fc-glow fc-glow--cyan' />
             <div className='fc-glow fc-glow--emerald' />
@@ -187,7 +194,7 @@ export const ForexChartsBackground: React.FC = () => {
             <div className='fc-hud-meta fc-hud-meta--top-left'>
                 <div className='fc-hud-chip'>
                     <span className='dot live' />
-                    <span>FEED: EUR/USD [M15] • INSTITUTIONAL DEPTH</span>
+                    <span>FEED: GBP/USD [1H] • LIVE TRADINGVIEW</span>
                 </div>
                 <div className='fc-hud-sub'>SPREAD: 0.1 PIP • VOLATILITY 84.6% • GLOBAL POOL $6.6T/DAY</div>
             </div>
