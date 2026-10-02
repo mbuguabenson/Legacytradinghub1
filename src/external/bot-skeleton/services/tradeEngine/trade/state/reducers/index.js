@@ -14,6 +14,7 @@ const signal = (state = initialState, action) => {
             return {
                 ...state,
                 scope: constants.BEFORE_PURCHASE,
+                proposalsReady: true,
                 hasFiredBefore: false,
                 hasFiredDuring: false,
             };
@@ -59,6 +60,7 @@ const signal = (state = initialState, action) => {
             return {
                 ...state,
                 newTick: action.payload,
+                newTickId: action.tickId || action.payload,
             };
         default:
             return state;

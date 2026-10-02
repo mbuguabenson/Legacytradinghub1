@@ -38,9 +38,16 @@ export default Engine =>
                 const lastTick = ticks.slice(-1)[0];
                 if (!lastTick || typeof lastTick.epoch !== 'number') return;
 
-                const { epoch } = lastTick;
+                const { epoch, quote } = lastTick;
                 this.lastTickEpoch = epoch;
-                this.store.dispatch({ type: constants.NEW_TICK, payload: epoch });
+                this.lastTickQuote = quote;
+                const tickId = `${epoch}_${quote !== undefined ? quote : ''}`;
+                this.store.dispatch({
+                    type: constants.NEW_TICK,
+                    payload: epoch,
+                    tickId,
+                    quote,
+                });
             };
 
             const key = await ticksService.monitor({ symbol, callback });

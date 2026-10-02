@@ -2,7 +2,7 @@ import { getRoundedNumber } from '@/components/shared';
 import DBotStore from '../../../scratch/dbot-store';
 import { api_base } from '../../api/api-base';
 import { contract as broadcastContract, contractStatus } from '../utils/broadcast';
-import { isFastModeActive } from '../utils/fastMode';
+import { isFastModeActive, isUltraModeActive } from '../utils/fastMode';
 import { openContractReceived, sell } from './state/actions';
 
 export default Engine =>
@@ -60,6 +60,14 @@ export default Engine =>
                 return;
             }
             this.bulk_sold_contract_ids.add(cId);
+
+            if (this.active_contract_ids) {
+                this.active_contract_ids.delete(cId);
+            }
+            if (this._watchdogTimers?.has(Number(cId))) {
+                clearTimeout(this._watchdogTimers.get(Number(cId)));
+                this._watchdogTimers.delete(Number(cId));
+            }
 
             // Enrich contract if sell_price is not yet populated on immediate is_expired exit
             const enrichedContract = { ...contract };
@@ -130,6 +138,61 @@ export default Engine =>
                     this.contract_subscription_ids?.delete(cId);
                 }
             } catch (e) {}
+
+            const isUltra = isUltraModeActive();
+            if (isUltra) {
+                if (this.contractId === cId) {
+                    const remaining = this.active_contract_ids && Array.from(this.active_contract_ids);
+                    this.contractId = remaining && remaining.length > 0 ? remaining[remaining.length - 1] : '';
+                }
+                if (this.bulk_contract_ids) {
+                    this.bulk_contract_ids.delete(cId);
+                }
+
+                contractStatus({
+                    id: 'contract.sold',
+                    data: enrichedContract.transaction_ids?.sell,
+                    contract: enrichedContract,
+                });
+
+                if (this.afterPromise) {
+                    const ap = this.afterPromise;
+                    this.afterPromise = null;
+                    ap();
+                }
+
+                // ⚡ ZERO-DELAY BALANCE UPDATE:
+                try {
+                    const { client } = DBotStore.instance || {};
+                    const payout = parseFloat(enrichedContract.sell_price ?? enrichedContract.payout ?? 0) || 0;
+                    if (client && typeof client.balance !== 'undefined' && payout > 0) {
+                        const currentBal = parseFloat(String(client.balance).replace(/,/g, '')) || 0;
+                        const targetId = this.accountInfo?.loginid || client.loginid;
+                        if (client.setBalance && currentBal > 0) {
+                            client.setBalance((currentBal + payout).toFixed(2), targetId);
+                        }
+                    }
+                } catch (e) {}
+
+                try {
+                    if (api_base.api) {
+                        api_base.api.send({ balance: 1 }).then(res => {
+                            if (res?.balance && typeof res.balance.balance === 'number') {
+                                const { client } = DBotStore.instance || {};
+                                if (client?.setBalance) {
+                                    client.setBalance(
+                                        res.balance.balance.toString(),
+                                        res.balance.loginid || this.accountInfo?.loginid || client.loginid
+                                    );
+                                }
+                            }
+                        }).catch(() => {});
+                    }
+                } catch (e) {}
+
+                // In Ultra mode: DO NOT dispatch sell() because that would set scope = STOP and halt tick buying!
+                return;
+            }
 
             const isBulk = Boolean(this.bulk_contract_ids && this.bulk_contract_ids.size > 1);
             const allBulkDone = !isBulk || this.bulk_sold_contract_ids.size >= this.bulk_contract_ids.size;
@@ -231,6 +294,9 @@ export default Engine =>
         expectedContractId(contractId) {
             if (!contractId) return false;
             const cIdStr = String(contractId);
+            if (this.active_contract_ids && this.active_contract_ids.has(cIdStr)) {
+                return true;
+            }
             if (this.bulk_contract_ids && this.bulk_contract_ids.has(cIdStr)) {
                 return true;
             }

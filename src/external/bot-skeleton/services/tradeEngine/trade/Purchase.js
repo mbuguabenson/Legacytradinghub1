@@ -2,7 +2,7 @@ import { LogTypes } from '../../../constants/messages';
 import DBotStore from '../../../scratch/dbot-store';
 import { api_base } from '../../api/api-base';
 import { contractStatus, info, log } from '../utils/broadcast';
-import { isFastModeActive, setFastExecutionOverride } from '../utils/fastMode';
+import { isFastModeActive, isUltraModeActive, setFastExecutionOverride } from '../utils/fastMode';
 import { doUntilDone, getUUID, recoverFromError, tradeOptionToBuy } from '../utils/helpers';
 import { proposalsReady, purchaseSuccessful, sell } from './state/actions';
 import { BEFORE_PURCHASE } from './state/constants';
@@ -31,6 +31,10 @@ export default Engine =>
                 clearTimeout(this._bulkWatchdogTimer);
                 this._bulkWatchdogTimer = null;
             }
+            if (this._watchdogTimers) {
+                this._watchdogTimers.forEach(timer => clearTimeout(timer));
+                this._watchdogTimers.clear();
+            }
         }
 
         // ─── Purchase (single trade) ───────────────────────────────────────────────
@@ -44,7 +48,8 @@ export default Engine =>
                 setFastExecutionOverride(true);
             }
 
-            const isFastMode = blockFastOn || isFastModeActive();
+            const isUltra = isUltraModeActive();
+            const isFastMode = blockFastOn || isFastModeActive() || isUltra;
             if (isFastMode) {
                 this.is_proposal_subscription_required = false;
                 if (!this.store.getState().proposalsReady) {
@@ -58,9 +63,9 @@ export default Engine =>
                 return this.bulkPurchase(contract_type, count);
             }
 
-            // Prevent duplicate parallel purchases or purchases when stopped
+            // Prevent duplicate parallel purchases or purchases when stopped (allow parallel in Ultra)
             if (
-                this.is_contract_buying_in_progress ||
+                (!isUltra && this.is_contract_buying_in_progress) ||
                 this.$scope?.stopped ||
                 (typeof window !== 'undefined' && window.__dbot_stopped) ||
                 !api_base.is_running
@@ -101,7 +106,7 @@ export default Engine =>
 
             this.is_contract_buying_in_progress = true;
 
-            if (this.store.getState().scope !== BEFORE_PURCHASE) {
+            if (!isUltra && this.store.getState().scope !== BEFORE_PURCHASE) {
                 this.is_contract_buying_in_progress = false;
                 return Promise.resolve();
             }
@@ -114,6 +119,7 @@ export default Engine =>
                 }
 
                 const { buy } = response;
+                if (!buy || !buy.contract_id) return;
 
                 if (buy && typeof buy.balance_after === 'number') {
                     try {
@@ -133,9 +139,23 @@ export default Engine =>
                     buy,
                 });
 
-                this.contractId = String(buy.contract_id);
-                this.bulk_contract_ids = new Set([String(buy.contract_id)]);
-                this.bulk_sold_contract_ids = new Set();
+                const cIdStr = String(buy.contract_id);
+                this.contractId = cIdStr;
+
+                if (!this.active_contract_ids) {
+                    this.active_contract_ids = new Set();
+                }
+                this.active_contract_ids.add(cIdStr);
+
+                if (!this.bulk_contract_ids) {
+                    this.bulk_contract_ids = new Set();
+                }
+                this.bulk_contract_ids.add(cIdStr);
+
+                if (!this.bulk_sold_contract_ids) {
+                    this.bulk_sold_contract_ids = new Set();
+                }
+
                 this.store.dispatch(purchaseSuccessful());
 
                 if (this.is_proposal_subscription_required && !isFastMode) {
@@ -154,15 +174,16 @@ export default Engine =>
                 }
 
                 // 🛡️ POC Watchdog Recovery Timer: Auto-poll contract completion if stream is delayed.
-                // Store on `this` so handleContractSold() can clear it immediately when the
-                // contract settles via the normal subscription path — preventing timer accumulation.
                 const purchasedContractId = buy.contract_id;
                 const watchdogDuration = Number(this.tradeOptions?.duration || 5) * 1200 + 3500;
 
-                this._clearWatchdog();
-                this._watchdogTimer = setTimeout(async () => {
-                    this._watchdogTimer = null;
-                    if (this.contractId === String(purchasedContractId) && !this.isSold) {
+                if (!this._watchdogTimers) {
+                    this._watchdogTimers = new Map();
+                }
+
+                const timer = setTimeout(async () => {
+                    this._watchdogTimers?.delete(purchasedContractId);
+                    if (this.active_contract_ids?.has(String(purchasedContractId))) {
                         try {
                             const res = await api_base.api?.send({
                                 proposal_open_contract: 1,
@@ -181,6 +202,8 @@ export default Engine =>
                         } catch {}
                     }
                 }, watchdogDuration);
+
+                this._watchdogTimers.set(purchasedContractId, timer);
 
                 delayIndex = 0;
                 log(LogTypes.PURCHASE, { transaction_id: buy.transaction_id });

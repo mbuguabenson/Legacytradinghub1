@@ -20,12 +20,13 @@ import Total from './Total';
 
 export { isFastModeActive, isUltraModeActive } from '../utils/fastMode';
 
+export let lastUltraPurchasedTickId = null;
+export const resetUltraPurchasedTick = () => {
+    lastUltraPurchasedTickId = null;
+};
+
 const watchBefore = store => {
     if (typeof window !== 'undefined' && (window.__dbot_stopped || !api_base.is_running)) {
-        return Promise.resolve(false);
-    }
-    const currentState = store.getState();
-    if (currentState.scope === constants.DURING_PURCHASE || currentState.scope === constants.STOP) {
         return Promise.resolve(false);
     }
 
@@ -57,6 +58,69 @@ const watchBefore = store => {
         });
     }
 
+    // 🚀 ULTRA MODE: Purchase on EVERY tick generated without waiting for previous contract to close!
+    if (isUltraModeActive()) {
+        const currentState = store.getState();
+        // If a purchase was just executed on this tick, exit before-purchase loop immediately
+        // so interpreter can pass during (instant) -> after_purchase (trade_again) -> loop
+        if (currentState.scope === constants.DURING_PURCHASE) {
+            return Promise.resolve(false);
+        }
+
+        const currentTickId = currentState.newTickId || currentState.newTick;
+
+        // If this is a fresh tick that hasn't traded yet, fire immediately!
+        if (currentTickId && currentTickId !== lastUltraPurchasedTickId) {
+            lastUltraPurchasedTickId = currentTickId;
+            return Promise.resolve(true);
+        }
+
+        // Otherwise wait for the NEXT tick to be dispatched by Ticks.js
+        return new Promise(resolve => {
+            let isResolved = false;
+            const cleanup = () => {
+                globalObserver.unregister('bot.stop', onBotStop);
+                unsubscribe();
+            };
+            const onBotStop = () => {
+                if (isResolved) return;
+                isResolved = true;
+                cleanup();
+                resolve(false);
+            };
+            globalObserver.register('bot.stop', onBotStop);
+
+            const unsubscribe = store.subscribe(() => {
+                if (isResolved) return;
+                if (typeof window !== 'undefined' && (window.__dbot_stopped || !api_base.is_running)) {
+                    isResolved = true;
+                    cleanup();
+                    resolve(false);
+                    return;
+                }
+                const state = store.getState();
+                if (state.scope === constants.DURING_PURCHASE || state.scope === constants.STOP) {
+                    isResolved = true;
+                    cleanup();
+                    resolve(false);
+                    return;
+                }
+                const tickId = state.newTickId || state.newTick;
+                if (tickId && tickId !== lastUltraPurchasedTickId) {
+                    isResolved = true;
+                    lastUltraPurchasedTickId = tickId;
+                    cleanup();
+                    resolve(true);
+                }
+            });
+        });
+    }
+
+    const currentState = store.getState();
+    if (currentState.scope === constants.DURING_PURCHASE || currentState.scope === constants.STOP) {
+        return Promise.resolve(false);
+    }
+
     if (
         currentState.scope === constants.BEFORE_PURCHASE &&
         currentState.proposalsReady &&
@@ -75,8 +139,19 @@ const watchBefore = store => {
     });
 };
 
-const watchDuring = store =>
-    new Promise(resolve => {
+const watchDuring = store => {
+    if (typeof window !== 'undefined' && (window.__dbot_stopped || !api_base.is_running)) {
+        return Promise.resolve(false);
+    }
+
+    // 🚀 ULTRA MODE: Never block in watchDuring!
+    // Exiting immediately allows after_purchase (trade_again) and next tick purchase
+    // to execute concurrently while previous contracts are still in flight.
+    if (isUltraModeActive()) {
+        return Promise.resolve(false);
+    }
+
+    return new Promise(resolve => {
         const currentState = store.getState();
         if (currentState.scope === constants.STOP || (typeof window !== 'undefined' && window.__dbot_stopped) || !api_base.is_running) {
             resolve(false);
@@ -148,6 +223,7 @@ const watchDuring = store =>
         };
         window.addEventListener('dbot_speed_mode_changed', onSpeedChange);
     });
+};
 
 
 /* The watchScope function is called randomly and resets the prevTick
@@ -317,15 +393,20 @@ export default class TradeEngine extends Balance(Purchase(Sell(OpenContract(Prop
 
             this._stopListener = () => {
                 try {
+                    resetUltraPurchasedTick();
                     this.store.dispatch({ type: constants.SELL });
                     this.is_contract_buying_in_progress = false;
                     this._clearWatchdog?.();
+                    if (this.active_contract_ids) this.active_contract_ids.clear();
+                    if (this.bulk_contract_ids) this.bulk_contract_ids.clear();
+                    if (this.bulk_sold_contract_ids) this.bulk_sold_contract_ids.clear();
                 } catch {}
             };
             globalObserver.register('bot.stop', this._stopListener);
 
             this._resumeListener = () => {
                 resetPrevTick();
+                resetUltraPurchasedTick();
                 this.makeDirectPurchaseDecision();
             };
             globalObserver.register('bot.resume', this._resumeListener);
