@@ -85,6 +85,14 @@ const SYSTEM_LOGS = [
     { min: 95, text: '[SYSTEM_READY] All nodes synchronized. Terminal armed.' },
 ];
 
+const MILESTONES = [
+    { target: 15, status: 'Authenticating Deriv Quantum WebSocket Gateway...' },
+    { target: 35, status: 'Arming Continuous Ultra Tick Execution Engine...' },
+    { target: 60, status: 'Calibrating 21 Quantitative Algorithmic Bots...' },
+    { target: 85, status: 'Synchronizing High-Frequency Market Radar Feeds...' },
+    { target: 100, status: 'Direct Market Access Enclave Online. Launching Terminal...' },
+];
+
 const WelcomeScreen = ({
     onFinished,
     isComplete,

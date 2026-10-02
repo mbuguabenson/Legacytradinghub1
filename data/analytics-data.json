@@ -1,7 +1,7 @@
 {
-  "totalPageViews": 68,
+  "totalPageViews": 69,
   "uniqueVisitors": 0,
-  "eventsCount": 649,
+  "eventsCount": 662,
   "hourlyHistory": {
     "2026-09-30-19": 1,
     "2026-09-30-20": 26,
@@ -12,11 +12,11 @@
     "2026-10-02-14": 4,
     "2026-10-02-15": 1,
     "2026-10-02-16": 2,
-    "2026-10-02-17": 1
+    "2026-10-02-17": 2
   },
   "dailyHistory": {
     "2026-09-30": 42,
-    "2026-10-02": 26
+    "2026-10-02": 27
   },
   "toolUsage": {
     "digit-cracker": 0,
@@ -30,17 +30,160 @@
     "other": 0
   },
   "pageHits": {
-    "/": 68
+    "/": 69
   },
   "deviceStats": {
-    "desktop": 62,
+    "desktop": 63,
     "mobile": 6,
     "tablet": 0
   },
   "browserStats": {
-    "Chrome": 68
+    "Chrome": 69
   },
   "recentEvents": [
+    {
+      "id": "ev_1790952583637_zscpa",
+      "eventType": "heartbeat",
+      "path": "/",
+      "sessionId": "sess_1790939309350_w76uhjbov",
+      "loginid": null,
+      "device": "desktop",
+      "ip": "::1",
+      "timestamp": "2026-10-02T14:49:43.637Z",
+      "metadata": {}
+    },
+    {
+      "id": "ev_1790952538639_tz1d4",
+      "eventType": "heartbeat",
+      "path": "/",
+      "sessionId": "sess_1790939309350_w76uhjbov",
+      "loginid": null,
+      "device": "desktop",
+      "ip": "::1",
+      "timestamp": "2026-10-02T14:48:58.639Z",
+      "metadata": {}
+    },
+    {
+      "id": "ev_1790952493621_piiqy",
+      "eventType": "page_view",
+      "path": "/",
+      "sessionId": "sess_1790939309350_w76uhjbov",
+      "loginid": null,
+      "device": "desktop",
+      "ip": "::1",
+      "timestamp": "2026-10-02T14:48:13.621Z",
+      "metadata": {}
+    },
+    {
+      "id": "ev_1790952458825_z5kyn",
+      "eventType": "heartbeat",
+      "path": "/",
+      "sessionId": "sess_1790939309350_w76uhjbov",
+      "loginid": null,
+      "device": "desktop",
+      "ip": "::1",
+      "timestamp": "2026-10-02T14:47:38.825Z",
+      "metadata": {}
+    },
+    {
+      "id": "ev_1790952413831_k8lqy",
+      "eventType": "heartbeat",
+      "path": "/",
+      "sessionId": "sess_1790939309350_w76uhjbov",
+      "loginid": null,
+      "device": "desktop",
+      "ip": "::1",
+      "timestamp": "2026-10-02T14:46:53.831Z",
+      "metadata": {}
+    },
+    {
+      "id": "ev_1790952368827_wrk87",
+      "eventType": "heartbeat",
+      "path": "/",
+      "sessionId": "sess_1790939309350_w76uhjbov",
+      "loginid": null,
+      "device": "desktop",
+      "ip": "::1",
+      "timestamp": "2026-10-02T14:46:08.827Z",
+      "metadata": {}
+    },
+    {
+      "id": "ev_1790952323818_5wvyr",
+      "eventType": "heartbeat",
+      "path": "/",
+      "sessionId": "sess_1790939309350_w76uhjbov",
+      "loginid": null,
+      "device": "desktop",
+      "ip": "::1",
+      "timestamp": "2026-10-02T14:45:23.818Z",
+      "metadata": {}
+    },
+    {
+      "id": "ev_1790952278814_a92t3",
+      "eventType": "heartbeat",
+      "path": "/",
+      "sessionId": "sess_1790939309350_w76uhjbov",
+      "loginid": null,
+      "device": "desktop",
+      "ip": "::1",
+      "timestamp": "2026-10-02T14:44:38.814Z",
+      "metadata": {}
+    },
+    {
+      "id": "ev_1790952233809_6qhcv",
+      "eventType": "heartbeat",
+      "path": "/",
+      "sessionId": "sess_1790939309350_w76uhjbov",
+      "loginid": null,
+      "device": "desktop",
+      "ip": "::1",
+      "timestamp": "2026-10-02T14:43:53.809Z",
+      "metadata": {}
+    },
+    {
+      "id": "ev_1790952188814_09m0j",
+      "eventType": "heartbeat",
+      "path": "/",
+      "sessionId": "sess_1790939309350_w76uhjbov",
+      "loginid": null,
+      "device": "desktop",
+      "ip": "::1",
+      "timestamp": "2026-10-02T14:43:08.814Z",
+      "metadata": {}
+    },
+    {
+      "id": "ev_1790952143815_owbya",
+      "eventType": "heartbeat",
+      "path": "/",
+      "sessionId": "sess_1790939309350_w76uhjbov",
+      "loginid": null,
+      "device": "desktop",
+      "ip": "::1",
+      "timestamp": "2026-10-02T14:42:23.815Z",
+      "metadata": {}
+    },
+    {
+      "id": "ev_1790952098819_6r5rl",
+      "eventType": "heartbeat",
+      "path": "/",
+      "sessionId": "sess_1790939309350_w76uhjbov",
+      "loginid": null,
+      "device": "desktop",
+      "ip": "::1",
+      "timestamp": "2026-10-02T14:41:38.819Z",
+      "metadata": {}
+    },
+    {
+      "id": "ev_1790952053818_3qfx8",
+      "eventType": "heartbeat",
+      "path": "/",
+      "sessionId": "sess_1790939309350_w76uhjbov",
+      "loginid": null,
+      "device": "desktop",
+      "ip": "::1",
+      "timestamp": "2026-10-02T14:40:53.818Z",
+      "metadata": {}
+    },
     {
       "id": "ev_1790952008802_0tcp1",
       "eventType": "heartbeat",
@@ -2096,149 +2239,6 @@
       "device": "desktop",
       "ip": "::1",
       "timestamp": "2026-10-02T12:16:30.584Z",
-      "metadata": {}
-    },
-    {
-      "id": "ev_1790943345568_jzvt2",
-      "eventType": "heartbeat",
-      "path": "/",
-      "sessionId": "sess_1790939309350_w76uhjbov",
-      "loginid": null,
-      "device": "desktop",
-      "ip": "::1",
-      "timestamp": "2026-10-02T12:15:45.568Z",
-      "metadata": {}
-    },
-    {
-      "id": "ev_1790943300586_djmg3",
-      "eventType": "heartbeat",
-      "path": "/",
-      "sessionId": "sess_1790939309350_w76uhjbov",
-      "loginid": null,
-      "device": "desktop",
-      "ip": "::1",
-      "timestamp": "2026-10-02T12:15:00.586Z",
-      "metadata": {}
-    },
-    {
-      "id": "ev_1790943255577_61680",
-      "eventType": "heartbeat",
-      "path": "/",
-      "sessionId": "sess_1790939309350_w76uhjbov",
-      "loginid": null,
-      "device": "desktop",
-      "ip": "::1",
-      "timestamp": "2026-10-02T12:14:15.577Z",
-      "metadata": {}
-    },
-    {
-      "id": "ev_1790943210575_7u5em",
-      "eventType": "heartbeat",
-      "path": "/",
-      "sessionId": "sess_1790939309350_w76uhjbov",
-      "loginid": null,
-      "device": "desktop",
-      "ip": "::1",
-      "timestamp": "2026-10-02T12:13:30.575Z",
-      "metadata": {}
-    },
-    {
-      "id": "ev_1790943165598_rlxa5",
-      "eventType": "page_view",
-      "path": "/",
-      "sessionId": "sess_1790939309350_w76uhjbov",
-      "loginid": null,
-      "device": "desktop",
-      "ip": "::1",
-      "timestamp": "2026-10-02T12:12:45.585Z",
-      "metadata": {}
-    },
-    {
-      "id": "ev_1790943148809_m0wr9",
-      "eventType": "heartbeat",
-      "path": "/",
-      "sessionId": "sess_1790939309350_w76uhjbov",
-      "loginid": null,
-      "device": "desktop",
-      "ip": "::1",
-      "timestamp": "2026-10-02T12:12:28.809Z",
-      "metadata": {}
-    },
-    {
-      "id": "ev_1790943103812_e0iye",
-      "eventType": "heartbeat",
-      "path": "/",
-      "sessionId": "sess_1790939309350_w76uhjbov",
-      "loginid": null,
-      "device": "desktop",
-      "ip": "::1",
-      "timestamp": "2026-10-02T12:11:43.812Z",
-      "metadata": {}
-    },
-    {
-      "id": "ev_1790943058825_0yrli",
-      "eventType": "heartbeat",
-      "path": "/",
-      "sessionId": "sess_1790939309350_w76uhjbov",
-      "loginid": null,
-      "device": "desktop",
-      "ip": "::1",
-      "timestamp": "2026-10-02T12:10:58.825Z",
-      "metadata": {}
-    },
-    {
-      "id": "ev_1790943013844_1i4fl",
-      "eventType": "heartbeat",
-      "path": "/",
-      "sessionId": "sess_1790939309350_w76uhjbov",
-      "loginid": null,
-      "device": "desktop",
-      "ip": "::1",
-      "timestamp": "2026-10-02T12:10:13.844Z",
-      "metadata": {}
-    },
-    {
-      "id": "ev_1790942968807_i7cxz",
-      "eventType": "heartbeat",
-      "path": "/",
-      "sessionId": "sess_1790939309350_w76uhjbov",
-      "loginid": null,
-      "device": "desktop",
-      "ip": "::1",
-      "timestamp": "2026-10-02T12:09:28.807Z",
-      "metadata": {}
-    },
-    {
-      "id": "ev_1790942923811_zcnkt",
-      "eventType": "heartbeat",
-      "path": "/",
-      "sessionId": "sess_1790939309350_w76uhjbov",
-      "loginid": null,
-      "device": "desktop",
-      "ip": "::1",
-      "timestamp": "2026-10-02T12:08:43.811Z",
-      "metadata": {}
-    },
-    {
-      "id": "ev_1790942878798_drxi6",
-      "eventType": "heartbeat",
-      "path": "/",
-      "sessionId": "sess_1790939309350_w76uhjbov",
-      "loginid": null,
-      "device": "desktop",
-      "ip": "::1",
-      "timestamp": "2026-10-02T12:07:58.798Z",
-      "metadata": {}
-    },
-    {
-      "id": "ev_1790942833855_5eevc",
-      "eventType": "heartbeat",
-      "path": "/",
-      "sessionId": "sess_1790939309350_w76uhjbov",
-      "loginid": null,
-      "device": "desktop",
-      "ip": "::1",
-      "timestamp": "2026-10-02T12:07:13.855Z",
       "metadata": {}
     }
   ]
