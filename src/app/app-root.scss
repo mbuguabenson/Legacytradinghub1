@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
 
 // ═══════════════════════════════════════════════════════════════
-// ✦ LEGACY TRADING HUB — WELCOME SCREEN & APP ROOT STYLES
+// ✦ BINARYTOOL / LEGACY TRADING HUB — APP ROOT STYLES
 // ═══════════════════════════════════════════════════════════════
 
 $bg-dark: #080b12;
@@ -106,995 +106,225 @@ $text-muted: #676a6f;
 }
 
 // ═══════════════════════════════════════════════════════════════
-// ✦ COMPLETELY REVAMPED PANORAMIC CYBER COMMAND HUD COCKPIT
+// ✦ BINARYTOOL SAMPLE WELCOME LOADING SCREEN DESIGN
 // ═══════════════════════════════════════════════════════════════
 .welcome-screen {
     position: fixed;
     inset: 0;
     z-index: 99999;
     overflow: hidden;
-    background: #050810;
+    background: #080d1a;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     user-select: none;
-    perspective: 1400px;
+    padding: 24px;
+    perspective: 1200px;
     transform-origin: center center;
+    cursor: pointer;
 
     &--visible {
         opacity: 1;
-        transform: scale(1) translateZ(0);
-        transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        transform: scale(1);
+        transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     &--exiting {
         opacity: 0;
-        transform: scale(1.15) translateZ(80px);
-        filter: blur(16px);
+        transform: scale(1.08) translateZ(40px);
+        filter: blur(14px);
         pointer-events: none;
         transition: opacity 0.48s cubic-bezier(0.16, 1, 0.3, 1),
-                    transform 0.58s cubic-bezier(0.16, 1, 0.3, 1),
+                    transform 0.52s cubic-bezier(0.16, 1, 0.3, 1),
                     filter 0.48s ease;
     }
 }
 
-// Ambient cyber grid mesh overlay
-.ws-cyber-grid-mesh {
+// Dark Vignette Backdrop Overlay
+.bt-backdrop-vignette {
     position: absolute;
     inset: 0;
-    background-image: 
-        radial-gradient(circle at 50% 50%, rgba(0, 245, 255, 0.05) 0%, transparent 65%),
-        linear-gradient(rgba(0, 245, 255, 0.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 245, 255, 0.035) 1px, transparent 1px);
-    background-size: 100% 100%, 48px 48px, 48px 48px;
-    background-position: center center;
+    background: radial-gradient(circle at 50% 50%, rgba(8, 13, 26, 0.38) 0%, rgba(8, 13, 26, 0.88) 100%);
     pointer-events: none;
     z-index: 2;
-
-    &::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(5, 8, 16, 0.85) 100%);
-    }
 }
 
-// ─── Panoramic Cockpit Main Frame ──────────────────────────────
-.welcome-cockpit {
+// Centered Glassmorphic Card (Matches Sample Image)
+.bt-welcome-card {
     position: relative;
     z-index: 10;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 20px 32px 24px;
-    box-sizing: border-box;
-
-    @media (max-width: 1024px) {
-        padding: 16px 20px;
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 1. TOP AVIONICS / TELEMETRY STATUS HUD BAR
-// ═══════════════════════════════════════════════════════════════
-.ws-avionics-bar {
     width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 12px 22px;
-    background: rgba(9, 14, 26, 0.75);
-    border: 1px solid rgba(0, 245, 255, 0.18);
-    backdrop-filter: blur(20px);
-    border-radius: 14px;
-    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 245, 255, 0.05);
-
-    .ws-avionics-left {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-
-        .ws-status-beacon {
-            position: relative;
-            width: 10px;
-            height: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            .ws-beacon-pulse {
-                position: absolute;
-                inset: -4px;
-                border-radius: 50%;
-                background: rgba(0, 245, 255, 0.45);
-                animation: wsBeaconGlow 1.8s infinite ease-out;
-            }
-
-            .ws-beacon-dot {
-                position: relative;
-                width: 7px;
-                height: 7px;
-                border-radius: 50%;
-                background: #00f5ff;
-                box-shadow: 0 0 8px #00f5ff;
-            }
-        }
-
-        .ws-avionics-meta {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-
-            .ws-meta-primary {
-                font-family: 'JetBrains Mono', monospace;
-                font-size: 0.7rem;
-                font-weight: 700;
-                letter-spacing: 0.1em;
-                color: #e2e8f0;
-            }
-
-            .ws-meta-secondary {
-                font-family: 'JetBrains Mono', monospace;
-                font-size: 0.62rem;
-                font-weight: 500;
-                letter-spacing: 0.06em;
-                color: #00f5ff;
-                opacity: 0.85;
-            }
-        }
-    }
-
-    .ws-avionics-center {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        .ws-hud-brand-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 5px 14px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-
-            .ws-brand-mono-lead {
-                font-family: 'JetBrains Mono', monospace;
-                font-size: 0.68rem;
-                color: #ff6b00;
-                font-weight: 800;
-            }
-
-            .ws-brand-mono-name {
-                font-family: 'Space Grotesk', sans-serif;
-                font-size: 0.8rem;
-                font-weight: 800;
-                letter-spacing: 0.12em;
-                color: #ffffff;
-                text-transform: uppercase;
-            }
-
-            .ws-brand-mono-ver {
-                font-family: 'JetBrains Mono', monospace;
-                font-size: 0.64rem;
-                color: #00f5ff;
-                background: rgba(0, 245, 255, 0.1);
-                border: 1px solid rgba(0, 245, 255, 0.25);
-                padding: 2px 6px;
-                border-radius: 4px;
-            }
-        }
-    }
-
-    .ws-avionics-right {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-
-        .ws-clock-chip, .ws-ping-chip {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.7rem;
-            color: #94a3b8;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            padding: 5px 10px;
-            border-radius: 6px;
-        }
-
-        .ws-ping-chip {
-            color: #10b981;
-            border-color: rgba(16, 185, 129, 0.2);
-            background: rgba(16, 185, 129, 0.08);
-
-            .ws-ping-icon {
-                color: #10b981;
-            }
-        }
-
-        .ws-quick-enter-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 0.72rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: #ffffff;
-            background: linear-gradient(135deg, rgba(255, 107, 0, 0.25), rgba(255, 46, 99, 0.25));
-            border: 1px solid rgba(255, 107, 0, 0.5);
-            padding: 6px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-
-            &:hover {
-                background: linear-gradient(135deg, #ff6b00, #ff2e63);
-                border-color: #ff6b00;
-                box-shadow: 0 0 16px rgba(255, 107, 0, 0.5);
-                transform: translateY(-1px);
-
-                .ws-enter-arrow {
-                    transform: translateX(3px);
-                }
-            }
-
-            .ws-enter-arrow {
-                transition: transform 0.2s ease;
-            }
-        }
-    }
-}
-
-// ═══════════════════════════════════════════════════════════════
-// 2. TRI-PANEL PANORAMIC COMMAND DECK
-// ═══════════════════════════════════════════════════════════════
-.ws-command-deck {
-    flex: 1;
-    display: grid;
-    grid-template-columns: 340px 1fr 340px;
-    align-items: center;
-    gap: 28px;
-    padding: 16px 0;
-    min-height: 0;
-
-    @media (max-width: 1200px) {
-        grid-template-columns: 300px 1fr 300px;
-        gap: 16px;
-    }
-
-    @media (max-width: 960px) {
-        grid-template-columns: 1fr;
-        overflow-y: auto;
-        padding: 12px 0;
-        gap: 20px;
-    }
-}
-
-// Shared Glass Panel styling for Left and Right Wings
-.ws-panel-glass {
-    background: rgba(10, 16, 30, 0.78);
-    border: 1px solid rgba(0, 245, 255, 0.15);
-    backdrop-filter: blur(24px);
-    border-radius: 18px;
-    padding: 18px;
-    box-shadow: 0 16px 40px -15px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    max-width: 440px;
+    background: rgba(14, 21, 37, 0.82);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 38px 36px 30px;
+    box-shadow: 
+        0 30px 80px -20px rgba(0, 0, 0, 0.88),
+        0 0 40px rgba(37, 99, 235, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    position: relative;
-    overflow: hidden;
-
-    &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.6), transparent);
-    }
-}
-
-.ws-panel-header {
-    display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding-bottom: 8px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    text-align: center;
+    cursor: default;
+    animation: btCardFloatIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 
-    .ws-panel-title-wrap {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        color: #f1f5f9;
-
-        .ws-panel-title-icon {
-            color: #00f5ff;
-        }
-
-        .ws-panel-title {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 0.76rem;
-            font-weight: 800;
-            letter-spacing: 0.12em;
-            text-transform: uppercase;
-        }
-    }
-
-    .ws-panel-badge {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 0.62rem;
-        font-weight: 700;
-        padding: 2px 7px;
-        border-radius: 4px;
-        background: rgba(0, 245, 255, 0.12);
-        color: #00f5ff;
-        border: 1px solid rgba(0, 245, 255, 0.25);
-
-        &--green {
-            background: rgba(16, 185, 129, 0.12);
-            color: #10b981;
-            border-color: rgba(16, 185, 129, 0.3);
-        }
+    @media (max-width: 480px) {
+        max-width: 92vw;
+        padding: 28px 22px 24px;
+        border-radius: 16px;
     }
 }
 
-// ── Left Wing: Engine Matrix & Logs ──
-.ws-deck-wing--left {
-    display: flex;
-    flex-direction: column;
-
-    .ws-engine-matrix {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-
-        .ws-engine-card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px 12px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.025);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.3s ease;
-
-            &.armed {
-                background: rgba(0, 245, 255, 0.04);
-                border-color: rgba(0, 245, 255, 0.22);
-
-                .ws-engine-icon-wrap {
-                    background: rgba(0, 245, 255, 0.15);
-                    color: var(--engine-accent, #00f5ff);
-                    border-color: var(--engine-accent, #00f5ff);
-                }
-            }
-
-            .ws-engine-icon-wrap {
-                width: 28px;
-                height: 28px;
-                border-radius: 7px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background: rgba(255, 255, 255, 0.05);
-                border: 1px solid rgba(255, 255, 255, 0.08);
-                color: #64748b;
-                transition: all 0.25s ease;
-            }
-
-            .ws-engine-info {
-                flex: 1;
-                margin-left: 10px;
-
-                .ws-engine-name {
-                    font-size: 0.72rem;
-                    font-weight: 700;
-                    color: #e2e8f0;
-                }
-
-                .ws-engine-detail {
-                    font-family: 'JetBrains Mono', monospace;
-                    font-size: 0.6rem;
-                    color: #64748b;
-                }
-            }
-
-            .ws-engine-status-tag {
-                font-family: 'JetBrains Mono', monospace;
-                font-size: 0.6rem;
-                font-weight: 700;
-
-                .tag-armed {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 3px;
-                    color: #10b981;
-                }
-
-                .tag-sync {
-                    color: #ff6b00;
-                    opacity: 0.8;
-                }
-            }
-        }
-    }
-
-    // Terminal console
-    .ws-terminal-console {
-        background: #04060c;
-        border: 1px solid rgba(255, 255, 255, 0.07);
-        border-radius: 10px;
-        overflow: hidden;
-
-        .ws-terminal-bar {
-            background: #090e1a;
-            padding: 6px 10px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-
-            .ws-term-dot {
-                width: 6px;
-                height: 6px;
-                border-radius: 50%;
-
-                &--red { background: #ef4444; }
-                &--yellow { background: #f59e0b; }
-                &--green { background: #10b981; }
-            }
-
-            .ws-terminal-bar-title {
-                font-family: 'JetBrains Mono', monospace;
-                font-size: 0.6rem;
-                color: #64748b;
-                margin-left: 4px;
-            }
-        }
-
-        .ws-terminal-logs {
-            padding: 8px 10px;
-            max-height: 100px;
-            overflow-y: hidden;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-
-            .ws-term-line, .ws-term-cursor-line {
-                font-family: 'JetBrains Mono', monospace;
-                font-size: 0.63rem;
-                line-height: 1.4;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-            }
-
-            .ws-term-prompt {
-                color: #00f5ff;
-                font-weight: 700;
-            }
-
-            .ws-term-text {
-                color: #94a3b8;
-            }
-
-            .ws-term-active-status {
-                color: #f1f5f9;
-                font-weight: 600;
-            }
-
-            .ws-term-caret {
-                width: 6px;
-                height: 11px;
-                background: #ff6b00;
-                animation: wsCaretBlink 0.9s infinite step-end;
-            }
-        }
-    }
-}
-
-// ── Center Wing: Quantum Arc Reactor Core ──
-.ws-deck-center {
+// Top Squircle Logo Badge
+.bt-logo-badge {
+    width: 62px;
+    height: 62px;
+    border-radius: 17px;
+    background: linear-gradient(135deg, #102a54 0%, #0c1c38 100%);
+    border: 1.5px solid rgba(59, 130, 246, 0.4);
+    box-shadow: 
+        0 0 24px rgba(37, 99, 235, 0.38),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-bottom: 18px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 
-    .ws-reactor-stage {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        width: 100%;
-        max-width: 520px;
+    &:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 30px rgba(56, 189, 248, 0.55);
+    }
 
-        .ws-reactor-flare {
-            position: absolute;
-            top: 25%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 320px;
-            height: 320px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(0, 245, 255, 0.15) 0%, rgba(255, 107, 0, 0.08) 45%, transparent 70%);
-            filter: blur(40px);
-            pointer-events: none;
-            animation: wsFlarePulse 3s infinite alternate ease-in-out;
-            z-index: 1;
-        }
-
-        .ws-reactor-orb {
-            position: relative;
-            z-index: 5;
-            width: 250px;
-            height: 250px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 12px;
-
-            @media (max-width: 1200px) {
-                width: 220px;
-                height: 220px;
-            }
-
-            .ws-reactor-svg {
-                position: absolute;
-                inset: 0;
-                width: 100%;
-                height: 100%;
-                overflow: visible;
-
-                .ws-reactor-ticks-outer {
-                    transform-origin: 120px 120px;
-                    animation: wsRotateSlow 36s linear infinite;
-                }
-
-                .ws-reactor-reticle {
-                    transform-origin: 120px 120px;
-                    animation: wsCounterRotate 22s linear infinite;
-                }
-
-                .ws-reactor-progress-arc {
-                    transition: stroke-dashoffset 0.25s ease;
-                }
-            }
-
-            .ws-reactor-core {
-                position: relative;
-                z-index: 10;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-
-                .ws-core-brand-icon-wrap {
-                    width: 48px;
-                    height: 48px;
-                    border-radius: 12px;
-                    background: linear-gradient(135deg, rgba(0, 245, 255, 0.15), rgba(255, 107, 0, 0.15));
-                    border: 1px solid rgba(0, 245, 255, 0.3);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    margin-bottom: 6px;
-                    box-shadow: 0 0 20px rgba(0, 245, 255, 0.25);
-
-                    .ws-core-logo {
-                        width: 30px;
-                        height: 30px;
-                        object-fit: contain;
-                    }
-                }
-
-                .ws-core-metric {
-                    display: flex;
-                    align-items: baseline;
-                    justify-content: center;
-                    line-height: 1;
-
-                    .ws-core-number {
-                        font-family: 'Space Grotesk', sans-serif;
-                        font-size: 3rem;
-                        font-weight: 800;
-                        letter-spacing: -0.04em;
-                        color: #ffffff;
-                        text-shadow: 0 0 24px rgba(0, 245, 255, 0.6);
-
-                        @media (max-width: 1200px) {
-                            font-size: 2.6rem;
-                        }
-                    }
-
-                    .ws-core-percent {
-                        font-family: 'Space Grotesk', sans-serif;
-                        font-size: 1.3rem;
-                        font-weight: 700;
-                        color: #ff6b00;
-                        margin-left: 2px;
-                        text-shadow: 0 0 16px rgba(255, 107, 0, 0.6);
-                    }
-                }
-
-                .ws-core-label {
-                    font-family: 'JetBrains Mono', monospace;
-                    font-size: 0.6rem;
-                    font-weight: 700;
-                    letter-spacing: 0.18em;
-                    color: #00f5ff;
-                    margin-top: 4px;
-                    text-transform: uppercase;
-                }
-            }
-        }
-
-        // High frequency spectrum equalizer
-        .ws-spectrum-equalizer {
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            gap: 4px;
-            height: 36px;
-            margin-bottom: 14px;
-            z-index: 5;
-
-            .ws-eq-bar {
-                width: 4px;
-                border-radius: 2px;
-                background: rgba(255, 255, 255, 0.08);
-                transition: height 0.15s ease, background-color 0.2s ease;
-
-                &.lit {
-                    background: linear-gradient(180deg, #ff6b00 0%, #00f5ff 100%);
-                    box-shadow: 0 0 8px rgba(0, 245, 255, 0.4);
-                }
-            }
-        }
-
-        .ws-reactor-brand-title {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.6rem;
-            font-weight: 900;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-            z-index: 5;
-
-            @media (max-width: 1200px) {
-                font-size: 1.35rem;
-            }
-
-            .brand-glow-white {
-                color: #ffffff;
-                text-shadow: 0 0 16px rgba(255, 255, 255, 0.4);
-            }
-
-            .brand-glow-gradient {
-                background: linear-gradient(135deg, #ff6b00 0%, #ff2e63 100%);
-                -webkit-background-clip: text;
-                background-clip: text;
-                -webkit-text-fill-color: transparent;
-                filter: drop-shadow(0 0 16px rgba(255, 107, 0, 0.5));
-            }
-        }
-
-        .ws-reactor-brand-sub {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.65rem;
-            font-weight: 600;
-            letter-spacing: 0.12em;
-            color: #94a3b8;
-            z-index: 5;
-            max-width: 420px;
-            line-height: 1.5;
-        }
+    .bt-monogram {
+        font-family: 'Space Grotesk', system-ui, sans-serif;
+        font-weight: 800;
+        font-size: 1.45rem;
+        letter-spacing: 0.04em;
+        color: #ffffff;
+        text-shadow: 0 0 14px rgba(59, 130, 246, 0.65);
     }
 }
 
-// ── Right Wing: Market Radar Pulse & Specs ──
-.ws-deck-wing--right {
+// Brand Title Typography
+.bt-card-title {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-size: 1.45rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #ffffff;
+    text-transform: uppercase;
+    margin: 0 0 4px;
+    text-shadow: 0 0 18px rgba(255, 255, 255, 0.2);
+
+    @media (max-width: 480px) {
+        font-size: 1.25rem;
+    }
+}
+
+// Workspace Subtitle
+.bt-card-subtitle {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: #94a3b8;
+    letter-spacing: 0.02em;
+    margin-bottom: 16px;
+}
+
+// 3 Animated Glowing Pulsating Dots
+.bt-dots-wave {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    height: 12px;
+    margin-bottom: 16px;
 
-    .ws-radar-list {
-        display: flex;
-        flex-direction: column;
-        gap: 7px;
-
-        .ws-radar-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 7px 11px;
-            border-radius: 9px;
-            background: rgba(255, 255, 255, 0.025);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-
-            .ws-radar-symbol-info {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-
-                .ws-radar-symbol {
-                    font-size: 0.72rem;
-                    font-weight: 700;
-                    color: #f1f5f9;
-                }
-
-                .ws-radar-tag {
-                    font-family: 'JetBrains Mono', monospace;
-                    font-size: 0.58rem;
-                    color: #64748b;
-                    background: rgba(255, 255, 255, 0.04);
-                    padding: 1px 5px;
-                    border-radius: 3px;
-                }
-            }
-
-            .ws-radar-price-info {
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                font-family: 'JetBrains Mono', monospace;
-
-                .ws-radar-price {
-                    font-size: 0.68rem;
-                    font-weight: 600;
-                    color: #cbd5e1;
-                }
-
-                .ws-radar-change {
-                    font-size: 0.64rem;
-                    font-weight: 700;
-
-                    &.up {
-                        color: #10b981;
-                    }
-
-                    &.down {
-                        color: #ef4444;
-                    }
-                }
-            }
-        }
-    }
-
-    .ws-specs-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-
-        .ws-spec-box {
-            background: #04060c;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 9px;
-            padding: 8px 10px;
-
-            .ws-spec-key {
-                font-family: 'JetBrains Mono', monospace;
-                font-size: 0.56rem;
-                color: #64748b;
-                letter-spacing: 0.06em;
-                margin-bottom: 2px;
-            }
-
-            .ws-spec-val {
-                font-family: 'Space Grotesk', sans-serif;
-                font-size: 0.68rem;
-                font-weight: 800;
-
-                &.text-fire {
-                    color: #ff6b00;
-                    text-shadow: 0 0 10px rgba(255, 107, 0, 0.35);
-                }
-
-                &.text-cyan {
-                    color: #00f5ff;
-                    text-shadow: 0 0 10px rgba(0, 245, 255, 0.35);
-                }
-
-                &.text-white {
-                    color: #ffffff;
-                }
-
-                &.text-emerald {
-                    color: #10b981;
-                }
-            }
-        }
+    .bt-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #38bdf8;
+        box-shadow: 0 0 8px #38bdf8;
+        animation: btDotWave 1.4s infinite ease-in-out;
     }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// 3. BOTTOM LASER HUD PROGRESS RAIL & CONTROLS
-// ═══════════════════════════════════════════════════════════════
-.ws-bottom-bar {
+// Dynamic Status Message
+.bt-status-message {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #cbd5e1;
+    letter-spacing: 0.01em;
+    margin-bottom: 24px;
+    min-height: 1.2rem;
+    transition: opacity 0.2s ease;
+}
+
+// Slim Glowing Progress Rail
+.bt-progress-rail {
+    width: 100%;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    overflow: hidden;
+    position: relative;
+
+    .bt-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #2563eb 0%, #38bdf8 100%);
+        box-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
+        border-radius: 999px;
+        transition: width 0.25s ease;
+    }
+}
+
+// Bottom Sequence & Percentage Info
+.bt-card-footer {
     width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 24px;
-    padding: 14px 24px;
-    background: rgba(9, 14, 26, 0.85);
-    border: 1px solid rgba(0, 245, 255, 0.18);
-    backdrop-filter: blur(20px);
-    border-radius: 16px;
-    box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.8);
+    margin-top: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    color: #64748b;
+    font-weight: 600;
 
-    @media (max-width: 768px) {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-        padding: 12px 16px;
+    .bt-footer-sequence {
+        letter-spacing: 0.02em;
     }
 
-    .ws-bottom-left {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-
-        .ws-progress-caption {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-family: 'JetBrains Mono', monospace;
-
-            .ws-caption-prefix {
-                font-size: 0.66rem;
-                color: #00f5ff;
-                font-weight: 800;
-                letter-spacing: 0.08em;
-            }
-
-            .ws-caption-status {
-                font-size: 0.72rem;
-                color: #e2e8f0;
-                font-weight: 600;
-            }
-        }
-
-        // 24-Segmented Laser LED Track
-        .ws-laser-segmented-track {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            width: 100%;
-            height: 8px;
-
-            .ws-laser-segment {
-                flex: 1;
-                height: 100%;
-                border-radius: 2px;
-                background: rgba(255, 255, 255, 0.08);
-                transition: background 0.25s ease, box-shadow 0.25s ease;
-
-                &.active {
-                    background: linear-gradient(90deg, #00f5ff, #ff6b00);
-                    box-shadow: 0 0 10px rgba(0, 245, 255, 0.6);
-                }
-            }
-        }
-    }
-
-    .ws-bottom-right {
-        display: flex;
-        align-items: center;
-        gap: 18px;
-
-        @media (max-width: 768px) {
-            justify-content: space-between;
-        }
-
-        .ws-completion-percent {
-            font-family: 'JetBrains Mono', monospace;
-            display: flex;
-            align-items: baseline;
-            gap: 4px;
-
-            .val {
-                font-family: 'Space Grotesk', sans-serif;
-                font-size: 1.25rem;
-                font-weight: 800;
-                color: #00f5ff;
-            }
-
-            .unit {
-                font-size: 0.68rem;
-                font-weight: 700;
-                color: #ff6b00;
-                letter-spacing: 0.06em;
-            }
-        }
-
-        .ws-terminal-enter-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 0.82rem;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: #050810;
-            background: linear-gradient(135deg, #00f5ff 0%, #ff6b00 100%);
-            border: none;
-            padding: 10px 22px;
-            border-radius: 10px;
-            cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 245, 255, 0.4), 0 4px 12px rgba(0, 0, 0, 0.4);
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-
-            &:hover {
-                transform: translateY(-2px) scale(1.02);
-                box-shadow: 0 0 30px rgba(255, 107, 0, 0.65), 0 6px 18px rgba(0, 0, 0, 0.6);
-
-                .ws-launch-icon {
-                    transform: translateX(4px);
-                }
-            }
-
-            .ws-launch-icon {
-                transition: transform 0.25s ease;
-            }
-        }
+    .bt-footer-percent {
+        letter-spacing: 0.04em;
     }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// ANIMATIONS
-// ═══════════════════════════════════════════════════════════════
-@keyframes wsBeaconGlow {
-    0% {
-        transform: scale(0.9);
-        opacity: 0.8;
+// Keyframes
+@keyframes btDotWave {
+    0%, 100% {
+        opacity: 0.3;
+        transform: scale(0.75);
     }
-    100% {
-        transform: scale(2.2);
+    50% {
+        opacity: 1;
+        transform: scale(1.25);
+        box-shadow: 0 0 12px #38bdf8;
+    }
+}
+
+@keyframes btCardFloatIn {
+    0% {
         opacity: 0;
-    }
-}
-
-@keyframes wsRotateSlow {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-@keyframes wsCounterRotate {
-    from {
-        transform: rotate(360deg);
-    }
-    to {
-        transform: rotate(0deg);
-    }
-}
-
-@keyframes wsCaretBlink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-}
-
-@keyframes wsFlarePulse {
-    0% {
-        opacity: 0.45;
-        transform: translate(-50%, -50%) scale(0.92);
+        transform: translateY(18px) scale(0.96);
     }
     100% {
-        opacity: 0.85;
-        transform: translate(-50%, -50%) scale(1.08);
+        opacity: 1;
+        transform: translateY(0) scale(1);
     }
 }
