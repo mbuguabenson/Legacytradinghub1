@@ -6,6 +6,7 @@ import { doUntilDone, getUUID, recoverFromError, tradeOptionToBuy } from '../uti
 import { proposalsReady, purchaseSuccessful, sell } from './state/actions';
 import { BEFORE_PURCHASE } from './state/constants';
 import { observer as globalObserver } from '../../../utils/observer';
+import { contractStatus } from '../utils/broadcast';
 
 let delayIndex = 0;
 let purchase_reference;
