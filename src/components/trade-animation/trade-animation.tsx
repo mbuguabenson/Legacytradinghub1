@@ -86,7 +86,6 @@ const TradeAnimation = observer(({ className, should_show_overlay }: TTradeAnima
     const should_show_tooltip = false;
     const speed_mode = run_panel?.speed_mode || (run_panel?.is_every_tick_mode ? 'fast' : 'normal');
     const is_fast_mode = speed_mode === 'fast';
-    const is_ultra_mode = speed_mode === 'ultra';
     const is_normal_mode = speed_mode === 'normal';
 
     const button_props = React.useMemo(() => {
@@ -95,7 +94,6 @@ const TradeAnimation = observer(({ className, should_show_overlay }: TTradeAnima
                 id: 'db-animation__stop-button',
                 class: classNames('animation__stop-button', {
                     'animation__stop-button--ai-active': scanner?.is_auto_trading,
-                    'animation__stop-button--ultra-active': is_ultra_mode,
                 }),
                 text: scanner?.is_auto_trading ? (
                     <Localize i18n_default_text='AI Stop' />
@@ -111,32 +109,25 @@ const TradeAnimation = observer(({ className, should_show_overlay }: TTradeAnima
                 'animation__run-button--ai-active': scanner?.is_auto_trading,
                 'animation__run-button--normal-active': is_normal_mode,
                 'animation__run-button--fast-active': is_fast_mode,
-                'animation__run-button--ultra-active': is_ultra_mode,
             }),
             text: scanner?.is_auto_trading ? (
-                is_ultra_mode ? (
-                    <Localize i18n_default_text='AI Ultra Run' />
-                ) : is_fast_mode ? (
+                is_fast_mode ? (
                     <Localize i18n_default_text='AI Fast Run' />
                 ) : (
                     <Localize i18n_default_text='AI Run' />
                 )
-            ) : is_ultra_mode ? (
-                <Localize i18n_default_text='Ultra Run' />
             ) : is_fast_mode ? (
                 <Localize i18n_default_text='Fast Run' />
             ) : (
                 <Localize i18n_default_text='Run' />
             ),
-            icon: is_ultra_mode ? (
-                <span style={{ fontSize: '15px', lineHeight: 1, display: 'inline-flex', alignItems: 'center' }}>🔥</span>
-            ) : is_fast_mode ? (
+            icon: is_fast_mode ? (
                 <span style={{ fontSize: '15px', lineHeight: 1, display: 'inline-flex', alignItems: 'center' }}>⚡</span>
             ) : (
                 <LabelPairedPlayLgFillIcon fill='#fff' />
             ),
         };
-    }, [is_stop_button_visible, scanner?.is_auto_trading, is_normal_mode, is_fast_mode, is_ultra_mode]);
+    }, [is_stop_button_visible, scanner?.is_auto_trading, is_normal_mode, is_fast_mode]);
     const show_overlay = should_show_overlay && is_contract_completed;
 
     // Fix TypeScript error by ensuring active_tab is a number

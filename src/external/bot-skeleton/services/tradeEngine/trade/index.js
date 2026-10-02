@@ -263,13 +263,8 @@ const watchScope = ({
 
     return new Promise(resolve => {
         let isResolved = false;
-        let ultraTimer = null;
 
         const cleanup = () => {
-            if (ultraTimer) {
-                clearInterval(ultraTimer);
-                ultraTimer = null;
-            }
             globalObserver.unregister('bot.stop', onBotStop);
             globalObserver.unregister('bot.resume', onBotResume);
             if (typeof window !== 'undefined') {
@@ -322,7 +317,7 @@ const watchScope = ({
                 return;
             }
 
-            // Fast / immediate / ultra / resume: resolve as soon as the flag is set, do not wait for another tick.
+            // Fast / immediate / resume: resolve as soon as the flag is set, do not wait for another tick.
             if (allowImmediate && canPassNow(newState)) {
                 isResolved = true;
                 cleanup();
@@ -345,28 +340,6 @@ const watchScope = ({
                 resolve(true);
             }
         });
-
-        // 🚀 ULTRA MODE: Execute purchase evaluation on every second (1000ms cadence)
-        if (isUltraModeActive() && passScope === constants.BEFORE_PURCHASE) {
-            ultraTimer = setInterval(() => {
-                if (isResolved) return;
-                const state = store.getState();
-                if (state.scope === stopScope || state.scope === constants.STOP || (typeof window !== 'undefined' && window.__dbot_stopped) || !api_base.is_running) {
-                    isResolved = true;
-                    cleanup();
-                    resolve(false);
-                    return;
-                }
-                if (state.scope === passScope && state[passFlag]) {
-                    isResolved = true;
-                    cleanup();
-                    if (fireOnceAction && fireOnceFlag && !state[fireOnceFlag]) {
-                        store.dispatch({ type: fireOnceAction });
-                    }
-                    resolve(true);
-                }
-            }, 1000);
-        }
     });
 };
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { observer } from 'mobx-react-lite';
 import { generateOAuthURL } from '@/components/shared';
@@ -73,117 +73,39 @@ const CurrencyDropdown = () => {
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Header Speed Dropdown (Minimal: Normal - Red, Fast - Green, Ultra - Orange)
+// Header Fast Speed Toggle (Single Icon: Normal - Inactive / Fast - Active Green)
 // ─────────────────────────────────────────────────────────────────────────────
-const HeaderSpeedDropdown = observer(() => {
+const HeaderFastToggle = observer(() => {
     const { run_panel } = useStore() ?? {};
     const { isDesktop } = useDevice();
-    const [isOpen, setIsOpen] = useState(false);
-    const dropdownRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const handleClickOutside = (e: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-                setIsOpen(false);
-            }
-        };
-        if (isOpen) {
-            document.addEventListener('mousedown', handleClickOutside);
-        }
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [isOpen]);
 
     if (!run_panel) return null;
 
-    const mode = run_panel.speed_mode || (run_panel.is_every_tick_mode ? 'fast' : 'normal');
+    const isFast = run_panel.speed_mode === 'fast' || Boolean(run_panel.is_every_tick_mode);
 
-    const speeds = [
-        {
-            id: 'normal' as const,
-            name: 'Normal',
-            color: '#ef4444',
-            icon: '⏱️',
-        },
-        {
-            id: 'fast' as const,
-            name: 'Fast',
-            color: '#10b981',
-            icon: '⚡',
-        },
-        {
-            id: 'ultra' as const,
-            name: 'Ultra',
-            color: '#f97316',
-            icon: '🔥',
-        },
-    ];
-
-    const currentSpeed = speeds.find(s => s.id === mode) || speeds[0];
-
-    const handleSelect = (selectedId: 'normal' | 'fast' | 'ultra') => {
-        run_panel.setSpeedMode(selectedId);
-        setIsOpen(false);
+    const handleToggle = () => {
+        const nextMode = isFast ? 'normal' : 'fast';
+        run_panel.setSpeedMode(nextMode);
     };
 
     return (
-        <div className='speed-dropdown-wrapper' ref={dropdownRef}>
-            <button
-                type='button'
-                id='header-speed-dropdown-btn'
-                className={clsx('app-header__speed-btn', `app-header__speed-btn--${mode}`, {
-                    'app-header__speed-btn--open': isOpen,
-                    'app-header__speed-btn--mobile': !isDesktop,
-                })}
-                onClick={() => setIsOpen(!isOpen)}
-                aria-haspopup='true'
-                aria-expanded={isOpen}
-                title={`Execution Speed: ${currentSpeed.name}`}
-            >
-                <span className='speed-btn__icon'>{currentSpeed.icon}</span>
-                {isDesktop && <span className='speed-btn__text'>{currentSpeed.name}</span>}
-                <svg
-                    className={clsx('speed-btn__chevron', { 'speed-btn__chevron--open': isOpen })}
-                    width='10'
-                    height='10'
-                    viewBox='0 0 24 24'
-                    fill='none'
-                    stroke='currentColor'
-                    strokeWidth='2.5'
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                >
-                    <path d='M6 9l6 6 6-6' />
-                </svg>
-            </button>
-
-            {isOpen && (
-                <div className='speed-dropdown-menu speed-dropdown-menu--minimal'>
-                    {speeds.map(s => {
-                        const isSelected = s.id === mode;
-                        return (
-                            <button
-                                key={s.id}
-                                type='button'
-                                className={clsx('speed-dropdown-item', `speed-dropdown-item--${s.id}`, {
-                                    'speed-dropdown-item--active': isSelected,
-                                })}
-                                onClick={() => handleSelect(s.id)}
-                            >
-                                <span className='speed-dropdown-item__icon'>{s.icon}</span>
-                                <span className='speed-dropdown-item__name'>{s.name}</span>
-                                {isSelected && (
-                                    <svg className='speed-dropdown-item__check-svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke={s.color} strokeWidth='3' strokeLinecap='round' strokeLinejoin='round'>
-                                        <polyline points='20 6 9 17 4 12' />
-                                    </svg>
-                                )}
-                            </button>
-                        );
-                    })}
-                </div>
-            )}
-        </div>
+        <button
+            type='button'
+            id='header-fast-speed-btn'
+            className={clsx('app-header__fast-btn', {
+                'app-header__fast-btn--active': isFast,
+                'app-header__fast-btn--inactive': !isFast,
+                'app-header__fast-btn--mobile': !isDesktop,
+            })}
+            onClick={handleToggle}
+            title={isFast ? 'Fast Speed Enabled (Click to disable)' : 'Enable Fast Speed (Click to activate)'}
+            aria-label={isFast ? 'Disable Fast Speed' : 'Enable Fast Speed'}
+            aria-pressed={isFast}
+        >
+            <span className='fast-btn__icon'>⚡</span>
+            {isDesktop && <span className='fast-btn__text'>Fast</span>}
+            {isFast && <span className='fast-btn__pulse' />}
+        </button>
     );
 });
 
@@ -428,7 +350,7 @@ const AppHeader = observer(() => {
                 </Wrapper>
                 <Wrapper variant='right'>
                     <div style={{ display: 'flex', alignItems: 'center', gap: isDesktop ? '8px' : '4px', paddingRight: isDesktop ? '1.6rem' : '0.4rem' }}>
-                        <HeaderSpeedDropdown />
+                        <HeaderFastToggle />
                         {!isDesktop && (
                             <button
                                 type='button'

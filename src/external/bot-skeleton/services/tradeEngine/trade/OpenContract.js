@@ -2,7 +2,7 @@ import { getRoundedNumber } from '@/components/shared';
 import DBotStore from '../../../scratch/dbot-store';
 import { api_base } from '../../api/api-base';
 import { contract as broadcastContract, contractStatus } from '../utils/broadcast';
-import { isFastModeActive, isUltraModeActive } from '../utils/fastMode';
+import { isFastModeActive } from '../utils/fastMode';
 import { openContractReceived, sell } from './state/actions';
 
 export default Engine =>

@@ -133,7 +133,7 @@ export default class RunPanelStore {
 
         const handleSpeedModeRequest = (event: any) => {
             if (event?.detail) {
-                if (event.detail.mode && ['normal', 'fast', 'ultra'].includes(event.detail.mode)) {
+                if (event.detail.mode && ['normal', 'fast'].includes(event.detail.mode)) {
                     runInAction(() => {
                         this.setSpeedMode(event.detail.mode);
                     });
@@ -164,23 +164,22 @@ export default class RunPanelStore {
     is_sell_requested = false;
     show_bot_stop_message = false;
     is_contract_buying_in_progress = false;
-    speed_mode: 'normal' | 'fast' | 'ultra' = (() => {
+    speed_mode: 'normal' | 'fast' = (() => {
         if (typeof localStorage === 'undefined') return 'normal';
         const speed = localStorage.getItem('bot_execution_speed');
-        if (speed === '3') return 'ultra';
-        if (speed === '2' || localStorage.getItem('dbot_every_tick_mode') === 'true') return 'fast';
+        if (speed === '2' || speed === '3' || localStorage.getItem('dbot_every_tick_mode') === 'true') return 'fast';
         return 'normal';
     })();
     is_every_tick_mode =
         typeof localStorage !== 'undefined'
-            ? localStorage.getItem('bot_execution_speed') === '3' ||
-              localStorage.getItem('bot_execution_speed') === '2' ||
+            ? localStorage.getItem('bot_execution_speed') === '2' ||
+              localStorage.getItem('bot_execution_speed') === '3' ||
               localStorage.getItem('dbot_every_tick_mode') === 'true'
             : false;
 
-    setSpeedMode = (mode: 'normal' | 'fast' | 'ultra') => {
+    setSpeedMode = (mode: 'normal' | 'fast') => {
         this.speed_mode = mode;
-        this.is_every_tick_mode = mode !== 'normal';
+        this.is_every_tick_mode = mode === 'fast';
         setExecutionSpeedMode(mode);
     };
 
@@ -190,13 +189,7 @@ export default class RunPanelStore {
     };
 
     toggleEveryTickMode = () => {
-        // Cycle: normal (1) -> fast (2) -> ultra (3) -> normal (1)
-        const nextMode =
-            this.speed_mode === 'normal'
-                ? 'fast'
-                : this.speed_mode === 'fast'
-                ? 'ultra'
-                : 'normal';
+        const nextMode = this.speed_mode === 'fast' ? 'normal' : 'fast';
         this.setSpeedMode(nextMode);
     };
 

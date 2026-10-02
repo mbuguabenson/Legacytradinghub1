@@ -507,189 +507,114 @@
     }
 }
 
-// ─── Minimal Header Speed Dropdown ──────────────────────────────────────────
-.speed-dropdown-wrapper {
-    position: relative;
-    display: inline-block;
-}
-
-.app-header__speed-btn {
+// ─── Single Header Fast Speed Toggle ──────────────────────────────────────────
+.app-header__fast-btn {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    height: 30px;
-    padding: 0 10px;
-    border-radius: 15px;
-    border: 1px solid var(--border-normal);
-    background: var(--general-section-1);
-    color: var(--text-general);
+    gap: 6px;
+    height: 32px;
+    padding: 0 12px;
+    border-radius: 16px;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     user-select: none;
     outline: none;
+    position: relative;
+    letter-spacing: 0.3px;
 
-    &:hover {
-        border-color: var(--text-less-prominent);
-        background: var(--general-section-2);
-    }
+    &--inactive {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: rgba(255, 255, 255, 0.65);
 
-    &--open {
-        border-color: var(--text-prominent) !important;
-    }
-
-    &--normal {
-        border-color: rgba(239, 68, 68, 0.4);
-        &:hover {
-            border-color: #ef4444;
-            background: rgba(239, 68, 68, 0.08);
+        .fast-btn__icon {
+            filter: grayscale(1) opacity(0.7);
+            transition: all 0.2s ease;
         }
-    }
 
-    &--fast {
-        border-color: rgba(16, 185, 129, 0.4);
         &:hover {
-            border-color: #10b981;
             background: rgba(16, 185, 129, 0.08);
+            border-color: rgba(16, 185, 129, 0.4);
+            color: #ffffff;
+
+            .fast-btn__icon {
+                filter: none;
+                transform: scale(1.1);
+            }
         }
     }
 
-    &--ultra {
-        border-color: rgba(249, 115, 22, 0.5);
-        color: #f97316;
-        box-shadow: 0 0 8px rgba(249, 115, 22, 0.2);
+    &--active {
+        background: rgba(16, 185, 129, 0.15);
+        border: 1px solid #10b981;
+        color: #10b981;
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.35), inset 0 0 8px rgba(16, 185, 129, 0.12);
+
+        .fast-btn__icon {
+            filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.8));
+            animation: fastIconPulse 1.8s ease-in-out infinite alternate;
+        }
+
         &:hover {
-            border-color: #f97316;
-            background: rgba(249, 115, 22, 0.1);
+            background: rgba(16, 185, 129, 0.25);
+            border-color: #34d399;
+            box-shadow: 0 0 16px rgba(16, 185, 129, 0.55), inset 0 0 10px rgba(16, 185, 129, 0.2);
+            transform: translateY(-1px);
         }
     }
 
     &--mobile {
-        padding: 0 6px;
-        height: 26px;
+        padding: 0 8px;
+        height: 28px;
+        border-radius: 14px;
+        gap: 0;
     }
 
-    .speed-btn__dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        flex-shrink: 0;
-
-        &--normal {
-            background-color: #ef4444;
-            box-shadow: 0 0 6px rgba(239, 68, 68, 0.7);
-        }
-        &--fast {
-            background-color: #10b981;
-            box-shadow: 0 0 6px rgba(16, 185, 129, 0.7);
-        }
-        &--ultra {
-            background-color: #f97316;
-            box-shadow: 0 0 8px rgba(249, 115, 22, 0.7);
-        }
-    }
-
-    .speed-btn__icon {
-        font-size: 13px;
+    .fast-btn__icon {
+        font-size: 14px;
         line-height: 1;
         display: inline-flex;
         align-items: center;
-        flex-shrink: 0;
+        justify-content: center;
     }
 
-    .speed-btn__text {
+    .fast-btn__text {
         font-size: 11px;
         font-weight: 700;
-        white-space: nowrap;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
-    .speed-btn__chevron {
-        transition: transform 0.2s ease;
-        opacity: 0.6;
-
-        &--open {
-            transform: rotate(180deg);
-        }
-    }
-}
-
-.speed-dropdown-menu--minimal {
-    position: absolute;
-    top: calc(100% + 6px);
-    right: 0;
-    min-width: 125px;
-    background: #11151f;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 10px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.65);
-    padding: 4px;
-    z-index: 100005 !important;
-    animation: speedMenuFadeIn 0.15s ease-out;
-    backdrop-filter: blur(12px);
-
-    .speed-dropdown-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        width: 100%;
-        padding: 7px 10px;
-        border-radius: 6px;
-        border: 1px solid transparent;
-        background: transparent;
-        color: #e2e8f0;
-        cursor: pointer;
-        text-align: left;
-        transition: all 0.15s ease;
-        font-size: 12px;
-        font-weight: 600;
-
-        &:hover {
-            background: rgba(255, 255, 255, 0.07);
-        }
-
-        &__icon {
-            font-size: 13px;
-            line-height: 1;
-            display: inline-flex;
-            align-items: center;
-            flex-shrink: 0;
-        }
-
-        &__name {
-            flex: 1;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        &__check-svg {
-            flex-shrink: 0;
-        }
-
-        &--active {
-            background: rgba(255, 255, 255, 0.08);
-
-            &.speed-dropdown-item--normal {
-                color: #ef4444;
-            }
-            &.speed-dropdown-item--fast {
-                color: #10b981;
-            }
-            &.speed-dropdown-item--ultra {
-                color: #f97316;
-            }
-        }
+    .fast-btn__pulse {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background-color: #10b981;
+        box-shadow: 0 0 6px #10b981;
+        margin-left: 2px;
+        animation: fastPulseDot 1.4s infinite cubic-bezier(0.4, 0, 0.6, 1);
     }
 }
 
-@keyframes speedMenuFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-4px);
-    }
-    to {
+@keyframes fastPulseDot {
+    0%, 100% {
         opacity: 1;
-        transform: translateY(0);
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.4;
+        transform: scale(0.7);
+    }
+}
+
+@keyframes fastIconPulse {
+    0% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(1.15);
     }
 }
 

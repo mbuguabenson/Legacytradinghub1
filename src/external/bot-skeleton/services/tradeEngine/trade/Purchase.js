@@ -1,8 +1,7 @@
 import { LogTypes } from '../../../constants/messages';
 import DBotStore from '../../../scratch/dbot-store';
 import { api_base } from '../../api/api-base';
-import { contractStatus, info, log } from '../utils/broadcast';
-import { isFastModeActive, isUltraModeActive, setFastExecutionOverride } from '../utils/fastMode';
+import { isFastModeActive, setFastExecutionOverride } from '../utils/fastMode';
 import { doUntilDone, getUUID, recoverFromError, tradeOptionToBuy } from '../utils/helpers';
 import { proposalsReady, purchaseSuccessful, sell } from './state/actions';
 import { BEFORE_PURCHASE } from './state/constants';
@@ -48,8 +47,7 @@ export default Engine =>
                 setFastExecutionOverride(true);
             }
 
-            const isUltra = isUltraModeActive();
-            const isFastMode = blockFastOn || isFastModeActive() || isUltra;
+            const isFastMode = blockFastOn || isFastModeActive();
             if (isFastMode) {
                 this.is_proposal_subscription_required = false;
                 if (!this.store.getState().proposalsReady) {
@@ -63,9 +61,9 @@ export default Engine =>
                 return this.bulkPurchase(contract_type, count);
             }
 
-            // Prevent duplicate parallel purchases or purchases when stopped (allow parallel in Ultra)
+            // Prevent duplicate parallel purchases or purchases when stopped
             if (
-                (!isUltra && this.is_contract_buying_in_progress) ||
+                this.is_contract_buying_in_progress ||
                 this.$scope?.stopped ||
                 (typeof window !== 'undefined' && window.__dbot_stopped) ||
                 !api_base.is_running
