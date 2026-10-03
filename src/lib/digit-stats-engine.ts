@@ -19,6 +19,7 @@ export class DigitStatsEngine {
 
     // Cached Stats
     digit_stats: TDigitStat[] = [];
+    digit_counts: number[] = Array(10).fill(0);
     recent_powers: number[][] = []; // History of powers for each digit [tick][digit]
     max_power_history = 50;
 
@@ -30,6 +31,7 @@ export class DigitStatsEngine {
         this.ticks = [];
         this.prices = [];
         this.current_price = 0;
+        this.digit_counts = Array(10).fill(0);
         this.even_odd_history = [];
         this.over_under_history = [];
         this.matches_differs_history = [];
@@ -79,7 +81,7 @@ export class DigitStatsEngine {
     }) {
         if (config.over_under_threshold !== undefined) this.over_under_threshold = config.over_under_threshold;
         if (config.match_diff_digit !== undefined) this.match_diff_digit = config.match_diff_digit;
-        if (config.total_samples !== undefined) this.total_samples = config.total_samples;
+        if (config.total_samples !== undefined) this.total_samples = Math.min(config.total_samples, 2000);
         if (config.pip !== undefined) this.pip = config.pip;
 
         // Re-calculate stats with new config if needed
@@ -88,13 +90,29 @@ export class DigitStatsEngine {
 
     private updateStats() {
         const counts = Array(10).fill(0);
-        this.ticks.forEach(d => counts[d]++);
+        for (let i = 0; i < this.ticks.length; i++) {
+            const d = this.ticks[i];
+            if (d >= 0 && d <= 9) counts[d]++;
+        }
+        this.digit_counts = counts;
 
         const total = this.ticks.length || 1;
 
         // Calculate powers/trend for each digit
         const last_50_ticks = this.ticks.slice(-50);
         const last_10_ticks = this.ticks.slice(-10);
+
+        // Pre-count last 10 and last 50
+        const c10 = Array(10).fill(0);
+        for (let i = 0; i < last_10_ticks.length; i++) {
+            const d = last_10_ticks[i];
+            if (d >= 0 && d <= 9) c10[d]++;
+        }
+        const c50 = Array(10).fill(0);
+        for (let i = 0; i < last_50_ticks.length; i++) {
+            const d = last_50_ticks[i];
+            if (d >= 0 && d <= 9) c50[d]++;
+        }
 
         // Rank digits by frequency
         const sorted_indices = counts.map((c, i) => ({ count: c, index: i })).sort((a, b) => b.count - a.count);
@@ -106,8 +124,8 @@ export class DigitStatsEngine {
             const rank = sorted_indices.findIndex(s => s.index === digit) + 1;
 
             // Calculate power movement (trend)
-            const recent_count = last_10_ticks.filter(d => d === digit).length;
-            const mid_count = last_50_ticks.filter(d => d === digit).length / 5;
+            const recent_count = c10[digit];
+            const mid_count = c50[digit] / 5;
             const is_increasing = recent_count > mid_count;
             const power = 50 + (recent_count - mid_count) * 10;
 
@@ -193,9 +211,13 @@ export class DigitStatsEngine {
 
     getPercentages() {
         const total = this.ticks.length || 1;
-        const evens = this.ticks.filter(d => d % 2 === 0).length;
-        const overs = this.ticks.filter(d => d > this.over_under_threshold).length;
-        const matches = this.ticks.filter(d => d === this.match_diff_digit).length;
+        const counts = this.digit_counts || Array(10).fill(0);
+        const evens = counts[0] + counts[2] + counts[4] + counts[6] + counts[8];
+        let overs = 0;
+        for (let i = this.over_under_threshold + 1; i <= 9; i++) {
+            overs += counts[i] || 0;
+        }
+        const matches = counts[this.match_diff_digit] || 0;
 
         let rises = 0;
         let valid_price_deltas = 0;

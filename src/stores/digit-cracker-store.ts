@@ -3,7 +3,7 @@ import { api_base, observer as globalObserver } from '@/external/bot-skeleton';
 import { DigitStatsEngine } from '@/lib/digit-stats-engine';
 import { DigitTradeEngine } from '@/lib/digit-trade-engine';
 import { getGroupedMarkets } from '@/constants/markets';
-import { safeSubscribe } from '@/utils/websocket-handler';
+import { subscribeTicks } from '@/services/deriv-tick-manager.service';
 import RootStore from './root-store';
 
 export type TDigitStat = {
@@ -114,15 +114,7 @@ export default class DigitCrackerStore {
             window.addEventListener('account_switched', () => {
                 this.subscribeToTicks();
             });
-            document.addEventListener('visibilitychange', () => {
-                if (!document.hidden && (!this.ticks || this.ticks.length === 0)) {
-                    this.subscribeToTicks();
-                }
-            });
         }
-        globalObserver.register('api.authorize', () => {
-            this.subscribeToTicks();
-        });
     }
 
     @action
@@ -259,16 +251,10 @@ export default class DigitCrackerStore {
             } catch {}
             this.unsubscribe_ticks = null;
         }
-        if (this.active_stream_id && api_base.api) {
-            try {
-                api_base.api.send({ forget: this.active_stream_id }).catch(() => {});
-            } catch {}
-            this.active_stream_id = null;
-        }
-        this.is_subscribing = false;
+        runInAction(() => {
+            this.is_subscribing = false;
+        });
     };
-
-    private active_stream_id: string | null = null;
 
     @action
     subscribeToTicks = async (retry_count = 0) => {
@@ -284,20 +270,15 @@ export default class DigitCrackerStore {
 
             // Clear previous subscription
             if (this.unsubscribe_ticks) {
-                this.unsubscribe_ticks();
-                this.unsubscribe_ticks = null;
-            }
-
-            if (this.active_stream_id && api_base.api) {
                 try {
-                    await api_base.api.send({ forget: this.active_stream_id });
-                } catch (e) {}
-                this.active_stream_id = null;
+                    this.unsubscribe_ticks();
+                } catch {}
+                this.unsubscribe_ticks = null;
             }
 
             this.is_subscribing = true;
             const sym = this.symbol;
-            const safeCount = Math.min(this.total_ticks || 5000, 5000);
+            const safeCount = Math.min(this.total_ticks || 1000, 1000);
 
             // 1. Initial history
             try {
@@ -328,34 +309,17 @@ export default class DigitCrackerStore {
 
             if (this.symbol !== sym) return;
 
-            // 2. Direct RxJS observable via safeSubscribe
-            const tickObservable = (api_base.api as any)?.subscribe?.({ ticks: sym });
-            const subscription = safeSubscribe(
-                tickObservable,
-                (tickRes: any) => {
-                    if (this.symbol !== sym) return;
-                    if (tickRes?.tick && tickRes.tick.symbol === sym) {
-                        this.handleTick(tickRes.tick);
-                    }
-                },
-                (err: any) => {
-                    const code = err?.error?.code || err?.code;
-                    const isAlreadySub =
-                        code === 'AlreadySubscribed' ||
-                        String(err?.message || '').toLowerCase().includes('already subscribed') ||
-                        String(err?.error?.message || '').toLowerCase().includes('already subscribed');
-                    if (isAlreadySub) return;
-                    if (code === 'InvalidSymbol') {
-                        console.info(`[DigitCrackerStore] Symbol ${sym} unavailable for streaming.`);
-                        return;
-                    }
-                    console.warn(`[DigitCrackerStore] Stream error for ${sym}:`, err);
+            // 2. Multiplexed tick subscription via derivTickManager
+            const sub = subscribeTicks(sym, (tickRes: any) => {
+                if (this.symbol !== sym) return;
+                if (tickRes?.tick && tickRes.tick.symbol === sym) {
+                    this.handleTick(tickRes.tick);
                 }
-            );
+            });
 
             this.unsubscribe_ticks = () => {
                 try {
-                    subscription?.unsubscribe?.();
+                    sub?.unsubscribe?.();
                 } catch (e) {}
             };
 
@@ -413,9 +377,7 @@ export default class DigitCrackerStore {
 
     @action
     dispose = () => {
-        if (this.unsubscribe_ticks) {
-            this.unsubscribe_ticks();
-            this.unsubscribe_ticks = null;
-        }
+        this.unsubscribeFromTicks();
+        this.trade_engine?.dispose?.();
     };
 }

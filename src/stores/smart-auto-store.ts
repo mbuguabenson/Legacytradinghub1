@@ -571,11 +571,22 @@ export default class SmartAutoStore {
         let totalProfit = 0;
         let wins = 0;
         let losses = 0;
+        let attempts = 0;
+        const maxAttempts = 35; // 35 seconds safety timeout
 
         const check = setInterval(async () => {
+            attempts++;
             try {
-                if (remaining.length === 0) {
+                if (remaining.length === 0 || attempts >= maxAttempts) {
                     clearInterval(check);
+                    runInAction(() => {
+                        if (batchWins > 0 || batchLosses > 0) {
+                            this.handleBulkResult(totalProfit, wins, losses, config);
+                        } else {
+                            this.is_executing = false;
+                            this.bot_status = attempts >= maxAttempts ? 'TIMEOUT' : 'IDLE';
+                        }
+                    });
                     return;
                 }
 
@@ -593,6 +604,9 @@ export default class SmartAutoStore {
                         totalProfit += profit;
                         if (profit > 0) wins++;
                         else losses++;
+                    } else if (res?.error) {
+                        // Error on this specific contract — discard to prevent infinite hang
+                        losses++;
                     } else {
                         stillOpen.push(remaining[idx]);
                     }

@@ -38,8 +38,9 @@ const DigitCracker = observer(() => {
 
     // Initialize/Cleanup
     useEffect(() => {
+        digit_cracker?.subscribeToTicks?.();
         return () => {
-            digit_cracker.dispose();
+            digit_cracker?.dispose?.();
         };
     }, [digit_cracker]);
 

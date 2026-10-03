@@ -1,0 +1,846 @@
+// ═══════════════════════════════════════════════════════════════
+// ✦ LUXURY NEUMORPHIC-GLASS INSTITUTIONAL WELCOME SCREEN
+// ═══════════════════════════════════════════════════════════════
+
+.lux-welcome-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #030712;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    user-select: none;
+    cursor: default;
+    padding: 24px 16px;
+    box-sizing: border-box;
+
+    &--visible {
+        opacity: 1;
+        transition: opacity 0.4s ease;
+    }
+
+    &--exiting {
+        opacity: 0;
+        transform: scale(1.04);
+        filter: blur(12px);
+        pointer-events: none;
+        transition: opacity 0.46s cubic-bezier(0.16, 1, 0.3, 1),
+                    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+                    filter 0.46s ease;
+    }
+}
+
+// ─── Atmospheric Background & Ambient Lighting ────────────────
+.lux-bg-vignette {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at 50% 45%, rgba(3, 7, 18, 0.3) 0%, rgba(3, 7, 18, 0.92) 85%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.lux-ambient-mesh {
+    position: fixed;
+    inset: -25%;
+    background: 
+        radial-gradient(circle at 30% 30%, rgba(14, 165, 233, 0.15) 0%, transparent 45%),
+        radial-gradient(circle at 70% 65%, rgba(16, 185, 129, 0.14) 0%, transparent 45%),
+        radial-gradient(circle at 50% 20%, rgba(99, 102, 241, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 60% 35%, rgba(6, 182, 212, 0.1) 0%, transparent 40%);
+    filter: blur(85px);
+    pointer-events: none;
+    animation: luxMeshDrift 16s ease-in-out infinite alternate;
+    z-index: 2;
+}
+
+.lux-bg-grid {
+    position: fixed;
+    inset: 0;
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    background-size: 38px 38px;
+    mask-image: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.85) 0%, transparent 80%);
+    -webkit-mask-image: radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.85) 0%, transparent 80%);
+    pointer-events: none;
+    z-index: 3;
+}
+
+.lux-particles-container {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 4;
+
+    .lux-particle {
+        position: absolute;
+        width: 2.5px;
+        height: 2.5px;
+        border-radius: 50%;
+        background: #38bdf8;
+        box-shadow: 0 0 8px #38bdf8, 0 0 16px #34d399;
+        opacity: 0.55;
+        animation: luxParticleFloat infinite ease-in-out alternate;
+    }
+}
+
+// ─── Center Glassmorphic & Neumorphic Container ──────────────
+.lux-card-container {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 660px;
+    margin: auto;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.lux-welcome-card {
+    position: relative;
+    width: 100%;
+    background: linear-gradient(155deg, rgba(15, 23, 42, 0.84) 0%, rgba(8, 14, 28, 0.9) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 26px;
+    padding: 32px 32px 26px;
+    // Neumorphic double-depth + cool glow
+    box-shadow: 
+        0 30px 80px -15px rgba(0, 0, 0, 0.95),
+        0 0 45px -10px rgba(14, 165, 233, 0.18),
+        inset 0 1px 1px 0 rgba(255, 255, 255, 0.22),
+        inset 0 -1px 2px 0 rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(30px) saturate(190%);
+    -webkit-backdrop-filter: blur(30px) saturate(190%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    animation: luxCardEnter 0.52s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+
+    @media (max-width: 640px) {
+        padding: 24px 18px 20px;
+        border-radius: 22px;
+    }
+}
+
+// ─── Top Institutional Beacon Badge ──────────────────────────
+.lux-top-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 15px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    margin-bottom: 20px;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+    .lux-status-beacon {
+        position: relative;
+        width: 8px;
+        height: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .lux-beacon-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #10b981;
+            opacity: 0.75;
+            animation: luxBeaconPulse 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+
+        .lux-beacon-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #34d399;
+            box-shadow: 0 0 8px #34d399;
+        }
+    }
+
+    .lux-badge-title {
+        font-weight: 700;
+        color: #f1f5f9;
+        font-size: 10.5px;
+        letter-spacing: 0.08em;
+    }
+
+    .lux-badge-sep {
+        color: #475569;
+        font-size: 10px;
+    }
+
+    .lux-badge-sub {
+        font-weight: 600;
+        color: #94a3b8;
+        font-size: 10px;
+    }
+
+    .lux-badge-ping {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 9.5px;
+        font-weight: 700;
+        color: #38bdf8;
+        background: rgba(56, 189, 248, 0.12);
+        padding: 1px 6px;
+        border-radius: 4px;
+        margin-left: 2px;
+    }
+
+    @media (max-width: 480px) {
+        gap: 6px;
+        padding: 4px 10px;
+
+        .lux-badge-sub {
+            display: none;
+        }
+    }
+}
+
+// ─── Emblem & Glowing Halo ───────────────────────────────────
+.lux-emblem-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+
+    .lux-emblem-halo {
+        position: absolute;
+        width: 125px;
+        height: 125px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, rgba(14, 165, 233, 0.15) 45%, transparent 70%);
+        filter: blur(20px);
+        pointer-events: none;
+        animation: luxHaloBreathe 4s ease-in-out infinite alternate;
+    }
+
+    .lux-brand-emblem {
+        width: 76px;
+        height: 76px;
+        position: relative;
+        z-index: 2;
+        transition: transform 0.3s ease;
+
+        &:hover {
+            transform: scale(1.04) translateY(-2px);
+        }
+
+        @media (max-width: 600px) {
+            width: 64px;
+            height: 64px;
+        }
+    }
+}
+
+// ─── Brand Titles (Montserrat Hierarchy) ─────────────────────
+.lux-brand-info {
+    margin-bottom: 12px;
+
+    .lux-brand-title {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 23px;
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        margin: 0;
+        background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 65%, #cbd5e1 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 2px 16px rgba(255, 255, 255, 0.12);
+
+        @media (max-width: 600px) {
+            font-size: 19px;
+            letter-spacing: 0.1em;
+        }
+    }
+
+    .lux-brand-subtitle {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 10.5px;
+        font-weight: 600;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        margin: 5px 0 0;
+        color: #38bdf8;
+        opacity: 0.95;
+
+        @media (max-width: 600px) {
+            font-size: 9.5px;
+            letter-spacing: 0.16em;
+        }
+    }
+}
+
+// ─── Kerned Motto Banner (Regular Font) ───────────────────────
+// "CHECK | EXECUTE | WITHDRAW message kerned on regular font"
+.lux-motto-banner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 6px 18px;
+    border-radius: 999px;
+    background: rgba(14, 165, 233, 0.05);
+    border: 1px solid rgba(56, 189, 248, 0.16);
+    margin-bottom: 22px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+    .lux-motto-item {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 11.5px;
+        font-weight: 400; // Regular font as requested
+        letter-spacing: 0.24em; // Generous elegant kerning
+        color: #e2e8f0;
+        text-transform: uppercase;
+        transition: color 0.2s ease;
+    }
+
+    .lux-motto-sep {
+        font-family: 'Montserrat', sans-serif;
+        font-size: 12px;
+        font-weight: 300;
+        color: #38bdf8;
+        opacity: 0.7;
+    }
+
+    @media (max-width: 500px) {
+        gap: 8px;
+        padding: 5px 12px;
+
+        .lux-motto-item {
+            font-size: 10px;
+            letter-spacing: 0.16em;
+        }
+    }
+}
+
+// ─── Feature Cards (Cottoned Neumorphic + Glassmorphic) ───────
+.lux-feature-cards {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 22px;
+
+    @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+}
+
+.lux-feature-card {
+    position: relative;
+    border-radius: 18px;
+    padding: 16px 14px;
+    background: linear-gradient(145deg, rgba(30, 41, 59, 0.65) 0%, rgba(15, 23, 42, 0.75) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: default;
+
+    // Cottoned soft neumorphic depth
+    box-shadow: 
+        0 10px 24px -6px rgba(0, 0, 0, 0.55),
+        inset 1px 1px 1px rgba(255, 255, 255, 0.14),
+        inset -1px -1px 2px rgba(0, 0, 0, 0.45);
+
+    .lux-card-glow-edge {
+        position: absolute;
+        inset: -1px;
+        border-radius: 19px;
+        border: 1px solid transparent;
+        pointer-events: none;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    &:hover {
+        transform: translateY(-2px);
+        background: linear-gradient(145deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.88) 100%);
+        border-color: rgba(56, 189, 248, 0.3);
+        box-shadow: 
+            0 14px 30px -6px rgba(0, 0, 0, 0.7),
+            0 0 20px -5px rgba(56, 189, 248, 0.2),
+            inset 1px 1px 1px rgba(255, 255, 255, 0.2);
+    }
+
+    &--active {
+        border-color: rgba(56, 189, 248, 0.45);
+        background: linear-gradient(145deg, rgba(30, 41, 59, 0.85) 0%, rgba(15, 23, 42, 0.92) 100%);
+        box-shadow: 
+            0 14px 32px -6px rgba(0, 0, 0, 0.75),
+            0 0 24px -4px var(--card-accent, rgba(56, 189, 248, 0.3)),
+            inset 1px 1px 1px rgba(255, 255, 255, 0.22);
+
+        .lux-card-glow-edge {
+            border-color: var(--card-accent, #38bdf8);
+            box-shadow: inset 0 0 12px -3px var(--card-accent, #38bdf8);
+        }
+
+        .lux-card-top-row .lux-card-icon-box {
+            color: var(--card-accent, #38bdf8);
+            border-color: var(--card-accent, #38bdf8);
+            box-shadow: 0 0 12px var(--card-accent, #38bdf8);
+        }
+
+        .lux-card-body .lux-card-title {
+            color: #ffffff;
+        }
+    }
+
+    .lux-card-top-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+
+        .lux-card-icon-box {
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: inset 1px 1px 1px rgba(255, 255, 255, 0.1);
+        }
+
+        .lux-card-step-badge {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 8.5px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: #94a3b8;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 3px 7px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            text-transform: uppercase;
+        }
+    }
+
+    .lux-card-body {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+
+        .lux-card-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin: 0;
+            letter-spacing: 0.01em;
+            line-height: 1.25;
+            transition: color 0.2s ease;
+        }
+
+        .lux-card-subtitle {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 10px;
+            font-weight: 600;
+            color: #38bdf8;
+            letter-spacing: 0.04em;
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        .lux-card-desc {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 11px;
+            font-weight: 400; // Regular font
+            color: #94a3b8;
+            line-height: 1.35;
+            margin: 4px 0 0;
+        }
+    }
+
+    @media (max-width: 600px) {
+        padding: 12px 14px;
+
+        .lux-card-top-row {
+            margin-bottom: 2px;
+        }
+
+        .lux-card-body {
+            .lux-card-title {
+                font-size: 13.5px;
+            }
+            .lux-card-desc {
+                font-size: 10.5px;
+            }
+        }
+    }
+}
+
+// ─── Active Stage Telemetry Tile ─────────────────────────────
+.lux-stage-tile {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 16px;
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(14px);
+    box-sizing: border-box;
+    text-align: left;
+    margin-bottom: 18px;
+    box-shadow: 
+        0 4px 16px -4px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    animation: luxStageEnter 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+
+    .lux-stage-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+    }
+
+    .lux-stage-text-block {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+
+        .lux-stage-phase {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            font-weight: 700;
+            color: #94a3b8;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .lux-stage-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.01em;
+            line-height: 1.25;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+
+            @media (max-width: 480px) {
+                font-size: 12px;
+                white-space: normal;
+            }
+        }
+
+        .lux-stage-detail {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 11px;
+            font-weight: 400; // Regular font
+            color: #94a3b8;
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+
+            @media (max-width: 480px) {
+                font-size: 10px;
+                white-space: normal;
+            }
+        }
+    }
+}
+
+// ─── Active Colorful Loader Progress Bar ─────────────────────
+// "active colorsfull loader progress bra to show site"
+.lux-progress-block {
+    width: 100%;
+    margin-bottom: 22px;
+
+    .lux-progress-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+
+        .lux-progress-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            color: #cbd5e1;
+
+            .lux-label-dot {
+                width: 5px;
+                height: 5px;
+                border-radius: 50%;
+                background: #34d399;
+                box-shadow: 0 0 6px #34d399;
+            }
+        }
+
+        .lux-progress-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 800;
+            color: #38bdf8;
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+        }
+    }
+
+    .lux-progress-track {
+        position: relative;
+        width: 100%;
+        height: 6px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+        box-shadow: 
+            inset 0 1px 3px rgba(0, 0, 0, 0.6),
+            0 1px 0 rgba(255, 255, 255, 0.05);
+
+        .lux-progress-fill {
+            position: relative;
+            height: 100%;
+            border-radius: 999px;
+            // Active colorful multi-spectrum gradient
+            background: linear-gradient(
+                90deg, 
+                #00f2fe 0%, 
+                #4facfe 20%, 
+                #6366f1 40%, 
+                #ec4899 65%, 
+                #f59e0b 82%, 
+                #10b981 100%
+            );
+            background-size: 200% 100%;
+            animation: luxShimmer 2.4s linear infinite;
+            box-shadow: 0 0 16px rgba(56, 189, 248, 0.8), 0 0 24px rgba(236, 72, 153, 0.5);
+            transition: width 0.24s ease-out;
+
+            .lux-progress-laser {
+                position: absolute;
+                right: 0;
+                top: -3px;
+                bottom: -3px;
+                width: 14px;
+                border-radius: 50%;
+                background: #ffffff;
+                box-shadow: 0 0 14px #ffffff, 0 0 24px #38bdf8;
+            }
+        }
+    }
+}
+
+// ─── Footer: Powered by Deriv & Quick Launch ──────────────────
+// "below add pwoerd by deriv logo"
+.lux-card-footer {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding-top: 4px;
+
+    .lux-powered-by {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: default;
+
+        .lux-powered-label {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 9.5px;
+            font-weight: 500;
+            letter-spacing: 0.16em;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+
+        .lux-deriv-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.09);
+            box-shadow: inset 1px 1px 1px rgba(255, 255, 255, 0.1);
+            transition: all 0.22s ease;
+
+            &:hover {
+                background: rgba(255, 255, 255, 0.08);
+                border-color: rgba(255, 68, 79, 0.4);
+                box-shadow: 0 0 12px rgba(255, 68, 79, 0.35);
+            }
+
+            .lux-deriv-logo {
+                width: 15px;
+                height: 15px;
+                flex-shrink: 0;
+            }
+
+            .lux-deriv-text {
+                font-family: 'Montserrat', sans-serif;
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 0.04em;
+                color: #f1f5f9;
+                text-transform: lowercase;
+            }
+        }
+    }
+
+    .lux-launch-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 18px;
+        border-radius: 10px;
+        background: rgba(56, 189, 248, 0.08);
+        border: 1px solid rgba(56, 189, 248, 0.3);
+        color: #38bdf8;
+        font-family: 'Montserrat', sans-serif;
+        font-size: 11.5px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+        letter-spacing: 0.04em;
+        white-space: nowrap;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+        &:hover {
+            background: #38bdf8;
+            color: #030712;
+            border-color: #38bdf8;
+            box-shadow: 0 0 22px rgba(56, 189, 248, 0.55);
+            transform: translateY(-1px);
+        }
+
+        &:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 480px) {
+            padding: 6px 12px;
+            font-size: 10.5px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        flex-direction: column-reverse;
+        gap: 12px;
+
+        .lux-launch-btn {
+            width: 100%;
+            justify-content: center;
+            padding: 9px 16px;
+        }
+
+        .lux-powered-by {
+            justify-content: center;
+            width: 100%;
+        }
+    }
+}
+
+// ─── Keyframe Animations ─────────────────────────────────────
+@keyframes luxCardEnter {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes luxHaloBreathe {
+    0% {
+        transform: scale(0.92);
+        opacity: 0.45;
+    }
+    100% {
+        transform: scale(1.16);
+        opacity: 0.85;
+    }
+}
+
+@keyframes luxMeshDrift {
+    0% {
+        transform: rotate(0deg) scale(1);
+    }
+    100% {
+        transform: rotate(6deg) scale(1.08);
+    }
+}
+
+@keyframes luxBeaconPulse {
+    0% {
+        transform: scale(0.95);
+        opacity: 0.9;
+    }
+    70% {
+        transform: scale(2.2);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(2.2);
+        opacity: 0;
+    }
+}
+
+@keyframes luxParticleFloat {
+    0% {
+        transform: translateY(0px) scale(0.7);
+        opacity: 0.25;
+    }
+    100% {
+        transform: translateY(-26px) scale(1.15);
+        opacity: 0.85;
+    }
+}
+
+@keyframes luxStageEnter {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes luxShimmer {
+    0% {
+        background-position: 0% 50%;
+    }
+    100% {
+        background-position: 200% 50%;
+    }
+}

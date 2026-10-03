@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '@/hooks/useStore';
@@ -14,6 +14,13 @@ const CirclesAnalysis = observer(() => {
     const [view_strategy, setViewStrategy] = useState<'even_odd' | 'over_under' | 'differs' | 'matches' | 'rise_fall'>(
         'even_odd'
     );
+
+    useEffect(() => {
+        analysis?.subscribeToTicks?.();
+        return () => {
+            analysis?.dispose?.();
+        };
+    }, [analysis]);
 
     const { is_socket_opened, latency } = common;
     const {

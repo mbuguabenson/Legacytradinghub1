@@ -125,6 +125,7 @@ export class DigitTradeEngine {
     private consecutive_odd = 0;
     private consecutive_over = 0;
     private consecutive_under = 0;
+    private active_intervals: Set<ReturnType<typeof setInterval>> = new Set();
 
     constructor() {
         makeObservable(this);
@@ -322,11 +323,23 @@ export class DigitTradeEngine {
         let totalBatchProfit = 0;
         let batchWins = 0;
         let batchLosses = 0;
+        let attempts = 0;
+        const maxAttempts = 35; // 35 seconds safety timeout
 
         const check = setInterval(async () => {
+            attempts++;
             try {
-                if (remaining.length === 0) {
+                if (remaining.length === 0 || attempts >= maxAttempts) {
                     clearInterval(check);
+                    this.active_intervals.delete(check);
+                    runInAction(() => {
+                        if (batchWins > 0 || batchLosses > 0) {
+                            this.handleBulkResult(totalBatchProfit, batchWins, batchLosses, config);
+                        } else {
+                            this.is_executing = false;
+                            this.trade_status = attempts >= maxAttempts ? 'TIMEOUT' : 'IDLE';
+                        }
+                    });
                     return;
                 }
 
@@ -344,6 +357,9 @@ export class DigitTradeEngine {
                         totalBatchProfit += profit;
                         if (profit > 0) batchWins++;
                         else batchLosses++;
+                    } else if (res?.error) {
+                        // Error on this specific contract — prune it to prevent infinite hang
+                        batchLosses++;
                     } else {
                         stillOpen.push(remaining[idx]);
                     }
@@ -353,17 +369,21 @@ export class DigitTradeEngine {
 
                 if (remaining.length === 0) {
                     clearInterval(check);
+                    this.active_intervals.delete(check);
                     runInAction(() => {
                         this.handleBulkResult(totalBatchProfit, batchWins, batchLosses, config);
                     });
                 }
             } catch (e) {
                 clearInterval(check);
+                this.active_intervals.delete(check);
                 runInAction(() => {
                     this.is_executing = false;
                 });
             }
         }, 1000);
+
+        this.active_intervals.add(check);
     };
 
     @action
@@ -617,20 +637,52 @@ export class DigitTradeEngine {
     };
 
     private monitorTrade = (contract_id: string, config: TTradeConfig) => {
+        let attempts = 0;
+        const maxAttempts = 25; // 25 seconds safety timeout for 1-tick trade
+
         const check = setInterval(async () => {
+            attempts++;
             try {
+                if (attempts >= maxAttempts) {
+                    clearInterval(check);
+                    this.active_intervals.delete(check);
+                    runInAction(() => {
+                        this.is_executing = false;
+                        this.trade_status = 'TIMEOUT';
+                        this.addLog(`Contract ${contract_id} check timed out after ${maxAttempts}s.`, 'error');
+                    });
+                    return;
+                }
+
                 const data = (await api_base.api?.send({ proposal_open_contract: 1, contract_id })) as {
                     proposal_open_contract?: { is_sold: number; profit: number };
+                    error?: { message: string; code: string };
                 };
-                if (data.proposal_open_contract && data.proposal_open_contract.is_sold) {
+
+                if (data?.error) {
                     clearInterval(check);
+                    this.active_intervals.delete(check);
+                    runInAction(() => {
+                        this.is_executing = false;
+                        this.trade_status = 'ERROR';
+                        this.addLog(`Proposal error: ${data.error?.message}`, 'error');
+                    });
+                    return;
+                }
+
+                if (data?.proposal_open_contract && data.proposal_open_contract.is_sold) {
+                    clearInterval(check);
+                    this.active_intervals.delete(check);
                     this.handleResult(data.proposal_open_contract, config);
                 }
             } catch (e) {
                 clearInterval(check);
+                this.active_intervals.delete(check);
                 runInAction(() => (this.is_executing = false));
             }
         }, 1000);
+
+        this.active_intervals.add(check);
     };
 
     @action
@@ -667,13 +719,23 @@ export class DigitTradeEngine {
 
     @action
     stopAll = (reason: string) => {
+        this.active_intervals.forEach(timer => clearInterval(timer));
+        this.active_intervals.clear();
         ['even_odd', 'over_under', 'differs', 'matches'].forEach(s => {
             const c = (this as Record<string, unknown>)[`${s}_config`] as TTradeConfig;
             if (c) c.is_running = false;
         });
         this.active_strategy = null;
         this.trade_status = reason;
+        this.is_executing = false;
         this.addLog(reason, 'info');
+    };
+
+    @action
+    dispose = () => {
+        this.active_intervals.forEach(timer => clearInterval(timer));
+        this.active_intervals.clear();
+        this.is_executing = false;
     };
 
     private calculateStake = (config: TTradeConfig & any) => {

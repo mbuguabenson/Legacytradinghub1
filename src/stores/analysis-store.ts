@@ -3,7 +3,7 @@ import { api_base, observer as globalObserver } from '@/external/bot-skeleton';
 import { DigitStatsEngine } from '@/lib/digit-stats-engine';
 import { DigitTradeEngine } from '@/lib/digit-trade-engine';
 import { getGroupedMarkets } from '@/constants/markets';
-import { safeSubscribe } from '@/utils/websocket-handler';
+import { subscribeTicks } from '@/services/deriv-tick-manager.service';
 import RootStore from './root-store';
 
 export type TDigitStat = {
@@ -37,7 +37,7 @@ export default class AnalysisStore {
     @observable accessor symbol = 'R_100';
     @observable accessor current_price: string | number = '0.00';
     @observable accessor last_digit: number | null = null;
-    @observable accessor total_ticks = 5000;
+    @observable accessor total_ticks = 1000;
     @observable accessor pip = 2;
     private symbol_pips: Map<string, number> = new Map();
 
@@ -134,15 +134,7 @@ export default class AnalysisStore {
             window.addEventListener('account_switched', () => {
                 this.subscribeToTicks();
             });
-            document.addEventListener('visibilitychange', () => {
-                if (!document.hidden && (!this.ticks || this.ticks.length === 0)) {
-                    this.subscribeToTicks();
-                }
-            });
         }
-        globalObserver.register('api.authorize', () => {
-            this.subscribeToTicks();
-        });
     }
 
     @action
@@ -196,15 +188,15 @@ export default class AnalysisStore {
             this.current_price = price;
             this.last_digit = new_digit;
 
-            this.stats_engine.update(current_ticks, [price]);
+            this.stats_engine.updateWithHistory(current_ticks, price);
             this.refreshStats();
 
             // Push to trade engine
             this.trade_engine.processTick(
                 new_digit,
-                { percentages: this.stats_engine.getPercentages(), digit_stats: this.stats_engine.digit_stats },
+                { percentages: this.percentages, digit_stats: this.digit_stats },
                 this.symbol,
-                this.root_store.client.currency || 'USD'
+                this.root_store.client?.currency || 'USD'
             );
         }
 
@@ -252,8 +244,8 @@ export default class AnalysisStore {
                 }
             }
 
-            // Check for Automated Trade Trigger (55%+ Power)
-            if (this.ou_auto_trade_enabled && !this.is_reanalyzing) {
+            // Check for Automated Trade Trigger (55%+ Power) with execution guard
+            if (this.ou_auto_trade_enabled && !this.is_reanalyzing && !this.trade_engine.is_executing) {
                 if (is_under_signal && signal.under.power >= 55) {
                     console.log(
                         `[Nexus OU] Under ${signal.under.prediction} met (Power: ${signal.under.power.toFixed(1)}%). Executing auto-trade...`
@@ -338,7 +330,7 @@ export default class AnalysisStore {
                 return;
             }
 
-            if (is_met && this.eo_auto_trade_enabled) {
+            if (is_met && this.eo_auto_trade_enabled && !this.trade_engine.is_executing) {
                 console.log(`[Nexus EO] Condition ${this.eo_selected_condition} met! Executing auto-trade...`);
                 this.recordEOTrade();
                 const contract_type = this.eo_target_side === 'EVEN' ? 'DIGITEVEN' : 'DIGITODD';
@@ -349,6 +341,7 @@ export default class AnalysisStore {
 
     @action
     manualTrade = async (contract_type: string, prediction?: number) => {
+        if (this.trade_engine.is_executing) return;
         try {
             const currency = this.root_store.client?.currency || 'USD';
             const strategy: 'over_under' | 'even_odd' =
@@ -403,24 +396,16 @@ export default class AnalysisStore {
         this.refreshStats();
     };
 
-    private active_stream_id: string | null = null;
     @action
     subscribeToTicks = async (retry_count = 0) => {
         if (!this.symbol || this.is_subscribing) return;
 
-        const safeCount = Math.min(this.total_ticks, 5000);
+        const safeCount = Math.min(this.total_ticks, 1000);
 
         this.unsubscribeFromTicks();
         this.is_subscribing = true;
         this.is_loading = true;
         this.error_message = null;
-
-        if (this.active_stream_id && api_base.api) {
-            try {
-                api_base.api.send({ forget: this.active_stream_id });
-            } catch (e) {}
-            this.active_stream_id = null;
-        }
 
         try {
             if (!api_base.api) {
@@ -463,34 +448,17 @@ export default class AnalysisStore {
 
             if (this.symbol !== sym) return;
 
-            // 2. Direct RxJS observable stream via safeSubscribe
-            const tickObservable = (api_base.api as any)?.subscribe?.({ ticks: sym });
-            const subscription = safeSubscribe(
-                tickObservable,
-                (tickRes: any) => {
-                    if (this.symbol !== sym) return;
-                    if (tickRes?.tick && tickRes.tick.symbol === sym) {
-                        this.handleTick(tickRes.tick);
-                    }
-                },
-                (err: any) => {
-                    const code = err?.error?.code || err?.code;
-                    const isAlreadySub =
-                        code === 'AlreadySubscribed' ||
-                        String(err?.message || '').toLowerCase().includes('already subscribed') ||
-                        String(err?.error?.message || '').toLowerCase().includes('already subscribed');
-                    if (isAlreadySub) return;
-                    if (code === 'InvalidSymbol') {
-                        console.info(`[AnalysisStore] Symbol ${sym} unavailable for streaming.`);
-                        return;
-                    }
-                    console.warn(`[AnalysisStore] Stream error for ${sym}:`, err);
+            // 2. Multiplexed tick subscription via derivTickManager
+            const sub = subscribeTicks(sym, (tickRes: any) => {
+                if (this.symbol !== sym) return;
+                if (tickRes?.tick && tickRes.tick.symbol === sym) {
+                    this.handleTick(tickRes.tick);
                 }
-            );
+            });
 
             this.unsubscribe_ticks = () => {
                 try {
-                    subscription?.unsubscribe?.();
+                    sub?.unsubscribe?.();
                 } catch (e) {}
             };
 
@@ -532,10 +500,17 @@ export default class AnalysisStore {
         runInAction(() => {
             this.is_loading = false;
             this.error_message = null;
+            this.is_subscribing = false;
             this.stats_engine.reset();
             this.refreshStats();
             this.ticks = [];
         });
+    };
+
+    @action
+    dispose = () => {
+        this.unsubscribeFromTicks();
+        this.trade_engine?.dispose?.();
     };
 
     @action
