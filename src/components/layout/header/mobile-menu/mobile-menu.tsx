@@ -33,7 +33,12 @@ const MobileMenu = ({ onLogout }: TMobileMenuProps) => {
     const [isDisclaimerOpen, setIsDisclaimerOpen] = useState(false);
     const { currentLang = 'EN', localize, switchLanguage } = useTranslations();
     const { hideModal, isModalOpenFor, showModal } = useModalManager();
-    const { isDesktop } = useDevice();
+    const { isDesktop: uiIsDesktop } = useDevice();
+    // Must match the header's breakpoints: the header only renders desktop menu items at >= 1280px
+    // (and not on touch tablets). Otherwise widths between 1024-1279px would have no menu at all.
+    const windowWidth = typeof window !== 'undefined' ? window.innerWidth : 1440;
+    const isTouchTablet = typeof navigator !== 'undefined' && navigator.maxTouchPoints > 1 && windowWidth <= 1366;
+    const isDesktop = uiIsDesktop && windowWidth >= 1280 && !isTouchTablet;
     // [AI] Get client from store to check menu items
     const { client } = useStore() ?? {};
     // [/AI]

@@ -1,7 +1,7 @@
 import { localize } from '@deriv-com/translations';
 import { modifyContextMenu } from '../../../../utils';
 
-window.Blockly.Blocks.profithub_bot_lock = {
+const profithubBotLockBlock = {
     init() {
         this.jsonInit(this.definition());
         this.setDeletable(false);
@@ -53,7 +53,7 @@ window.Blockly.Blocks.profithub_bot_lock = {
     },
 };
 
-window.Blockly.JavaScript.javascriptGenerator.forBlock.profithub_bot_lock = () => {
+const profithubBotLockGenerator = () => {
     return `
 // === ProfitHub Algorithmic Security Shield ===
 (function() {
@@ -68,6 +68,21 @@ window.Blockly.JavaScript.javascriptGenerator.forBlock.profithub_bot_lock = () =
 })();
 `;
 };
+
+/**
+ * Registers the block with Blockly. Safe to call before Blockly is loaded (no-op) and
+ * idempotent. Called from the Misc blocks index once Blockly is available.
+ */
+export const registerProfitHubBotLock = () => {
+    const blockly = typeof window !== 'undefined' ? window.Blockly : undefined;
+    if (!blockly?.Blocks) return false;
+    blockly.Blocks.profithub_bot_lock = profithubBotLockBlock;
+    const forBlock = blockly.JavaScript?.javascriptGenerator?.forBlock;
+    if (forBlock) forBlock.profithub_bot_lock = profithubBotLockGenerator;
+    return true;
+};
+
+registerProfitHubBotLock();
 
 export const PROFITHUB_LOCK_BLOCK_TYPE = 'profithub_bot_lock';
 
