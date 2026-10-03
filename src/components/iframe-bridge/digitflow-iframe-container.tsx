@@ -52,7 +52,7 @@ export const DigitFlowIframeContainer: React.FC<DigitFlowIframeContainerProps> =
         }, [client?.loginid]);
 
         const syncSession = useCallback(
-            async (includeToken = false) => {
+            async (includeToken = true) => {
                 const iframe = iframeRef.current;
                 if (!iframe || !iframe.contentWindow) return;
 
@@ -62,7 +62,11 @@ export const DigitFlowIframeContainer: React.FC<DigitFlowIframeContainerProps> =
                     client?.loginid ||
                     localStorage.getItem('active_loginid') ||
                     '';
-                const token = tokenData.token || (await resolveValidDerivWSToken(activeLoginId));
+                const token =
+                    tokenData.token ||
+                    (await resolveValidDerivWSToken(activeLoginId)) ||
+                    getActiveToken(activeLoginId) ||
+                    '';
                 const appId = getClientId() || '33Mmq9JHMrJaUKT2KIhKZ';
                 const currency = client?.currency || 'USD';
                 const maskedToken = token ? `${token.slice(0, 4)}...${token.slice(-4)}` : 'none';
@@ -71,9 +75,11 @@ export const DigitFlowIframeContainer: React.FC<DigitFlowIframeContainerProps> =
 
                 if (!activeLoginId) return;
 
+                const accounts = getAccountsList();
                 const sessionPayload: any = {
                     loginid: activeLoginId,
                     loginId: activeLoginId,
+                    account: activeLoginId,
                     acct1: activeLoginId,
                     currency,
                     cur1: currency,
@@ -85,10 +91,15 @@ export const DigitFlowIframeContainer: React.FC<DigitFlowIframeContainerProps> =
                     hideHeader,
                     authMode: 'derivws_otp',
                     bt_secret: 'binarytool',
+                    accounts,
+                    'client.accounts': localStorage.getItem('client.accounts'),
+                    active_loginid: activeLoginId,
                 };
 
                 if (includeToken && token) {
                     sessionPayload.token = token;
+                    sessionPayload.token1 = token;
+                    sessionPayload.access_token = token;
                 }
 
                 // Check again after async token resolution
@@ -110,12 +121,11 @@ export const DigitFlowIframeContainer: React.FC<DigitFlowIframeContainerProps> =
                     const safePost = (msg: any) => {
                         try {
                             targetWindow.postMessage(msg, targetOrigin);
-                        } catch {
-                            if (targetOrigin !== '*') {
-                                try {
-                                    targetWindow.postMessage(msg, '*');
-                                } catch {}
-                            }
+                        } catch {}
+                        if (targetOrigin !== '*') {
+                            try {
+                                targetWindow.postMessage(msg, '*');
+                            } catch {}
                         }
                     };
 
@@ -128,18 +138,23 @@ export const DigitFlowIframeContainer: React.FC<DigitFlowIframeContainerProps> =
                         safePost({ action: 'setToken', ...sessionPayload });
                         safePost({ action: 'login', ...sessionPayload });
                         safePost({ action: 'SYNC_SESSION', ...sessionPayload });
-                        safePost(JSON.stringify({ type: 'SESSION_DATA', ...sessionPayload }));
+                        safePost({ type: 'newdtrader:auth', ...sessionPayload });
+                        try {
+                            safePost(JSON.stringify({ type: 'SESSION_DATA', ...sessionPayload }));
+                            safePost(JSON.stringify({ type: 'DERIV_AUTH', ...sessionPayload }));
+                        } catch {}
                     }
                 } catch (e) {
                     console.warn('[DigitFlowIframe] Error sending auth postMessage:', e);
                 }
             },
-            [tokenData, client?.currency, hideHeader]
+            [tokenData, client?.currency, client?.loginid, hideHeader, logger]
         );
 
         const appId = getClientId() || '33Mmq9JHMrJaUKT2KIhKZ';
         const currency = client?.currency || 'USD';
         const loginId = tokenData.loginid || client?.loginid || localStorage.getItem('active_loginid') || '';
+        const currentToken = tokenData.token || getActiveToken(loginId) || '';
 
         const targetBase = rawUrl.trim().replace(/\/$/, '');
 
@@ -156,6 +171,13 @@ export const DigitFlowIframeContainer: React.FC<DigitFlowIframeContainerProps> =
         if (loginId) {
             queryParams.set('acct1', loginId);
             queryParams.set('cur1', currency);
+            queryParams.set('account', loginId);
+            queryParams.set('loginid', loginId);
+            if (currentToken) {
+                queryParams.set('token1', currentToken);
+                queryParams.set('token', currentToken);
+                queryParams.set('access_token', currentToken);
+            }
         }
 
         try {
@@ -165,7 +187,11 @@ export const DigitFlowIframeContainer: React.FC<DigitFlowIframeContainerProps> =
                 if (accId !== loginId) {
                     index++;
                     queryParams.set(`acct${index}`, accId);
-                    queryParams.set(`cur${index}`, currency || 'USD');
+                    const accObj: any = (client?.account_list || []).find((a: any) => a.loginid === accId) || {};
+                    queryParams.set(`cur${index}`, accObj.currency || currency || 'USD');
+                    if (accountsList[accId]) {
+                        queryParams.set(`token${index}`, accountsList[accId]);
+                    }
                 }
             }
         } catch (error) {
@@ -174,7 +200,6 @@ export const DigitFlowIframeContainer: React.FC<DigitFlowIframeContainerProps> =
 
         const iframeSrc = `${targetBase}?${queryParams.toString()}`;
 
-
         useEffect(() => {
             const iframe = iframeRef.current;
             if (!iframe) return;
@@ -182,7 +207,7 @@ export const DigitFlowIframeContainer: React.FC<DigitFlowIframeContainerProps> =
             initializationCount.current += 1;
             logger.debug('DIGITFLOW_INITIALIZATION_COUNT', { count: initializationCount.current });
 
-            const timer = setTimeout(() => setIsLoading(false), 2500);
+            const timer = setTimeout(() => setIsLoading(false), 2000);
 
             const bridge = new ParentBridgeClient();
             let computedIframeOrigin = '*';
@@ -196,9 +221,42 @@ export const DigitFlowIframeContainer: React.FC<DigitFlowIframeContainerProps> =
             const authService = new IframeAuthService(iframeRef, syncSession, logger);
             authService.start();
 
+            const handleWindowMessage = (event: MessageEvent) => {
+                if (!event.data) return;
+                const d =
+                    typeof event.data === 'string'
+                        ? (() => {
+                              try {
+                                  return JSON.parse(event.data);
+                              } catch {
+                                  return {};
+                              }
+                          })()
+                        : event.data;
+                const type = d?.type || d?.action;
+                if (
+                    [
+                        'REQUEST_SESSION',
+                        'REQUEST_AUTH',
+                        'GET_SESSION',
+                        'CHECK_AUTH',
+                        'DIGITFLOW_READY',
+                        'READY',
+                        'INIT',
+                        'GET_TOKEN',
+                    ].includes(type)
+                ) {
+                    syncSession(true);
+                }
+            };
+            window.addEventListener('message', handleWindowMessage);
+
             const handleLoad = () => {
                 setIsLoading(false);
-                syncSession(false);
+                syncSession(true);
+                setTimeout(() => syncSession(true), 400);
+                setTimeout(() => syncSession(true), 1200);
+                setTimeout(() => syncSession(true), 2500);
                 if (onLoad) onLoad();
             };
 
@@ -206,11 +264,12 @@ export const DigitFlowIframeContainer: React.FC<DigitFlowIframeContainerProps> =
 
             return () => {
                 clearTimeout(timer);
+                window.removeEventListener('message', handleWindowMessage);
                 iframe.removeEventListener('load', handleLoad);
                 bridge.detach();
                 authService.stop();
             };
-        }, [syncSession, onLoad, iframeSrc]);
+        }, [syncSession, onLoad, iframeSrc, logger]);
 
         return (
             <div

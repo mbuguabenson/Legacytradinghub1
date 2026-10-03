@@ -1,10 +1,12 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import AnalysisTool from './analysis-tool';
 import AllAnalysis from './all-analysis';
 import Signals from '../signals';
 import TickAnalyser from './tick-analyser';
 import CirclesAnalysis from '../circles-analysis';
 import DigitCracker from '../digit-cracker';
+import EasyTool from '../easy-tool';
+import DigitFlowPage from '../digitflow/digitflow';
 import { useStore } from '@/hooks/useStore';
 import { ApiHelpers } from '@/external/bot-skeleton';
 import { ALL_DERIV_MARKETS } from '@/constants/markets';
@@ -16,7 +18,9 @@ type AnalysisToolSubTab =
     | 'all-analysis'
     | 'tick-analyser'
     | 'circles-analysis'
-    | 'digit-cracker';
+    | 'digit-cracker'
+    | 'easy-tool'
+    | 'digitflow';
 
 const AnalysisTools: React.FC = () => {
     const { run_panel } = useStore();
@@ -655,6 +659,10 @@ const AnalysisTools: React.FC = () => {
                 return <CirclesAnalysis />;
             case 'digit-cracker':
                 return <DigitCracker />;
+            case 'easy-tool':
+                return <EasyTool />;
+            case 'digitflow':
+                return <DigitFlowPage />;
             default:
                 return null;
         }
@@ -710,6 +718,22 @@ const AnalysisTools: React.FC = () => {
                     >
                         <div className='analysis-tools__card-content'>
                             <span className='analysis-tools__card-label'>Digit Cracker</span>
+                        </div>
+                    </div>
+                    <div
+                        className={`analysis-tools__card analysis-tools__card--light ${active_tool === 'easy-tool' ? 'analysis-tools__card--active' : ''}`}
+                        onClick={() => handleCardClick('easy-tool')}
+                    >
+                        <div className='analysis-tools__card-content'>
+                            <span className='analysis-tools__card-label'>Easy Tool</span>
+                        </div>
+                    </div>
+                    <div
+                        className={`analysis-tools__card analysis-tools__card--light ${active_tool === 'digitflow' ? 'analysis-tools__card--active' : ''}`}
+                        onClick={() => handleCardClick('digitflow')}
+                    >
+                        <div className='analysis-tools__card-content'>
+                            <span className='analysis-tools__card-label'>Digit Flow</span>
                         </div>
                     </div>
                 </div>

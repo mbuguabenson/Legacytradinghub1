@@ -37,5 +37,4 @@ const ProfihubModal = observer(() => {
         </>
     );
 });
-
 export default ProfihubModal;
