@@ -29,13 +29,17 @@ const DraggableResizeWrapper: React.FC<DraggableResizeWrapperProps> = ({
 }) => {
     const [show, setShow] = useState(false);
     const getInitialBounds = () => {
-        const maxW = Math.max(minWidth, (typeof window !== 'undefined' ? window.innerWidth : 1000) - 24);
-        const maxH = Math.max(minHeight, (typeof window !== 'undefined' ? window.innerHeight : 800) - 70);
-        const width = Math.min(modalWidth, maxW);
-        const height = Math.min(modalHeight, maxH);
-        const xAxis = Math.max(0, ((typeof window !== 'undefined' ? window.innerWidth : 1000) - width) / 2);
-        const yAxis = Math.max(0, ((typeof window !== 'undefined' ? window.innerHeight : 800) - height) / 2);
-        return { width, height, xAxis, yAxis };
+        const winW = typeof window !== 'undefined' ? window.innerWidth : 1000;
+        const winH = typeof window !== 'undefined' ? window.innerHeight : 800;
+        const effectiveMinWidth = Math.min(minWidth, winW - 16);
+        const effectiveMinHeight = Math.min(minHeight, winH - 60);
+        const maxW = Math.max(effectiveMinWidth, winW - 16);
+        const maxH = Math.max(effectiveMinHeight, winH - 60);
+        const width = Math.max(effectiveMinWidth, Math.min(modalWidth, maxW));
+        const height = Math.max(effectiveMinHeight, Math.min(modalHeight, maxH));
+        const xAxis = Math.max(8, Math.round((winW - width) / 2));
+        const yAxis = Math.max(8, Math.round((winH - height) / 2));
+        return { width, height, xAxis, yAxis, effectiveMinWidth, effectiveMinHeight };
     };
 
     const [initialValues, setInitialValues] = React.useState(getInitialBounds());
@@ -59,8 +63,8 @@ const DraggableResizeWrapper: React.FC<DraggableResizeWrapperProps> = ({
                 <Draggable
                     boundary={boundary}
                     initialValues={initialValues}
-                    minWidth={minWidth}
-                    minHeight={minHeight}
+                    minWidth={initialValues.effectiveMinWidth ?? minWidth}
+                    minHeight={initialValues.effectiveMinHeight ?? minHeight}
                     enableResizing={enableResizing}
                     enableDragging={enableDragging}
                     header={header}

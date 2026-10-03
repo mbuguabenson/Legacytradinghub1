@@ -381,12 +381,12 @@ const DigitCracker = observer(() => {
                         {activeStrategy === 'differs' && <DiffersCracker />}
                         {activeStrategy === 'matches' && <MatchesCracker />}
                     </div>
-
-                    {renderQuickConfig()}
                 </div>
 
-                {/* RIGHT: Live Journal & Performance Telemetry */}
+                {/* RIGHT: Live Execution Parameters & Telemetry Journal */}
                 <div className='telemetry-column'>
+                    {renderQuickConfig()}
+
                     <div className='journal-card-deck'>
                         <div className='journal-tabs-row'>
                             <button

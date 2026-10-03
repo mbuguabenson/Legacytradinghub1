@@ -31,7 +31,6 @@ const Draggable: React.FC<TDraggableProps> = ({
     const [zIndex, setZIndex] = useState(100);
     const [zoomScale, setZoomScale] = useState(1);
     const [isMinimized, setIsMinimized] = useState(false);
-    const [isMaximized, setIsMaximized] = useState(false);
 
     const savedGeometryRef = useRef<{
         x: number;
@@ -51,7 +50,7 @@ const Draggable: React.FC<TDraggableProps> = ({
     const [boundaryRef, setBoundaryRef] = useState<HTMLElement | null>(null);
 
     useEffect(() => {
-        if (!isMaximized && !isMinimized) {
+        if (!isMinimized) {
             setSize({ width: initialValues.width, height: initialValues.height });
             setPosition({ x: initialValues.xAxis, y: initialValues.yAxis });
             savedGeometryRef.current = {
@@ -88,74 +87,18 @@ const Draggable: React.FC<TDraggableProps> = ({
         e.stopPropagation();
         if (isMinimized) {
             setIsMinimized(false);
-            if (!isMaximized) {
-                setSize({ width: savedGeometryRef.current.width, height: savedGeometryRef.current.height });
-                setPosition({ x: savedGeometryRef.current.x, y: savedGeometryRef.current.y });
-            }
+            setSize({ width: savedGeometryRef.current.width, height: savedGeometryRef.current.height });
+            setPosition({ x: savedGeometryRef.current.x, y: savedGeometryRef.current.y });
         } else {
-            if (!isMaximized) {
-                savedGeometryRef.current = {
-                    x: position.x,
-                    y: position.y,
-                    width: size.width,
-                    height: size.height,
-                };
-            }
+            savedGeometryRef.current = {
+                x: position.x,
+                y: position.y,
+                width: size.width,
+                height: size.height,
+            };
             setIsMinimized(true);
         }
     };
-
-    const handleMaximizeToggle = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (isMaximized) {
-            // Restore to previous normal state
-            setIsMaximized(false);
-            setIsMinimized(false);
-            setPosition({ x: savedGeometryRef.current.x, y: savedGeometryRef.current.y });
-            setSize({ width: savedGeometryRef.current.width, height: savedGeometryRef.current.height });
-        } else {
-            // Save current geometry first
-            if (!isMinimized) {
-                savedGeometryRef.current = {
-                    x: position.x,
-                    y: position.y,
-                    width: size.width,
-                    height: size.height,
-                };
-            }
-            setIsMinimized(false);
-            setIsMaximized(true);
-
-            const boundaryRect = boundaryRef?.getBoundingClientRect();
-            const topOffset = boundaryRef?.offsetTop ?? 0;
-            const leftOffset = boundaryRef?.offsetLeft ?? 0;
-
-            const maxWidth = boundaryRect ? Math.max(minWidth, boundaryRect.width - (SAFETY_MARGIN * 2)) : window.innerWidth - 16;
-            const maxHeight = boundaryRect ? Math.max(minHeight, boundaryRect.height - (SAFETY_MARGIN * 2)) : window.innerHeight - 80;
-
-            setPosition({ x: leftOffset + SAFETY_MARGIN, y: topOffset + SAFETY_MARGIN });
-            setSize({ width: maxWidth, height: maxHeight });
-        }
-    };
-
-    useEffect(() => {
-        if (!isMaximized) return;
-
-        const handleWindowResize = () => {
-            const boundaryRect = boundaryRef?.getBoundingClientRect();
-            const topOffset = boundaryRef?.offsetTop ?? 0;
-            const leftOffset = boundaryRef?.offsetLeft ?? 0;
-
-            const maxWidth = boundaryRect ? Math.max(minWidth, boundaryRect.width - (SAFETY_MARGIN * 2)) : window.innerWidth - 16;
-            const maxHeight = boundaryRect ? Math.max(minHeight, boundaryRect.height - (SAFETY_MARGIN * 2)) : window.innerHeight - 80;
-
-            setPosition({ x: leftOffset + SAFETY_MARGIN, y: topOffset + SAFETY_MARGIN });
-            setSize({ width: maxWidth, height: maxHeight });
-        };
-
-        window.addEventListener('resize', handleWindowResize);
-        return () => window.removeEventListener('resize', handleWindowResize);
-    }, [isMaximized, boundaryRef, minWidth, minHeight]);
 
     const handleClose = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -170,8 +113,8 @@ const Draggable: React.FC<TDraggableProps> = ({
         calculateZindex({ setZIndex });
         if (!action) return;
 
-        // If maximized, disable resizing and dragging
-        if (isMaximized) return;
+        // If minimized, resizing is disabled
+        if (isMinimized && action !== DRAGGABLE_CONSTANTS.MOVE) return;
 
         const resize_direction = action;
         isResizing.current = action !== DRAGGABLE_CONSTANTS.MOVE && enableResizing && !isMinimized;
@@ -308,12 +251,13 @@ const Draggable: React.FC<TDraggableProps> = ({
         const handleDrag = (deltaX: number, deltaY: number) => {
             const newX = deltaX + initialX;
             const newY = deltaY + initialY;
+            const currentW = isMinimized ? 220 : size.width;
             const currentH = isMinimized ? 44 : size.height;
             const boundedX = Math.min(
                 Math.max(newX, leftOffset + SAFETY_MARGIN),
                 leftOffset +
                     (boundaryRect?.width ?? window.innerWidth) -
-                    size.width -
+                    currentW -
                     (SAFETY_MARGIN + EXTRA_BOTTOM_RIGHT_SAFETY_MARGIN * 2)
             );
             const boundedY = Math.min(
@@ -324,7 +268,7 @@ const Draggable: React.FC<TDraggableProps> = ({
                     (SAFETY_MARGIN + EXTRA_BOTTOM_RIGHT_SAFETY_MARGIN * 2)
             );
             setPosition({ x: boundedX, y: boundedY });
-            if (!isMinimized && !isMaximized) {
+            if (!isMinimized) {
                 savedGeometryRef.current.x = boundedX;
                 savedGeometryRef.current.y = boundedY;
             }
@@ -356,13 +300,15 @@ const Draggable: React.FC<TDraggableProps> = ({
 
     return (
         <div
-            className={`draggable ${isDragging ? 'dragging' : ''} ${isMinimized ? 'draggable--minimized' : ''} ${isMaximized ? 'draggable--maximized' : ''}`}
+            className={`draggable ${isDragging ? 'dragging' : ''} ${isMinimized ? 'draggable--minimized' : ''}`}
             style={{
                 position: 'absolute',
                 top: position.y,
                 left: position.x,
                 zIndex,
-                transform: zoomScale !== 1 && !isMinimized && !isMaximized ? `scale(${zoomScale})` : undefined,
+                width: isMinimized ? 'fit-content' : undefined,
+                maxWidth: isMinimized ? 'min(240px, calc(100vw - 16px))' : undefined,
+                transform: zoomScale !== 1 && !isMinimized ? `scale(${zoomScale})` : undefined,
                 transformOrigin: 'top left',
             }}
             onMouseDown={() => calculateZindex({ setZIndex })}
@@ -376,7 +322,9 @@ const Draggable: React.FC<TDraggableProps> = ({
                 className={`draggable-content ${isMinimized ? 'draggable-content--minimized' : ''}`}
                 data-testid='dt_react_draggable_content'
                 style={{
-                    width: size.width,
+                    width: isMinimized ? 'auto' : size.width,
+                    minWidth: isMinimized ? 190 : undefined,
+                    maxWidth: isMinimized ? 240 : undefined,
                     height: isMinimized ? 'auto' : size.height,
                 }}
             >
@@ -401,7 +349,7 @@ const Draggable: React.FC<TDraggableProps> = ({
                             <div className='draggable-zoom-controls'>
                                 <button
                                     type='button'
-                                    className='draggable-zoom-btn'
+                                    className='draggable-zoom-btn draggable-zoom-btn--out'
                                     onClick={handleZoomOut}
                                     title='Zoom Out'
                                     aria-label='Zoom Out'
@@ -410,7 +358,7 @@ const Draggable: React.FC<TDraggableProps> = ({
                                 </button>
                                 <button
                                     type='button'
-                                    className='draggable-zoom-btn'
+                                    className='draggable-zoom-btn draggable-zoom-btn--reset'
                                     onClick={handleZoomReset}
                                     title='Reset Zoom'
                                     aria-label='Reset Zoom'
@@ -419,7 +367,7 @@ const Draggable: React.FC<TDraggableProps> = ({
                                 </button>
                                 <button
                                     type='button'
-                                    className='draggable-zoom-btn'
+                                    className='draggable-zoom-btn draggable-zoom-btn--in'
                                     onClick={handleZoomIn}
                                     title='Zoom In'
                                     aria-label='Zoom In'
@@ -429,41 +377,25 @@ const Draggable: React.FC<TDraggableProps> = ({
                             </div>
                         )}
 
-                        {/* Window Management Controls: Minimize, Maximize / Restore, Close */}
+                        {/* Window Management Controls: Restore (when minimized) / Minimize (when expanded), Close */}
                         <div className='draggable-window-controls'>
                             <button
                                 type='button'
-                                className={`draggable-window-btn draggable-window-btn--minimize ${isMinimized ? 'active' : ''}`}
+                                className={`draggable-window-btn ${isMinimized ? 'draggable-window-btn--restore active' : 'draggable-window-btn--minimize'}`}
                                 onClick={handleMinimizeToggle}
                                 title={isMinimized ? 'Restore' : 'Minimize'}
                                 aria-label={isMinimized ? 'Restore window' : 'Minimize window'}
                             >
-                                <svg width='12' height='12' viewBox='0 0 12 12' fill='currentColor'>
-                                    {isMinimized ? (
-                                        <path d='M2 9h8V7H2v2zm0-4h8V3H2v2z' fill='currentColor' />
-                                    ) : (
-                                        <path d='M2 6h8v2H2z' fill='currentColor' />
-                                    )}
-                                </svg>
-                            </button>
-
-                            <button
-                                type='button'
-                                className={`draggable-window-btn draggable-window-btn--maximize ${isMaximized ? 'active' : ''}`}
-                                onClick={handleMaximizeToggle}
-                                title={isMaximized ? 'Restore' : 'Maximize'}
-                                aria-label={isMaximized ? 'Restore window size' : 'Maximize window'}
-                            >
-                                <svg width='12' height='12' viewBox='0 0 12 12' fill='none' stroke='currentColor' strokeWidth='1.5'>
-                                    {isMaximized ? (
-                                        <>
-                                            <rect x='3.5' y='1.5' width='7' height='7' rx='1' fill='none' />
-                                            <path d='M1.5 4.5v6a1 1 0 001 1h6' fill='none' />
-                                        </>
-                                    ) : (
-                                        <rect x='2' y='2' width='8' height='8' rx='1.2' fill='none' />
-                                    )}
-                                </svg>
+                                {isMinimized ? (
+                                    <svg width='12' height='12' viewBox='0 0 12 12' fill='none' stroke='currentColor' strokeWidth='1.5'>
+                                        <rect x='1.5' y='3.5' width='7' height='7' rx='1' fill='none' />
+                                        <path d='M3.5 1.5h6a1 1 0 011 1v6' fill='none' />
+                                    </svg>
+                                ) : (
+                                    <svg width='12' height='12' viewBox='0 0 12 12' fill='currentColor'>
+                                        <rect x='2' y='5.5' width='8' height='1.5' rx='0.75' />
+                                    </svg>
+                                )}
                             </button>
 
                             <button
@@ -495,7 +427,7 @@ const Draggable: React.FC<TDraggableProps> = ({
                     {children}
                 </div>
 
-                {enableResizing && !isMinimized && !isMaximized && (
+                {enableResizing && !isMinimized && (
                     <>
                         <div
                             className='resizable-handle__top'

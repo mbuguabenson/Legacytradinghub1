@@ -257,7 +257,7 @@ const WorkspaceGroup = observer(() => {
                         }
                     />
                     <ToolbarIcon
-                        popover_message={localize('Easy Tool & Digit Flow')}
+                        popover_message={localize('Analysis & Entry Scanner')}
                         icon={
                             <span
                                 className={classNames('toolbar__icon', {
@@ -280,20 +280,42 @@ const WorkspaceGroup = observer(() => {
                                             : 'drop-shadow(0 0 4px rgba(14,165,233,0.3))',
                                     }}
                                 >
+                                    {/* Scanner viewfinder reticle corners */}
                                     <path
-                                        d='M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242'
-                                        stroke='#0ea5e9'
-                                        strokeWidth='2'
-                                        strokeLinecap='round'
-                                    />
-                                    <path d='M12 12v9' stroke='#0ea5e9' strokeWidth='2' strokeLinecap='round' />
-                                    <path
-                                        d='m8 17 4 4 4-4'
+                                        d='M3 7V5a2 2 0 0 1 2-2h2'
                                         stroke='#0ea5e9'
                                         strokeWidth='2'
                                         strokeLinecap='round'
                                         strokeLinejoin='round'
                                     />
+                                    <path
+                                        d='M17 3h2a2 2 0 0 1 2 2v2'
+                                        stroke='#0ea5e9'
+                                        strokeWidth='2'
+                                        strokeLinecap='round'
+                                        strokeLinejoin='round'
+                                    />
+                                    <path
+                                        d='M21 17v2a2 2 0 0 1-2 2h-2'
+                                        stroke='#0ea5e9'
+                                        strokeWidth='2'
+                                        strokeLinecap='round'
+                                        strokeLinejoin='round'
+                                    />
+                                    <path
+                                        d='M7 21H5a2 2 0 0 1-2-2v-2'
+                                        stroke='#0ea5e9'
+                                        strokeWidth='2'
+                                        strokeLinecap='round'
+                                        strokeLinejoin='round'
+                                    />
+                                    {/* Central target radar reticle */}
+                                    <circle cx='12' cy='12' r='4' stroke='#0ea5e9' strokeWidth='1.8' />
+                                    <path d='M12 6.5v2' stroke='#0ea5e9' strokeWidth='1.8' strokeLinecap='round' />
+                                    <path d='M12 15.5v2' stroke='#0ea5e9' strokeWidth='1.8' strokeLinecap='round' />
+                                    <path d='M6.5 12h2' stroke='#0ea5e9' strokeWidth='1.8' strokeLinecap='round' />
+                                    <path d='M15.5 12h2' stroke='#0ea5e9' strokeWidth='1.8' strokeLinecap='round' />
+                                    <circle cx='12' cy='12' r='1.2' fill='#38bdf8' />
                                 </svg>
                             </span>
                         }

@@ -1,9 +1,12 @@
-import React, { useEffect } from 'react';
-import { getAppId, getSocketURL } from '@/components/shared/utils/config/config';
+import React, { useEffect, useRef } from 'react';
+import { getSocketURL } from '@/components/shared/utils/config/config';
 import { api_base } from '@/external/bot-skeleton/services/api/api-base';
 import './all-analysis.scss';
 
 const AllAnalysis: React.FC = () => {
+    const riseFallTableRef = useRef<HTMLTableSectionElement>(null);
+    const overUnderTableRef = useRef<HTMLTableSectionElement>(null);
+
     // All Analysis functionality
     useEffect(() => {
         let isCancelled = false;
@@ -49,8 +52,8 @@ const AllAnalysis: React.FC = () => {
             };
 
             function updateTables() {
-                const riseFallTable = document.getElementById('riseFallTable');
-                const overUnderTable = document.getElementById('overUnderTable');
+                const riseFallTable = riseFallTableRef.current || document.getElementById('riseFallTable');
+                const overUnderTable = overUnderTableRef.current || document.getElementById('overUnderTable');
 
                 if (!riseFallTable || !overUnderTable) return;
 
@@ -219,29 +222,29 @@ const AllAnalysis: React.FC = () => {
                             <th>Fall 📉</th>
                         </tr>
                     </thead>
-                    <tbody id='riseFallTable'>
-                        <tr>
-                            <td>Loading...</td>
-                            <td>
-                                <span className='signal-box'>----</span>
-                            </td>
-                            <td>
-                                <span className='signal-box'>----</span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <tbody ref={riseFallTableRef} id='riseFallTable'>
+                    <tr>
+                        <td>Loading...</td>
+                        <td>
+                            <span className='signal-box'>----</span>
+                        </td>
+                        <td>
+                            <span className='signal-box'>----</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
 
-                <h2>Over 2 / Under 7</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Market</th>
-                            <th>Over 2</th>
-                            <th>Under 7</th>
-                        </tr>
-                    </thead>
-                    <tbody id='overUnderTable'>
+            <h2>Over 2 / Under 7</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Market</th>
+                        <th>Over 2</th>
+                        <th>Under 7</th>
+                    </tr>
+                </thead>
+                <tbody ref={overUnderTableRef} id='overUnderTable'>
                         <tr>
                             <td>Loading...</td>
                             <td>

@@ -8,7 +8,6 @@ import { useDevice } from '@deriv-com/ui';
 /* [/AI] */
 import ToolbarButton from './toolbar-button';
 import WorkspaceGroup from './workspace-group';
-import MobileToolbarCard from './mobile-toolbar-card';
 
 const Toolbar = observer(() => {
     const { run_panel, toolbar, quick_strategy } = useStore();
@@ -40,12 +39,7 @@ const Toolbar = observer(() => {
                     {isDesktop && <WorkspaceGroup />}
                 </div>
             </div>
-            {/* On mobile: floating draggable + resizable card with all workspace tools */}
-            {!isDesktop && (
-                <MobileToolbarCard>
-                    <WorkspaceGroup />
-                </MobileToolbarCard>
-            )}
+            {!isDesktop && <WorkspaceGroup />}
             <Dialog
                 portal_element_id='modal_root'
                 title={localize('Are you sure?')}

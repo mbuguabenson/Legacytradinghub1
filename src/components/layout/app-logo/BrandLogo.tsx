@@ -8,9 +8,10 @@ type TBrandLogoProps = {
     height?: number;
     fill?: string;
     className?: string;
+    compact?: boolean;
 };
 
-export const BrandLogo = observer(({ height = 36, className = '' }: TBrandLogoProps) => {
+export const BrandLogo = observer(({ height = 36, className = '', compact = false }: TBrandLogoProps) => {
     const cfg = getSiteConfig();
     const customLogo = cfg?.logoBase64;
     const brandName = getBrandLabel() || 'Legacy Trading Hub';
@@ -212,10 +213,14 @@ export const BrandLogo = observer(({ height = 36, className = '' }: TBrandLogoPr
                         </g>
                     </svg>
                 )}
-                <div className='lth-brand-logo__text-col'>
-                    <span className='lth-brand-logo__title lth-brand-logo__legacy'>LEGACY</span>
-                    <span className='lth-brand-logo__subtitle lth-brand-logo__trading-hub'>TRADING HUB</span>
-                </div>
+                {compact ? (
+                    <span className='lth-brand-logo__compact-label'>LTH</span>
+                ) : (
+                    <div className='lth-brand-logo__text-col'>
+                        <span className='lth-brand-logo__title lth-brand-logo__legacy'>LEGACY</span>
+                        <span className='lth-brand-logo__subtitle lth-brand-logo__trading-hub'>TRADING HUB</span>
+                    </div>
+                )}
             </div>
         </div>
     );

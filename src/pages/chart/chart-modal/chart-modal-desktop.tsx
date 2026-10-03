@@ -9,6 +9,9 @@ const ChartModalDesktop = observer(() => {
     const { dashboard } = useStore();
     const { is_chart_modal_visible, setChartModalVisibility } = dashboard;
 
+    const modalWidth = typeof window !== 'undefined' ? Math.min(526, window.innerWidth - 16) : 526;
+    const modalHeight = typeof window !== 'undefined' ? Math.min(595, window.innerHeight - 60) : 595;
+
     return (
         <React.Fragment>
             {is_chart_modal_visible && (
@@ -16,10 +19,10 @@ const ChartModalDesktop = observer(() => {
                     boundary='.main'
                     header={localize('Chart')}
                     onClose={setChartModalVisibility}
-                    modalWidth={526}
-                    modalHeight={595}
-                    minWidth={526}
-                    minHeight={524}
+                    modalWidth={modalWidth}
+                    modalHeight={modalHeight}
+                    minWidth={280}
+                    minHeight={300}
                     enableResizing
                 >
                     <div className='chart-modal-dialog' data-testid='chart-modal-dialog'>

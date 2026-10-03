@@ -30,9 +30,9 @@ body.theme--dark,
 }
 
 .circles-analysis-hud {
-    height: 100%;
-    max-height: 100%;
-    overflow: hidden;
+    min-height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
     padding: to-rem(16px);
     background: var(--ca-bg);
     color: var(--ca-text-main);
@@ -313,26 +313,21 @@ body.theme--dark,
 // 3. Workspace Layout Grid
 .workspace-dual-grid {
     display: grid;
-    grid-template-columns: 1.15fr 0.85fr;
+    grid-template-columns: 1fr 1fr;
     gap: to-rem(20px);
     align-items: start;
     width: 100%;
-    flex: 1;
     min-height: 0;
-    overflow: hidden;
 
     @media (max-width: 1024px) {
         grid-template-columns: 1fr;
-        overflow-y: auto;
+        gap: to-rem(16px);
     }
 
     .analytics-side {
-        height: 100%;
         display: flex;
         flex-direction: column;
         gap: to-rem(16px);
-        overflow-y: auto;
-        padding-right: to-rem(4px);
         min-height: 0;
 
         &::-webkit-scrollbar {
@@ -501,6 +496,73 @@ body.theme--dark,
                         &.under {
                             background: #f59e0b;
                         }
+                        &.diff {
+                            background: #10b981;
+                        }
+                        &.match {
+                            background: #f59e0b;
+                        }
+                    }
+                }
+
+                .digit-mini-selector {
+                    display: grid;
+                    grid-template-columns: repeat(10, 1fr);
+                    gap: 3px;
+                    margin: to-rem(8px) 0 to-rem(10px);
+
+                    .selector-pill {
+                        background: rgba(255, 255, 255, 0.05);
+                        border: 1px solid rgba(255, 255, 255, 0.08);
+                        border-radius: 6px;
+                        color: var(--ca-text-sub);
+                        padding: 4px 0;
+                        font-size: to-rem(11px);
+                        font-weight: 700;
+                        cursor: pointer;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        transition: all 0.18s ease;
+
+                        &:hover {
+                            background: rgba(124, 58, 237, 0.2);
+                            border-color: #7c3aed;
+                            color: #ffffff;
+                        }
+
+                        &.active {
+                            background: linear-gradient(135deg, #7c3aed, #9333ea);
+                            border-color: #a855f7;
+                            color: #ffffff;
+                            font-weight: 900;
+                            box-shadow: 0 0 10px rgba(124, 58, 237, 0.5);
+                            transform: scale(1.06);
+                        }
+                    }
+                }
+
+                .delta-metric-row {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    background: rgba(255, 255, 255, 0.03);
+                    border: 1px solid rgba(255, 255, 255, 0.06);
+                    border-radius: 8px;
+                    padding: 6px 12px;
+                    margin: to-rem(8px) 0 to-rem(10px);
+
+                    .delta-label {
+                        font-size: to-rem(10px);
+                        font-weight: 800;
+                        color: var(--ca-text-sub);
+                        letter-spacing: 0.5px;
+                    }
+
+                    .delta-val {
+                        font-size: to-rem(14px);
+                        font-weight: 900;
+                        color: #10b981;
                     }
                 }
 
@@ -605,21 +667,19 @@ body.theme--dark,
     }
 
     .visualizations-side {
-        height: 100%;
         display: flex;
         flex-direction: column;
         gap: to-rem(16px);
         width: 100%;
-        overflow-y: auto;
-        padding-right: to-rem(4px);
         min-height: 0;
+    }
 
-        &::-webkit-scrollbar {
-            width: 4px;
-        }
-        &::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
+    .command-engine-section {
+        width: 100%;
+        margin-top: to-rem(8px);
+
+        .circles-trading-engine-hud {
+            width: 100%;
         }
     }
 }

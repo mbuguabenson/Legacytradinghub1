@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import AnalysisTool from './analysis-tool';
 import AllAnalysis from './all-analysis';
 import Signals from '../signals';
@@ -26,6 +26,51 @@ const AnalysisTools: React.FC = () => {
     const { run_panel } = useStore();
     const [active_tool, setActiveTool] = useState<AnalysisToolSubTab>('analysis-tool');
     const [show_trade_config, setShowTradeConfig] = useState<boolean>(false);
+    const cardsContainerRef = useRef<HTMLDivElement>(null);
+    const [isDragging, setIsDragging] = useState(false);
+    const [startX, setStartX] = useState(0);
+    const [scrollLeftPos, setScrollLeftPos] = useState(0);
+
+    const handleSubtabsWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+        if (cardsContainerRef.current && e.deltaY !== 0) {
+            cardsContainerRef.current.scrollLeft += e.deltaY * 1.2;
+        }
+    };
+
+    const handleMouseDown = (e: React.MouseEvent) => {
+        if (!cardsContainerRef.current) return;
+        setIsDragging(true);
+        setStartX(e.pageX - cardsContainerRef.current.offsetLeft);
+        setScrollLeftPos(cardsContainerRef.current.scrollLeft);
+    };
+
+    const handleMouseLeaveOrUp = () => {
+        setIsDragging(false);
+    };
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        if (!isDragging || !cardsContainerRef.current) return;
+        e.preventDefault();
+        const x = e.pageX - cardsContainerRef.current.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        cardsContainerRef.current.scrollLeft = scrollLeftPos - walk;
+    };
+
+    const scrollSubtabs = (direction: 'left' | 'right') => {
+        if (cardsContainerRef.current) {
+            const offset = direction === 'left' ? -220 : 220;
+            cardsContainerRef.current.scrollBy({ left: offset, behavior: 'smooth' });
+        }
+    };
+
+    useEffect(() => {
+        if (!cardsContainerRef.current) return;
+        const activeEl = cardsContainerRef.current.querySelector('.analysis-tools__card--active') as HTMLElement;
+        if (activeEl) {
+            activeEl.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+        }
+    }, [active_tool]);
+
     const [tradeConfig, setTradeConfig] = useState({
         market: 'synthetic_index',
         submarket: 'random_index',
@@ -671,71 +716,99 @@ const AnalysisTools: React.FC = () => {
     return (
         <div className='analysis-tools'>
             <div className='analysis-tools__header'>
-                <div className='analysis-tools__cards-container'>
-                    <div
-                        className={`analysis-tools__card analysis-tools__card--light ${active_tool === 'signals' ? 'analysis-tools__card--active' : ''}`}
-                        onClick={() => handleCardClick('signals')}
+                <div className='analysis-tools__subtabs-wrapper'>
+                    <button
+                        type='button'
+                        className='analysis-tools__scroll-btn analysis-tools__scroll-btn--left'
+                        onClick={() => scrollSubtabs('left')}
+                        aria-label='Scroll tabs left'
+                        title='Scroll left'
                     >
-                        <div className='analysis-tools__card-content'>
-                            <span className='analysis-tools__card-label'>Signals</span>
+                        ‹
+                    </button>
+                    <div
+                        ref={cardsContainerRef}
+                        className='analysis-tools__cards-container'
+                        onWheel={handleSubtabsWheel}
+                        onMouseDown={handleMouseDown}
+                        onMouseUp={handleMouseLeaveOrUp}
+                        onMouseLeave={handleMouseLeaveOrUp}
+                        onMouseMove={handleMouseMove}
+                    >
+                        <div
+                            className={`analysis-tools__card analysis-tools__card--light ${active_tool === 'signals' ? 'analysis-tools__card--active' : ''}`}
+                            onClick={() => handleCardClick('signals')}
+                        >
+                            <div className='analysis-tools__card-content'>
+                                <span className='analysis-tools__card-label'>Signals</span>
+                            </div>
+                        </div>
+                        <div
+                            className={`analysis-tools__card analysis-tools__card--light ${active_tool === 'all-analysis' ? 'analysis-tools__card--active' : ''}`}
+                            onClick={() => handleCardClick('all-analysis')}
+                        >
+                            <div className='analysis-tools__card-content'>
+                                <span className='analysis-tools__card-label'>All Markets</span>
+                            </div>
+                        </div>
+                        <div
+                            className={`analysis-tools__card analysis-tools__card--light ${active_tool === 'tick-analyser' ? 'analysis-tools__card--active' : ''}`}
+                            onClick={() => handleCardClick('tick-analyser')}
+                        >
+                            <div className='analysis-tools__card-content'>
+                                <span className='analysis-tools__card-label'>Tick Analyser</span>
+                            </div>
+                        </div>
+                        <div
+                            className={`analysis-tools__card analysis-tools__card--light ${active_tool === 'analysis-tool' ? 'analysis-tools__card--active' : ''}`}
+                            onClick={() => handleCardClick('analysis-tool')}
+                        >
+                            <div className='analysis-tools__card-content'>
+                                <span className='analysis-tools__card-label'>ProfitHub Analysis</span>
+                            </div>
+                        </div>
+                        <div
+                            className={`analysis-tools__card analysis-tools__card--light ${active_tool === 'circles-analysis' ? 'analysis-tools__card--active' : ''}`}
+                            onClick={() => handleCardClick('circles-analysis')}
+                        >
+                            <div className='analysis-tools__card-content'>
+                                <span className='analysis-tools__card-label'>Circles Analysis</span>
+                            </div>
+                        </div>
+                        <div
+                            className={`analysis-tools__card analysis-tools__card--light ${active_tool === 'digit-cracker' ? 'analysis-tools__card--active' : ''}`}
+                            onClick={() => handleCardClick('digit-cracker')}
+                        >
+                            <div className='analysis-tools__card-content'>
+                                <span className='analysis-tools__card-label'>Digit Cracker</span>
+                            </div>
+                        </div>
+                        <div
+                            className={`analysis-tools__card analysis-tools__card--light ${active_tool === 'easy-tool' ? 'analysis-tools__card--active' : ''}`}
+                            onClick={() => handleCardClick('easy-tool')}
+                        >
+                            <div className='analysis-tools__card-content'>
+                                <span className='analysis-tools__card-label'>Easy Tool</span>
+                            </div>
+                        </div>
+                        <div
+                            className={`analysis-tools__card analysis-tools__card--light ${active_tool === 'digitflow' ? 'analysis-tools__card--active' : ''}`}
+                            onClick={() => handleCardClick('digitflow')}
+                        >
+                            <div className='analysis-tools__card-content'>
+                                <span className='analysis-tools__card-label'>Digit Flow</span>
+                            </div>
                         </div>
                     </div>
-                    <div
-                        className={`analysis-tools__card analysis-tools__card--light ${active_tool === 'all-analysis' ? 'analysis-tools__card--active' : ''}`}
-                        onClick={() => handleCardClick('all-analysis')}
+                    <button
+                        type='button'
+                        className='analysis-tools__scroll-btn analysis-tools__scroll-btn--right'
+                        onClick={() => scrollSubtabs('right')}
+                        aria-label='Scroll tabs right'
+                        title='Scroll right'
                     >
-                        <div className='analysis-tools__card-content'>
-                            <span className='analysis-tools__card-label'>All Markets</span>
-                        </div>
-                    </div>
-                    <div
-                        className={`analysis-tools__card analysis-tools__card--light ${active_tool === 'tick-analyser' ? 'analysis-tools__card--active' : ''}`}
-                        onClick={() => handleCardClick('tick-analyser')}
-                    >
-                        <div className='analysis-tools__card-content'>
-                            <span className='analysis-tools__card-label'>Tick Analyser</span>
-                        </div>
-                    </div>
-                    <div
-                        className={`analysis-tools__card analysis-tools__card--light ${active_tool === 'analysis-tool' ? 'analysis-tools__card--active' : ''}`}
-                        onClick={() => handleCardClick('analysis-tool')}
-                    >
-                        <div className='analysis-tools__card-content'>
-                            <span className='analysis-tools__card-label'>ProfitHub Analysis</span>
-                        </div>
-                    </div>
-                    <div
-                        className={`analysis-tools__card analysis-tools__card--light ${active_tool === 'circles-analysis' ? 'analysis-tools__card--active' : ''}`}
-                        onClick={() => handleCardClick('circles-analysis')}
-                    >
-                        <div className='analysis-tools__card-content'>
-                            <span className='analysis-tools__card-label'>Circles Analysis</span>
-                        </div>
-                    </div>
-                    <div
-                        className={`analysis-tools__card analysis-tools__card--light ${active_tool === 'digit-cracker' ? 'analysis-tools__card--active' : ''}`}
-                        onClick={() => handleCardClick('digit-cracker')}
-                    >
-                        <div className='analysis-tools__card-content'>
-                            <span className='analysis-tools__card-label'>Digit Cracker</span>
-                        </div>
-                    </div>
-                    <div
-                        className={`analysis-tools__card analysis-tools__card--light ${active_tool === 'easy-tool' ? 'analysis-tools__card--active' : ''}`}
-                        onClick={() => handleCardClick('easy-tool')}
-                    >
-                        <div className='analysis-tools__card-content'>
-                            <span className='analysis-tools__card-label'>Easy Tool</span>
-                        </div>
-                    </div>
-                    <div
-                        className={`analysis-tools__card analysis-tools__card--light ${active_tool === 'digitflow' ? 'analysis-tools__card--active' : ''}`}
-                        onClick={() => handleCardClick('digitflow')}
-                    >
-                        <div className='analysis-tools__card-content'>
-                            <span className='analysis-tools__card-label'>Digit Flow</span>
-                        </div>
-                    </div>
+                        ›
+                    </button>
                 </div>
                 <button type='button' className='analysis-tools__trade-button' onClick={() => setShowTradeConfig(true)}>
                     Trade Set_UP
@@ -759,159 +832,159 @@ const AnalysisTools: React.FC = () => {
                                 onClick={() => setShowTradeConfig(false)}
                                 aria-label='Close'
                             >
-                                ├ù
+                                ×
                             </button>
                         </div>
-                        <div className='analysis-tools__trade-grid'>
+                    <div className='analysis-tools__trade-grid'>
+                        <label>
+                            Volatility:
+                            <select
+                                value={
+                                    volatilityOptions.some(opt => opt.value === tradeConfig.symbol)
+                                        ? tradeConfig.symbol
+                                        : volatilityOptions[0].value
+                                }
+                                onChange={e =>
+                                    setTradeConfig(p => ({
+                                        ...p,
+                                        market: 'synthetic_index',
+                                        submarket: 'continuous_index',
+                                        symbol: e.target.value,
+                                    }))
+                                }
+                            >
+                                {volatilityOptions.map(opt => (
+                                    <option key={opt.value} value={opt.value}>
+                                        {opt.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                        <label>
+                            Market:
+                            <select
+                                value={tradeConfig.market}
+                                onChange={e => setTradeConfig(p => ({ ...p, market: e.target.value }))}
+                            >
+                                {options.markets.map(([label, value], idx) => (
+                                    <option key={`${value}-${idx}`} value={value}>
+                                        {label}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                        <label>
+                            Trade Type:
+                            <select
+                                value={tradeConfig.tradeTypeCategory}
+                                onChange={e => setTradeConfig(p => ({ ...p, tradeTypeCategory: e.target.value }))}
+                            >
+                                {options.tradeTypeCategories.map(([label, value], idx) => (
+                                    <option key={`${value}-${idx}`} value={value}>
+                                        {label}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                        <label>
+                            Type:
+                            <select
+                                value={tradeConfig.tradeType}
+                                onChange={e => setTradeConfig(p => ({ ...p, tradeType: e.target.value }))}
+                            >
+                                {options.tradeTypes.map(([label, value], idx) => (
+                                    <option key={`${value}-${idx}`} value={value}>
+                                        {label}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                        <label>
+                            Contract:
+                            <select
+                                value={tradeConfig.contract}
+                                onChange={e => setTradeConfig(p => ({ ...p, contract: e.target.value }))}
+                            >
+                                {options.contractTypes.map(([label, value], idx) => (
+                                    <option key={`${value}-${idx}`} value={value}>
+                                        {label}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                        <label>
+                            Prediction:
+                            <input
+                                type='number'
+                                min={0}
+                                max={9}
+                                value={tradeConfig.prediction}
+                                onChange={e => setTradeConfig(p => ({ ...p, prediction: e.target.value }))}
+                            />
+                        </label>
+                        {hasPrediction2 && (
                             <label>
-                                Volatility:
-                                <select
-                                    value={
-                                        volatilityOptions.some(opt => opt.value === tradeConfig.symbol)
-                                            ? tradeConfig.symbol
-                                            : volatilityOptions[0].value
-                                    }
-                                    onChange={e =>
-                                        setTradeConfig(p => ({
-                                            ...p,
-                                            market: 'synthetic_index',
-                                            submarket: 'continuous_index',
-                                            symbol: e.target.value,
-                                        }))
-                                    }
-                                >
-                                    {volatilityOptions.map(opt => (
-                                        <option key={opt.value} value={opt.value}>
-                                            {opt.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
-                            <label>
-                                Market:
-                                <select
-                                    value={tradeConfig.market}
-                                    onChange={e => setTradeConfig(p => ({ ...p, market: e.target.value }))}
-                                >
-                                    {options.markets.map(([label, value], idx) => (
-                                        <option key={`${value}-${idx}`} value={value}>
-                                            {label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
-                            <label>
-                                Trade Type:
-                                <select
-                                    value={tradeConfig.tradeTypeCategory}
-                                    onChange={e => setTradeConfig(p => ({ ...p, tradeTypeCategory: e.target.value }))}
-                                >
-                                    {options.tradeTypeCategories.map(([label, value], idx) => (
-                                        <option key={`${value}-${idx}`} value={value}>
-                                            {label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
-                            <label>
-                                Type:
-                                <select
-                                    value={tradeConfig.tradeType}
-                                    onChange={e => setTradeConfig(p => ({ ...p, tradeType: e.target.value }))}
-                                >
-                                    {options.tradeTypes.map(([label, value], idx) => (
-                                        <option key={`${value}-${idx}`} value={value}>
-                                            {label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
-                            <label>
-                                Contract:
-                                <select
-                                    value={tradeConfig.contract}
-                                    onChange={e => setTradeConfig(p => ({ ...p, contract: e.target.value }))}
-                                >
-                                    {options.contractTypes.map(([label, value], idx) => (
-                                        <option key={`${value}-${idx}`} value={value}>
-                                            {label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
-                            <label>
-                                Prediction:
+                                Prediction 2:
                                 <input
                                     type='number'
                                     min={0}
                                     max={9}
-                                    value={tradeConfig.prediction}
-                                    onChange={e => setTradeConfig(p => ({ ...p, prediction: e.target.value }))}
+                                    value={tradeConfig.prediction2}
+                                    onChange={e => setTradeConfig(p => ({ ...p, prediction2: e.target.value }))}
                                 />
                             </label>
-                            {hasPrediction2 && (
-                                <label>
-                                    Prediction 2:
-                                    <input
-                                        type='number'
-                                        min={0}
-                                        max={9}
-                                        value={tradeConfig.prediction2}
-                                        onChange={e => setTradeConfig(p => ({ ...p, prediction2: e.target.value }))}
-                                    />
-                                </label>
-                            )}
-                            <label>
-                                Duration:
-                                <div className='analysis-tools__trade-inline'>
-                                    <input
-                                        type='number'
-                                        min={1}
-                                        value={tradeConfig.duration}
-                                        onChange={e => setTradeConfig(p => ({ ...p, duration: e.target.value }))}
-                                    />
-                                    <select
-                                        value={tradeConfig.durationUnit}
-                                        onChange={e => setTradeConfig(p => ({ ...p, durationUnit: e.target.value }))}
-                                    >
-                                        {options.durationTypes.map(([label, value], idx) => (
-                                            <option key={`${value}-${idx}`} value={value}>
-                                                {label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </label>
-                            <label>
-                                Stake:
-                                <div className='analysis-tools__trade-inline'>
-                                    <input
-                                        type='number'
-                                        step='0.01'
-                                        value={tradeConfig.stake}
-                                        onChange={e => setTradeConfig(p => ({ ...p, stake: e.target.value }))}
-                                    />
-                                    <select
-                                        value={tradeConfig.stakeCurrency}
-                                        onChange={e => setTradeConfig(p => ({ ...p, stakeCurrency: e.target.value }))}
-                                    >
-                                        {options.currencies.map(([label, value], idx) => (
-                                            <option key={`${value}-${idx}`} value={value}>
-                                                {label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </label>
-                            <label>
-                                Candle Interval:
+                        )}
+                        <label>
+                            Duration:
+                            <div className='analysis-tools__trade-inline'>
                                 <input
-                                    type='text'
-                                    value={tradeConfig.candleInterval}
-                                    onChange={e => setTradeConfig(p => ({ ...p, candleInterval: e.target.value }))}
+                                    type='number'
+                                    min={1}
+                                    value={tradeConfig.duration}
+                                    onChange={e => setTradeConfig(p => ({ ...p, duration: e.target.value }))}
                                 />
-                            </label>
-                        </div>
+                                <select
+                                    value={tradeConfig.durationUnit}
+                                    onChange={e => setTradeConfig(p => ({ ...p, durationUnit: e.target.value }))}
+                                >
+                                    {options.durationTypes.map(([label, value], idx) => (
+                                        <option key={`${value}-${idx}`} value={value}>
+                                            {label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </label>
+                        <label>
+                            Stake:
+                            <div className='analysis-tools__trade-inline'>
+                                <input
+                                    type='number'
+                                    step='0.01'
+                                    value={tradeConfig.stake}
+                                    onChange={e => setTradeConfig(p => ({ ...p, stake: e.target.value }))}
+                                />
+                                <select
+                                    value={tradeConfig.stakeCurrency}
+                                    onChange={e => setTradeConfig(p => ({ ...p, stakeCurrency: e.target.value }))}
+                                >
+                                    {options.currencies.map(([label, value], idx) => (
+                                        <option key={`${value}-${idx}`} value={value}>
+                                            {label}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </label>
+                        <label>
+                            Candle Interval:
+                            <input
+                                type='text'
+                                value={tradeConfig.candleInterval}
+                                onChange={e => setTradeConfig(p => ({ ...p, candleInterval: e.target.value }))}
+                            />
+                        </label>
+                    </div>
                         <div className='analysis-tools__trade-footer'>
                             <button
                                 type='button'
@@ -922,7 +995,7 @@ const AnalysisTools: React.FC = () => {
                                     setShowTradeConfig(false);
                                 }}
                             >
-                                Γû╢ Run
+                                ▶ Run
                             </button>
                         </div>
                     </div>

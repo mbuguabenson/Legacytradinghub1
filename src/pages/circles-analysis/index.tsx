@@ -287,47 +287,223 @@ const CirclesAnalysis = observer(() => {
                         </div>
                     </div>
 
-                    {/* Dual Distribution Split */}
+                    {/* Dynamic Strategy Spectrum Cards */}
                     <div className='analytics-deck-grid'>
-                        <div className='glass-card mini-intel'>
-                            <label>EVEN / ODD SPECTRUM</label>
-                            <div className='split-bar'>
-                                <div className='segment even' style={{ width: `${percentages.even}%` }}>
-                                    <span>E {percentages.even.toFixed(0)}%</span>
+                        {view_strategy === 'even_odd' && (
+                            <>
+                                <div className='glass-card mini-intel'>
+                                    <label>EVEN / ODD SPECTRUM</label>
+                                    <div className='split-bar'>
+                                        <div className='segment even' style={{ width: `${percentages.even}%` }}>
+                                            <span>E {percentages.even.toFixed(0)}%</span>
+                                        </div>
+                                        <div className='segment odd' style={{ width: `${percentages.odd}%` }}>
+                                            <span>O {percentages.odd.toFixed(0)}%</span>
+                                        </div>
+                                    </div>
+                                    <div className='hot-tags'>
+                                        <span>
+                                            HOT EVEN: <strong className='ev num'>{highestEven}</strong>
+                                        </span>
+                                        <span>
+                                            HOT ODD: <strong className='od num'>{highestOdd}</strong>
+                                        </span>
+                                    </div>
                                 </div>
-                                <div className='segment odd' style={{ width: `${percentages.odd}%` }}>
-                                    <span>O {percentages.odd.toFixed(0)}%</span>
+                                <div className='glass-card mini-intel'>
+                                    <label>OVER / UNDER DEPTH</label>
+                                    <div className='split-bar'>
+                                        <div className='segment over' style={{ width: `${percentages.over}%` }}>
+                                            <span>OV {percentages.over.toFixed(0)}%</span>
+                                        </div>
+                                        <div className='segment under' style={{ width: `${percentages.under}%` }}>
+                                            <span>UN {percentages.under.toFixed(0)}%</span>
+                                        </div>
+                                    </div>
+                                    <div className='hot-tags'>
+                                        <span>
+                                            HOT OVER: <strong className='ov num'>{highestOver}</strong>
+                                        </span>
+                                        <span>
+                                            HOT UNDER: <strong className='un num'>{highestUnder}</strong>
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className='hot-tags'>
-                                <span>
-                                    HOT EVEN: <strong className='ev num'>{highestEven}</strong>
-                                </span>
-                                <span>
-                                    HOT ODD: <strong className='od num'>{highestOdd}</strong>
-                                </span>
-                            </div>
-                        </div>
+                            </>
+                        )}
 
-                        <div className='glass-card mini-intel'>
-                            <label>OVER / UNDER DEPTH</label>
-                            <div className='split-bar'>
-                                <div className='segment over' style={{ width: `${percentages.over}%` }}>
-                                    <span>OV {percentages.over.toFixed(0)}%</span>
+                        {view_strategy === 'over_under' && (
+                            <>
+                                <div className='glass-card mini-intel'>
+                                    <label>OVER / UNDER DEPTH</label>
+                                    <div className='split-bar'>
+                                        <div className='segment over' style={{ width: `${percentages.over}%` }}>
+                                            <span>OV {percentages.over.toFixed(0)}%</span>
+                                        </div>
+                                        <div className='segment under' style={{ width: `${percentages.under}%` }}>
+                                            <span>UN {percentages.under.toFixed(0)}%</span>
+                                        </div>
+                                    </div>
+                                    <div className='hot-tags'>
+                                        <span>
+                                            HOT OVER: <strong className='ov num'>{highestOver}</strong>
+                                        </span>
+                                        <span>
+                                            HOT UNDER: <strong className='un num'>{highestUnder}</strong>
+                                        </span>
+                                    </div>
                                 </div>
-                                <div className='segment under' style={{ width: `${percentages.under}%` }}>
-                                    <span>UN {percentages.under.toFixed(0)}%</span>
+                                <div className='glass-card mini-intel'>
+                                    <label>THRESHOLD SELECTOR (CURRENT: {analysis.over_under_threshold})</label>
+                                    <div className='digit-mini-selector'>
+                                        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(d => (
+                                            <button
+                                                key={d}
+                                                type='button'
+                                                className={classNames('selector-pill num', {
+                                                    active: d === analysis.over_under_threshold,
+                                                })}
+                                                onClick={() => analysis.setOverUnderThreshold(d)}
+                                            >
+                                                {d}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div className='hot-tags'>
+                                        <span>LOWER: 0 to {analysis.over_under_threshold}</span>
+                                        <span>UPPER: {analysis.over_under_threshold + 1} to 9</span>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className='hot-tags'>
-                                <span>
-                                    HOT OVER: <strong className='ov num'>{highestOver}</strong>
-                                </span>
-                                <span>
-                                    HOT UNDER: <strong className='un num'>{highestUnder}</strong>
-                                </span>
-                            </div>
-                        </div>
+                            </>
+                        )}
+
+                        {view_strategy === 'differs' && (
+                            <>
+                                <div className='glass-card mini-intel'>
+                                    <label>DIFFERS VS MATCHES BIAS</label>
+                                    <div className='split-bar'>
+                                        <div className='segment diff' style={{ width: `${percentages.differ || 90}%` }}>
+                                            <span>DIFF {(percentages.differ || 90).toFixed(0)}%</span>
+                                        </div>
+                                        <div className='segment match' style={{ width: `${percentages.match || 10}%` }}>
+                                            <span>MAT {(percentages.match || 10).toFixed(0)}%</span>
+                                        </div>
+                                    </div>
+                                    <div className='hot-tags'>
+                                        <span>
+                                            LEAST OCCURRING: <strong className='od num'>{digit_stats.reduce((prev, curr) => (curr.count < prev.count ? curr : prev), digit_stats[0])?.digit ?? 0}</strong>
+                                        </span>
+                                        <span>SAFETY: <strong className='ev num'>90%+ ODDS</strong></span>
+                                    </div>
+                                </div>
+                                <div className='glass-card mini-intel'>
+                                    <label>DIFFERS TARGET DIGIT (TARGET: {analysis.match_diff_digit})</label>
+                                    <div className='digit-mini-selector'>
+                                        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(d => (
+                                            <button
+                                                key={d}
+                                                type='button'
+                                                className={classNames('selector-pill num', {
+                                                    active: d === analysis.match_diff_digit,
+                                                })}
+                                                onClick={() => analysis.setMatchDiffDigit(d)}
+                                            >
+                                                {d}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div className='hot-tags'>
+                                        <span>CLICK TO LOCK PREDICTION</span>
+                                        <span>STATUS: <strong className='ev num'>ACTIVE</strong></span>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+
+                        {view_strategy === 'matches' && (
+                            <>
+                                <div className='glass-card mini-intel'>
+                                    <label>REPETITION CLUSTER BIAS</label>
+                                    <div className='split-bar'>
+                                        <div className='segment match' style={{ width: `${Math.min(100, (percentages.match || 10) * 3)}%` }}>
+                                            <span>REPEAT {(percentages.match || 10).toFixed(0)}%</span>
+                                        </div>
+                                        <div className='segment diff' style={{ width: `${Math.max(0, 100 - (percentages.match || 10) * 3)}%` }}>
+                                            <span>BASE</span>
+                                        </div>
+                                    </div>
+                                    <div className='hot-tags'>
+                                        <span>
+                                            HOTTEST DIGIT: <strong className='ev num'>{digit_stats.reduce((prev, curr) => (curr.count > prev.count ? curr : prev), digit_stats[0])?.digit ?? 0}</strong>
+                                        </span>
+                                        <span>PAYOUT: <strong className='ov num'>~9.0x MULTIPLIER</strong></span>
+                                    </div>
+                                </div>
+                                <div className='glass-card mini-intel'>
+                                    <label>MATCH TARGET DIGIT (TARGET: {analysis.match_diff_digit})</label>
+                                    <div className='digit-mini-selector'>
+                                        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(d => (
+                                            <button
+                                                key={d}
+                                                type='button'
+                                                className={classNames('selector-pill num', {
+                                                    active: d === analysis.match_diff_digit,
+                                                })}
+                                                onClick={() => analysis.setMatchDiffDigit(d)}
+                                            >
+                                                {d}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div className='hot-tags'>
+                                        <span>ASSIGN MATCH PREDICTION</span>
+                                        <span>STATUS: <strong className='un num'>READY</strong></span>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+
+                        {view_strategy === 'rise_fall' && (
+                            <>
+                                <div className='glass-card mini-intel'>
+                                    <label>TICK MOMENTUM VELOCITY</label>
+                                    <div className='split-bar'>
+                                        <div className='segment even' style={{ width: `${percentages.rise || 50}%` }}>
+                                            <span>RISE {(percentages.rise || 50).toFixed(0)}%</span>
+                                        </div>
+                                        <div className='segment under' style={{ width: `${percentages.fall || 50}%` }}>
+                                            <span>FALL {(percentages.fall || 50).toFixed(0)}%</span>
+                                        </div>
+                                    </div>
+                                    <div className='hot-tags'>
+                                        <span>
+                                            BIAS: <strong className='ev num'>{(percentages.rise || 50) >= (percentages.fall || 50) ? 'BULLISH' : 'BEARISH'}</strong>
+                                        </span>
+                                        <span>CONFIDENCE: <strong className='ov num'>70%</strong></span>
+                                    </div>
+                                </div>
+                                <div className='glass-card mini-intel'>
+                                    <label>TICK DELTA DYNAMICS</label>
+                                    <div className='delta-metric-row'>
+                                        <span className='delta-label'>LAST 2 TICKS DELTA:</span>
+                                        <span className='delta-val num'>
+                                            {(() => {
+                                                const last2 = ticks.slice(-2);
+                                                if (last2.length < 2) return '+0.0000';
+                                                const q1 = (last2[1] as any)?.quote ?? (last2[1] as any) ?? 0;
+                                                const q0 = (last2[0] as any)?.quote ?? (last2[0] as any) ?? 0;
+                                                const diff = q1 - q0;
+                                                return `${diff >= 0 ? '+' : ''}${diff.toFixed(4)}`;
+                                            })()}
+                                        </span>
+                                    </div>
+                                    <div className='hot-tags'>
+                                        <span>CURRENT SPOT: <strong className='ev num'>{current_price || '0.000'}</strong></span>
+                                        <span>STATUS: <strong className='ov num'>STREAMING</strong></span>
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </div>
 
                     {/* 60-Tick Pattern Strip */}
@@ -357,11 +533,6 @@ const CirclesAnalysis = observer(() => {
                             ))}
                         </div>
                     </div>
-
-                    {/* TRADING ENGINE CONSOLE */}
-                    <div className='engine-card-wrapper'>
-                        <TradingEngine />
-                    </div>
                 </div>
 
                 {/* RIGHT: DYNAMIC VISUALIZATIONS */}
@@ -370,6 +541,11 @@ const CirclesAnalysis = observer(() => {
                     <LastDigitsLineChart ticks={ticks} />
                     <Last20DigitsGrid ticks={ticks} />
                 </div>
+            </div>
+
+            {/* 4. BALANCED FULL-WIDTH COMMAND & EXECUTION DECK */}
+            <div className='command-engine-section'>
+                <TradingEngine />
             </div>
         </div>
     );

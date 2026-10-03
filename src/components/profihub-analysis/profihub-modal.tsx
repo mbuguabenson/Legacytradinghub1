@@ -21,8 +21,8 @@ const ProfihubModal = observer(() => {
                     onClose={setProfihubModalVisibility}
                     modalWidth={modalWidth}
                     modalHeight={modalHeight}
-                    minWidth={320}
-                    minHeight={350}
+                    minWidth={280}
+                    minHeight={300}
                     enableResizing
                 >
                     <div className='profihub-modal-body'>

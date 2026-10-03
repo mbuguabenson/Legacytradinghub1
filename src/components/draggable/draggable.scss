@@ -131,16 +131,6 @@
             }
         }
 
-        &--maximize {
-            &:hover,
-            &.active {
-                background: rgba(16, 185, 129, 0.2);
-                color: #34d399;
-                border-color: rgba(16, 185, 129, 0.5);
-                box-shadow: 0 0 10px rgba(16, 185, 129, 0.25);
-            }
-        }
-
         &--close {
             &:hover {
                 background: rgba(239, 68, 68, 0.25);
@@ -264,41 +254,107 @@
         touch-action: none;
 
         .draggable-content__header {
-            padding: 4px 8px;
-            height: 44px;
-            min-height: 44px;
-            gap: 6px;
+            padding: 4px 6px;
+            height: 40px;
+            min-height: 40px;
+            gap: 4px;
 
             &__title {
-                font-size: 13px;
+                font-size: 12px;
+                max-width: 95px;
             }
         }
 
-        .draggable-window-btn {
-            width: 36px;
-            height: 36px;
+        .draggable-header-actions {
+            gap: 3px;
         }
 
         .draggable-zoom-controls {
-            display: none; // Keep header compact on mobile
+            display: flex !important;
+            align-items: center;
+            gap: 2px;
         }
-    }
 
-    .resizable-handle {
-        &__top,
-        &__bottom {
-            height: 16px !important;
+        .draggable-zoom-btn {
+            padding: 3px 6px;
+            font-size: 11px;
+            min-width: 24px;
+            height: 26px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+
+            &--reset {
+                display: none !important; // Only zoom in and zoom out on mobile
+            }
         }
-        &__left,
-        &__right {
-            width: 16px !important;
+
+        .draggable-window-controls {
+            gap: 2px;
         }
-        &__top-left,
-        &__top-right,
-        &__bottom-left,
-        &__bottom-right {
-            width: 20px !important;
-            height: 20px !important;
+
+        .draggable-window-btn {
+            width: 26px;
+            height: 26px;
+            border-radius: 5px;
+
+            svg {
+                width: 11px;
+                height: 11px;
+            }
+        }
+
+        // 📱 Scalable and Resizable by hand from either side or corner on mobile
+        .resizable-handle {
+            &__top {
+                height: 24px !important;
+                top: -12px !important;
+                touch-action: none !important;
+                z-index: 20;
+            }
+            &__bottom {
+                height: 24px !important;
+                bottom: -12px !important;
+                touch-action: none !important;
+                z-index: 20;
+            }
+            &__left {
+                width: 24px !important;
+                left: -12px !important;
+                touch-action: none !important;
+                z-index: 20;
+            }
+            &__right {
+                width: 24px !important;
+                right: -12px !important;
+                touch-action: none !important;
+                z-index: 20;
+            }
+            &__top-left,
+            &__top-right,
+            &__bottom-left,
+            &__bottom-right {
+                width: 34px !important;
+                height: 34px !important;
+                touch-action: none !important;
+                z-index: 25;
+            }
+            &__top-left {
+                top: -17px !important;
+                left: -17px !important;
+            }
+            &__top-right {
+                top: -17px !important;
+                right: -17px !important;
+            }
+            &__bottom-left {
+                bottom: -17px !important;
+                left: -17px !important;
+            }
+            &__bottom-right {
+                bottom: -17px !important;
+                right: -17px !important;
+            }
         }
     }
 }

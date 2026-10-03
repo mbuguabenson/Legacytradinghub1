@@ -173,4 +173,45 @@
             text-shadow: none;
         }
     }
+
+    &__compact-label {
+        font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+        font-size: 1.4rem;
+        font-weight: 900;
+        letter-spacing: 1.5px;
+        line-height: 1;
+        text-transform: uppercase;
+        color: var(--text-prominent, #f8fafc);
+        white-space: nowrap;
+
+        body.theme--dark &,
+        .theme--dark &,
+        :global(.theme--dark) & {
+            color: #ffffff !important;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.4);
+        }
+
+        body:not(.theme--dark) &,
+        body.theme--light &,
+        .theme--light &,
+        :global(.theme--light) & {
+            color: #0f172a !important;
+        }
+    }
+}
+
+// ─── Mobile Logo Overrides ─────────────────────────────────────────
+.app-header__logo--mobile {
+    padding-inline-start: 0.4rem;
+    padding-inline-end: 0.4rem;
+    height: 28px;
+
+    .lth-brand-logo {
+        padding: 1px 3px;
+        border-radius: 8px;
+    }
+
+    .lth-brand-logo__row {
+        gap: 6px;
+    }
 }
