@@ -47,25 +47,12 @@ const ChartWrapper = lazyRetry(() => import('../chart/chart-wrapper'), 'charts')
 const TradingView = lazyRetry(() => import('../tradingview'), 'tradingview');
 const AnalysisTools = lazyRetry(() => import('../analysis-tool'), 'analysis_tool');
 const Signals = lazyRetry(() => import('../signals'), 'signals');
-const ScannerPage = lazyRetry(() => import('../scanner/scanner'), 'scanner');
-
-const EasyTool = lazyRetry(() => import('../easy-tool'), 'easy_tool');
 const Marketkiller = lazyRetry(() => import('../marketkiller'), 'marketkiller');
-const MarketHunterPro = lazyRetry(() => import('../market-hunter-pro'), 'market_hunter_pro');
 const TradingBots = lazyRetry(() => import('../free-bots/trading-bots'), 'trading_bots');
-const EntryScanner = lazyRetry(
-    () => import('../entry-scanner/entry-scanner').then(m => ({ default: m.EntryScanner })),
-    'entry_scanner'
-);
-const DigitFlowPage = lazyRetry(() => import('../digitflow/digitflow'), 'digitflow');
-const EliteProPage = lazyRetry(() => import('../elite-pro/elite-pro'), 'elite_pro');
-const PovertyHunterPage = lazyRetry(() => import('../poverty-hunter'), 'poverty_hunter');
-const AutoXEoPage = lazyRetry(() => import('../auto-x-eo'), 'auto_x_eo');
-const OverlordAiPage = lazyRetry(() => import('../overlord-ai'), 'overlord_ai');
 const CopyTradingPage = lazyRetry(() => import('../copy-trading/copy-trading'), 'copy_trading');
 const DTraderPage = lazyRetry(() => import('../dtrader'), 'dtrader');
-const AutoflipperPage = lazyRetry(() => import('../autoflipper/autoflipper'), 'autoflipper');
 const AutoTrades = lazyRetry(() => import('../autotrades'), 'autotrades');
+const AiIntelligence = lazyRetry(() => import('../ai-intelligence'), 'ai_intelligence');
 
 import { TabErrorBoundary } from '@/components/shared/TabErrorBoundary';
 import { copyTradingService } from '@/pages/copy-trading/services/copy-trading.service';
@@ -124,6 +111,7 @@ const AppWrapper = observer(() => {
         'analysis_tool',
         'tradingview',
         'signals',
+        'ai_intelligence',
         'scanner',
         'easy_tool',
         'marketkiller',
@@ -506,13 +494,15 @@ const AppWrapper = observer(() => {
                 ),
             },
             {
-                key: 'scanner',
-                id: 'id-scanner',
-                label: <TabIcon iconKey='scanner' label='AI Strategy Scanner' />,
+                key: 'ai_intelligence',
+                id: 'id-ai-intelligence',
+                label: <TabIcon iconKey='ai_intelligence' label='AI Intelligence Hub' />,
                 content: (
-                    <TabErrorBoundary tabId='id-scanner' tabName='AI Strategy Scanner'>
-                        <Suspense fallback={<ChunkLoader message={localize('Please wait, loading Scanner...')} />}>
-                            <ScannerPage />
+                    <TabErrorBoundary tabId='id-ai-intelligence' tabName='AI Intelligence Hub'>
+                        <Suspense
+                            fallback={<ChunkLoader message={localize('Please wait, loading AI Intelligence Hub...')} />}
+                        >
+                            <AiIntelligence />
                         </Suspense>
                     </TabErrorBoundary>
                 ),
@@ -525,34 +515,6 @@ const AppWrapper = observer(() => {
                     <TabErrorBoundary tabId='id-marketkiller' tabName='Marketkiller'>
                         <Suspense fallback={<ChunkLoader message={localize('Please wait, loading Marketkiller...')} />}>
                             <Marketkiller />
-                        </Suspense>
-                    </TabErrorBoundary>
-                ),
-            },
-            {
-                key: 'market_hunter_pro',
-                id: 'id-market-hunter-pro',
-                label: <TabIcon iconKey='market_hunter_pro' label='Market Hunter Pro' />,
-                content: (
-                    <TabErrorBoundary tabId='id-market-hunter-pro' tabName='Market Hunter Pro'>
-                        <Suspense
-                            fallback={<ChunkLoader message={localize('Please wait, loading Market Hunter Pro...')} />}
-                        >
-                            <MarketHunterPro />
-                        </Suspense>
-                    </TabErrorBoundary>
-                ),
-            },
-            {
-                key: 'ai_trading_engine',
-                id: 'id-ai-trading-engine',
-                label: <TabIcon iconKey='ai_trading_engine' label='AI Trading Engine' />,
-                content: (
-                    <TabErrorBoundary tabId='id-ai-trading-engine' tabName='AI Trading Engine'>
-                        <Suspense
-                            fallback={<ChunkLoader message={localize('Please wait, loading AI Trading Engine...')} />}
-                        >
-                            <EntryScanner />
                         </Suspense>
                     </TabErrorBoundary>
                 ),
@@ -630,8 +592,10 @@ const AppWrapper = observer(() => {
 
     const currentTabKey = React.useMemo(() => {
         const autoTradeSubtabs = ['elite_pro', 'auto_x_eo', 'poverty_hunter', 'overlord_ai', 'autoflipper', 'autotrades'];
+        const aiIntelligenceSubtabs = ['market_hunter_pro', 'ai_trading_engine', 'scanner', 'ai_intelligence', 'ai_intelligence_hub'];
         const analysisSubtabs = ['easy_tool', 'easy-tool', 'digitflow'];
         if (autoTradeSubtabs.includes(rawTabKey)) return 'autotrades';
+        if (aiIntelligenceSubtabs.includes(rawTabKey)) return 'ai_intelligence';
         if (analysisSubtabs.includes(rawTabKey)) return 'analysis_tool';
         return rawTabKey;
     }, [rawTabKey]);

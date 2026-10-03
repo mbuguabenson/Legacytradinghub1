@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import AnalysisTool from './analysis-tool';
 import AllAnalysis from './all-analysis';
-import Signals from '../signals';
 import TickAnalyser from './tick-analyser';
 import CirclesAnalysis from '../circles-analysis';
 import DigitCracker from '../digit-cracker';
@@ -13,7 +12,6 @@ import { ALL_DERIV_MARKETS } from '@/constants/markets';
 import './analysis-tools.scss';
 
 type AnalysisToolSubTab =
-    | 'signals'
     | 'analysis-tool'
     | 'all-analysis'
     | 'tick-analyser'
@@ -692,8 +690,6 @@ const AnalysisTools: React.FC = () => {
         if (!active_tool) return null;
 
         switch (active_tool) {
-            case 'signals':
-                return <Signals />;
             case 'analysis-tool':
                 return <AnalysisTool />;
             case 'all-analysis':
@@ -735,14 +731,6 @@ const AnalysisTools: React.FC = () => {
                         onMouseLeave={handleMouseLeaveOrUp}
                         onMouseMove={handleMouseMove}
                     >
-                        <div
-                            className={`analysis-tools__card analysis-tools__card--light ${active_tool === 'signals' ? 'analysis-tools__card--active' : ''}`}
-                            onClick={() => handleCardClick('signals')}
-                        >
-                            <div className='analysis-tools__card-content'>
-                                <span className='analysis-tools__card-label'>Signals</span>
-                            </div>
-                        </div>
                         <div
                             className={`analysis-tools__card analysis-tools__card--light ${active_tool === 'all-analysis' ? 'analysis-tools__card--active' : ''}`}
                             onClick={() => handleCardClick('all-analysis')}

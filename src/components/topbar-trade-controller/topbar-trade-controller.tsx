@@ -44,6 +44,10 @@ export const TopBarTradeController: React.FC<TopBarTradeControllerProps> = ({ cu
         return (typeof window !== 'undefined' ? sessionStorage.getItem('legacy_autotrades_subtab') : '') || 'elite_pro';
     });
 
+    const [activeAiIntelligenceSubtab, setActiveAiIntelligenceSubtab] = useState<string>(() => {
+        return (typeof window !== 'undefined' ? sessionStorage.getItem('legacy_ai_intelligence_subtab') : '') || 'market_hunter_pro';
+    });
+
     useEffect(() => {
         const handleSubtabChange = (e: Event) => {
             const customEvent = e as CustomEvent<{ subtab: string }>;
@@ -51,12 +55,27 @@ export const TopBarTradeController: React.FC<TopBarTradeControllerProps> = ({ cu
                 setActiveAutoTradeSubtab(customEvent.detail.subtab);
             }
         };
+        const handleAiSubtabChange = (e: Event) => {
+            const customEvent = e as CustomEvent<{ subtab: string }>;
+            if (customEvent.detail?.subtab) {
+                setActiveAiIntelligenceSubtab(customEvent.detail.subtab);
+            }
+        };
         window.addEventListener('PH_AUTOTRADES_SUBTAB_CHANGE', handleSubtabChange);
-        return () => window.removeEventListener('PH_AUTOTRADES_SUBTAB_CHANGE', handleSubtabChange);
+        window.addEventListener('PH_AI_INTELLIGENCE_SUBTAB_CHANGE', handleAiSubtabChange);
+        return () => {
+            window.removeEventListener('PH_AUTOTRADES_SUBTAB_CHANGE', handleSubtabChange);
+            window.removeEventListener('PH_AI_INTELLIGENCE_SUBTAB_CHANGE', handleAiSubtabChange);
+        };
     }, []);
 
     const rawTab = (currentTabKey || '').toLowerCase();
-    const normalizedTab = rawTab === 'autotrades' ? activeAutoTradeSubtab : rawTab;
+    const normalizedTab =
+        rawTab === 'autotrades'
+            ? activeAutoTradeSubtab
+            : (rawTab === 'ai_intelligence' || rawTab === 'ai_intelligence_hub')
+            ? activeAiIntelligenceSubtab
+            : rawTab;
     const currentStatus = engineStatuses[normalizedTab] || { isRunning: false };
 
     // Trigger action on the active trading engine
