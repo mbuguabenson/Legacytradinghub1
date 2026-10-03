@@ -532,16 +532,16 @@ body.theme--dark,
     }
 
     .tb-cards-grid {
-        grid-template-columns: repeat(3, 1fr) !important;
-        gap: 6px !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
     }
 
     .pro-bot-card {
-        border-radius: 12px !important;
+        border-radius: 16px !important;
 
         &__inner {
-            padding: 8px 6px !important;
-            gap: 6px !important;
+            padding: 12px 10px !important;
+            gap: 8px !important;
         }
 
         &__header {
@@ -549,19 +549,19 @@ body.theme--dark,
         }
 
         &__icon-box {
-            width: 30px !important;
-            height: 30px !important;
-            border-radius: 8px !important;
+            width: 36px !important;
+            height: 36px !important;
+            border-radius: 10px !important;
 
             .icon-emoji {
-                font-size: 15px !important;
+                font-size: 18px !important;
             }
         }
 
         &__badges {
             .type-tag {
-                font-size: 0.52rem !important;
-                padding: 2px 4px !important;
+                font-size: 0.58rem !important;
+                padding: 2px 6px !important;
                 letter-spacing: 0 !important;
             }
         }
@@ -571,14 +571,14 @@ body.theme--dark,
         }
 
         &__name {
-            font-size: 0.68rem !important;
-            line-height: 1.15 !important;
+            font-size: 0.8rem !important;
+            line-height: 1.25 !important;
             display: -webkit-box !important;
             -webkit-line-clamp: 2 !important;
             line-clamp: 2 !important;
             -webkit-box-orient: vertical !important;
             overflow: hidden !important;
-            height: 2.3em !important;
+            height: 2.5em !important;
         }
 
         &__sub-tags {
@@ -590,13 +590,13 @@ body.theme--dark,
         }
 
         &__meter-box {
-            padding: 4px 5px !important;
-            border-radius: 8px !important;
-            gap: 3px !important;
+            padding: 6px 8px !important;
+            border-radius: 10px !important;
+            gap: 4px !important;
 
             .meter-label-row {
                 .meter-title {
-                    font-size: 0.54rem !important;
+                    font-size: 0.62rem !important;
                     gap: 3px !important;
 
                     svg {
@@ -605,12 +605,12 @@ body.theme--dark,
                 }
 
                 .meter-val {
-                    font-size: 0.68rem !important;
+                    font-size: 0.74rem !important;
                 }
             }
 
             .meter-track {
-                height: 3px !important;
+                height: 4px !important;
             }
         }
 
@@ -619,7 +619,7 @@ body.theme--dark,
         }
 
         &__actions {
-            margin-top: 2px !important;
+            margin-top: 4px !important;
             gap: 4px !important;
 
             .btn-preview {
@@ -627,14 +627,14 @@ body.theme--dark,
             }
 
             .btn-load-bot {
-                padding: 5px 2px !important;
-                font-size: 0.64rem !important;
-                border-radius: 6px !important;
-                gap: 3px !important;
+                padding: 7px 8px !important;
+                font-size: 0.72rem !important;
+                border-radius: 8px !important;
+                gap: 4px !important;
 
                 .btn-icon {
-                    width: 10px !important;
-                    height: 10px !important;
+                    width: 12px !important;
+                    height: 12px !important;
                 }
             }
         }

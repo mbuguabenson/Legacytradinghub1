@@ -257,7 +257,7 @@ const WorkspaceGroup = observer(() => {
                         }
                     />
                     <ToolbarIcon
-                        popover_message={localize('Entry Scanner')}
+                        popover_message={localize('Easy Tool & Digit Flow')}
                         icon={
                             <span
                                 className={classNames('toolbar__icon', {
