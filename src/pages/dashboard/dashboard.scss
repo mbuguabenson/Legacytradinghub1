@@ -1,62 +1,68 @@
 @use 'components/shared/styles/mixins' as *;
 @use 'risk-disclaimer.scss';
 
-// ═══════════════════════════════════════════════════════════════
-// ✦ INSTITUTIONAL FROSTED SPONGY GLOWING LANDING DESIGN SYSTEM
-// ═══════════════════════════════════════════════════════════════
+// ═════════════════════════════════════════════════════════════════════════════
+// ✦ LEGACY TRADING HUB — CLEAN GLOWING NEUMORPHIC / GLASS FINTECH DESIGN
+// ═════════════════════════════════════════════════════════════════════════════
 
 :root,
 body.theme--dark,
 .theme--dark {
-    --dash-bg: #060911;
-    --dash-frosted-bg: rgba(13, 19, 36, 0.78);
-    --dash-frosted-bg-hover: rgba(18, 27, 52, 0.88);
-    --dash-border: rgba(255, 255, 255, 0.12);
-    --dash-border-glow: rgba(255, 255, 255, 0.28);
+    // Deep obsidian midnight base with glowing neon ambiance
+    --dash-bg: #060813;
+    --dash-surface: rgba(13, 20, 38, 0.82);
+    --dash-surface-hover: rgba(20, 30, 56, 0.92);
+    --dash-surface-active: rgba(28, 42, 77, 0.98);
+    --dash-border: rgba(56, 189, 248, 0.2);
+    --dash-border-highlight: rgba(255, 255, 255, 0.22);
+    --dash-border-glow: rgba(56, 189, 248, 0.55);
 
-    // Visible, crisp, high-contrast typography tokens
-    --dash-text-title: #ffffff;
-    --dash-text-body: #f8fafc;
-    --dash-text-muted: #cbd5e1;
-    --dash-text-subtle: #94a3b8;
+    --dash-text-dominant: #ffffff;
+    --dash-text-title: #f8fafc;
+    --dash-text-body: #e2e8f0;
+    --dash-text-muted: #94a3b8;
+    --dash-text-subtle: #64748b;
 
-    // Cushioned spongy tactile shadows with soft inner highlights
-    --dash-spongy-shadow: 0 12px 32px -4px rgba(0, 0, 0, 0.52), inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.18), inset 0 -2px 3px 0 rgba(0, 0, 0, 0.38);
-    --dash-spongy-shadow-hover: 0 18px 48px -4px rgba(0, 0, 0, 0.65), inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.28), inset 0 -2px 3px 0 rgba(0, 0, 0, 0.45);
+    // Glowing neumorphic & glass depths
+    --dash-neumorph-card: 0 10px 28px -4px rgba(0, 0, 0, 0.65), 0 0 18px rgba(6, 182, 212, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.16), inset 0 -1.5px 2px rgba(0, 0, 0, 0.55);
+    --dash-neumorph-card-hover: 0 16px 38px -4px rgba(0, 0, 0, 0.8), 0 0 28px rgba(6, 182, 212, 0.35), inset 0 1.5px 2px rgba(255, 255, 255, 0.28), inset 0 -2px 3px rgba(0, 0, 0, 0.65);
+    --dash-neumorph-inset: inset 0 2px 4px rgba(0, 0, 0, 0.5), inset 0 -1px 2px rgba(255, 255, 255, 0.08);
 
-    // Vibrant glowing accent halos
-    --glow-emerald: rgba(16, 185, 129, 0.42);
-    --glow-cyan: rgba(6, 182, 212, 0.42);
-    --glow-indigo: rgba(99, 102, 241, 0.42);
-    --glow-purple: rgba(168, 85, 247, 0.42);
-    --glow-amber: rgba(245, 158, 11, 0.42);
-    --glow-rose: rgba(244, 63, 94, 0.42);
+    --glow-cyan: rgba(6, 182, 212, 0.5);
+    --glow-blue: rgba(14, 165, 233, 0.5);
+    --glow-purple: rgba(168, 85, 247, 0.45);
+    --glow-emerald: rgba(16, 185, 129, 0.5);
+    --glow-amber: rgba(245, 158, 11, 0.5);
+    --glow-rose: rgba(244, 63, 94, 0.5);
 }
 
 body.theme--light,
 .theme--light {
-    --dash-bg: #f3f5f9;
-    --dash-frosted-bg: rgba(255, 255, 255, 0.9);
-    --dash-frosted-bg-hover: rgba(255, 255, 255, 0.98);
-    --dash-border: rgba(0, 0, 0, 0.1);
-    --dash-border-glow: rgba(0, 0, 0, 0.22);
+    // Pearl / off-white clean palette
+    --dash-bg: #f8fafc;
+    --dash-surface: rgba(255, 255, 255, 0.78);
+    --dash-surface-hover: rgba(255, 255, 255, 0.96);
+    --dash-surface-active: #ffffff;
+    --dash-border: rgba(226, 232, 240, 0.9);
+    --dash-border-highlight: rgba(255, 255, 255, 0.95);
+    --dash-border-glow: rgba(14, 165, 233, 0.4);
 
-    // High contrast typography for light theme
-    --dash-text-title: #090d16;
-    --dash-text-body: #1e293b;
-    --dash-text-muted: #334155;
-    --dash-text-subtle: #475569;
+    --dash-text-dominant: #0f172a;
+    --dash-text-title: #1e293b;
+    --dash-text-body: #334155;
+    --dash-text-muted: #64748b;
+    --dash-text-subtle: #94a3b8;
 
-    // Spongy tactile shadows for light theme
-    --dash-spongy-shadow: 0 8px 24px -2px rgba(15, 23, 42, 0.08), inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 0.95), inset 0 -2px 3px 0 rgba(15, 23, 42, 0.04);
-    --dash-spongy-shadow-hover: 0 14px 34px -2px rgba(15, 23, 42, 0.14), inset 0 1.5px 1.5px 0 rgba(255, 255, 255, 1), inset 0 -2px 3px 0 rgba(15, 23, 42, 0.06);
+    --dash-neumorph-card: 0 8px 22px -4px rgba(15, 23, 42, 0.05), inset 0 1.5px 2px rgba(255, 255, 255, 0.95), inset 0 -1.5px 2px rgba(15, 23, 42, 0.02);
+    --dash-neumorph-card-hover: 0 14px 32px -4px rgba(15, 23, 42, 0.09), inset 0 2px 2px rgba(255, 255, 255, 1), inset 0 -2px 3px rgba(15, 23, 42, 0.03);
+    --dash-neumorph-inset: inset 0 2px 4px rgba(15, 23, 42, 0.06), inset 0 -1px 2px rgba(255, 255, 255, 0.85);
 
-    --glow-emerald: rgba(16, 185, 129, 0.25);
-    --glow-cyan: rgba(6, 182, 212, 0.25);
-    --glow-indigo: rgba(99, 102, 241, 0.25);
-    --glow-purple: rgba(168, 85, 247, 0.25);
-    --glow-amber: rgba(245, 158, 11, 0.25);
-    --glow-rose: rgba(244, 63, 94, 0.25);
+    --glow-cyan: rgba(6, 182, 212, 0.35);
+    --glow-blue: rgba(14, 165, 233, 0.35);
+    --glow-purple: rgba(168, 85, 247, 0.3);
+    --glow-emerald: rgba(16, 185, 129, 0.35);
+    --glow-amber: rgba(245, 158, 11, 0.35);
+    --glow-rose: rgba(244, 63, 94, 0.35);
 }
 
 .bot-dashboard {
@@ -67,7 +73,7 @@ body.theme--light,
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DASHBOARD WRAPPER & HIGH-TECH PATTERN BACKGROUND WITH REDUCED OPACITY
+// ✦ BACKGROUND: CLEAN GLOWING GRADIENT LIGHTS
 // ─────────────────────────────────────────────────────────────────────────────
 .tab__dashboard {
     display: flex;
@@ -76,48 +82,45 @@ body.theme--light,
     background: var(--dash-bg);
     overflow: hidden;
 
-    // High-tech geometric blueprint matrix + grid pattern with reduced opacity
     &::before {
         content: '';
         position: absolute;
         inset: 0;
         background-image:
-            // Soft ambient atmospheric orbs
-            radial-gradient(circle at 10% 12%, rgba(99, 102, 241, 0.16) 0%, transparent 45%),
-            radial-gradient(circle at 90% 20%, rgba(16, 185, 129, 0.14) 0%, transparent 42%),
-            radial-gradient(circle at 50% 85%, rgba(6, 182, 212, 0.12) 0%, transparent 50%),
-            // Technical isometric / matrix dots pattern with reduced opacity
-            radial-gradient(rgba(255, 255, 255, 0.11) 1.2px, transparent 1.2px),
-            // Technical micro-grid lines with reduced opacity
-            linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+            // Top-left: vibrant cyan/blue neon light blob
+            radial-gradient(circle at 10% 10%, rgba(6, 182, 212, 0.25) 0%, transparent 46%),
+            // Top-right: vivid purple neon ambient bloom
+            radial-gradient(circle at 90% 12%, rgba(168, 85, 247, 0.22) 0%, transparent 45%),
+            // Center ambient glow
+            radial-gradient(circle at 50% 40%, rgba(14, 165, 233, 0.14) 0%, transparent 50%),
+            // Bottom-left subtle emerald accent
+            radial-gradient(circle at 12% 82%, rgba(16, 185, 129, 0.14) 0%, transparent 40%),
+            // Micro-matrix texture
+            radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
         background-size:
             100% 100%,
             100% 100%,
             100% 100%,
-            32px 32px,
-            32px 32px,
+            100% 100%,
             32px 32px;
         background-position:
             0 0,
             0 0,
             0 0,
             0 0,
-            -1px -1px,
-            -1px -1px;
+            0 0;
         pointer-events: none;
         z-index: 0;
-        opacity: 0.88;
+        opacity: 0.95;
     }
 
     body.theme--light &::before {
         background-image:
-            radial-gradient(circle at 10% 12%, rgba(99, 102, 241, 0.08) 0%, transparent 45%),
-            radial-gradient(circle at 90% 20%, rgba(16, 185, 129, 0.07) 0%, transparent 42%),
-            radial-gradient(circle at 50% 85%, rgba(6, 182, 212, 0.06) 0%, transparent 50%),
-            radial-gradient(rgba(15, 23, 42, 0.08) 1.2px, transparent 1.2px),
-            linear-gradient(rgba(15, 23, 42, 0.032) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(15, 23, 42, 0.032) 1px, transparent 1px);
+            radial-gradient(circle at 10% 10%, rgba(14, 165, 233, 0.12) 0%, transparent 46%),
+            radial-gradient(circle at 90% 12%, rgba(168, 85, 247, 0.09) 0%, transparent 45%),
+            radial-gradient(circle at 50% 40%, rgba(6, 182, 212, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 12% 82%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
+            radial-gradient(rgba(15, 23, 42, 0.035) 1px, transparent 1px);
     }
 
     &__content {
@@ -127,25 +130,24 @@ body.theme--light,
         flex-direction: column;
         width: 100%;
         min-height: 100vh;
-        padding: 24px 36px 90px;
+        padding: 16px 24px 60px;
         box-sizing: border-box;
 
         @include mobile-screen {
-            padding: 14px 14px 80px;
+            padding: 12px 12px 70px;
         }
 
         .quick-panel {
-            // Increased desktop size for full institutional width & comfort
-            max-width: 1420px;
+            max-width: 1280px;
             margin: 0 auto;
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 22px;
+            gap: 14px;
             position: relative;
 
             @include mobile-screen {
-                gap: 16px;
+                gap: 12px;
             }
         }
     }
@@ -154,158 +156,745 @@ body.theme--light,
 .dash-cockpit {
     display: flex;
     flex-direction: column;
-    gap: 22px;
+    gap: 14px;
     width: 100%;
 
     @include mobile-screen {
-        gap: 16px;
+        gap: 12px;
     }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 1. BEAUTIFUL FROSTED SPONGY WELCOME BANNER (NO DERIV API CONNECTED)
+// 1. BRAND HEADER: CLEAN TYPOGRAPHY (NO LOGO ON DASHBOARD)
 // ─────────────────────────────────────────────────────────────────────────────
-.dash-welcome-strip {
+.dash-brand-header {
+    position: relative;
+    overflow: hidden;
+    padding: 16px 24px 14px;
+    border-radius: 18px;
+    background: var(--dash-surface);
+    backdrop-filter: blur(28px) saturate(190%);
+    -webkit-backdrop-filter: blur(28px) saturate(190%);
+    border: 1px solid var(--dash-border);
+    box-shadow: var(--dash-neumorph-card);
+    transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    &:hover {
+        border-color: var(--dash-border-glow);
+        box-shadow: var(--dash-neumorph-card-hover);
+        transform: translateY(-1px);
+    }
+
+    @include mobile-screen {
+        padding: 14px 16px;
+        border-radius: 14px;
+    }
+
+    &__halo-1 {
+        position: absolute;
+        top: -40px;
+        left: -30px;
+        width: 220px;
+        height: 160px;
+        background: radial-gradient(circle, rgba(6, 182, 212, 0.22) 0%, transparent 70%);
+        filter: blur(34px);
+        pointer-events: none;
+    }
+
+    &__halo-2 {
+        position: absolute;
+        top: -40px;
+        right: -20px;
+        width: 200px;
+        height: 150px;
+        background: radial-gradient(circle, rgba(168, 85, 247, 0.2) 0%, transparent 70%);
+        filter: blur(30px);
+        pointer-events: none;
+    }
+
+    &__top-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        z-index: 1;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .dash-brand-wordmark {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        line-height: 1;
+
+        @include mobile-screen {
+            flex-direction: column;
+            gap: 2px;
+        }
+    }
+
+    .dash-brand-legacy {
+        font-size: 1.6rem;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+        background: linear-gradient(135deg, #ffffff 0%, #38bdf8 55%, #06b6d4 100%);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+        filter: drop-shadow(0 0 14px rgba(56, 189, 248, 0.35));
+
+        body.theme--light & {
+            background: linear-gradient(135deg, #0f172a 0%, #0369a1 55%, #0ea5e9 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: none;
+        }
+
+        @include mobile-screen {
+            font-size: 1.35rem;
+        }
+    }
+
+    .dash-brand-hub {
+        font-size: 0.76rem;
+        font-weight: 800;
+        letter-spacing: 0.32em;
+        color: #38bdf8;
+        display: inline-block;
+        filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.5));
+
+        body.theme--light & {
+            color: #0284c7;
+            filter: none;
+        }
+
+        @include mobile-screen {
+            font-size: 0.64rem;
+            letter-spacing: 0.2em;
+        }
+    }
+
+    &__badge-wrap {
+        display: flex;
+        align-items: center;
+    }
+
+    .dash-pill-acc {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 0.72rem;
+        font-weight: 800;
+        padding: 5px 12px;
+        border-radius: 9999px;
+        letter-spacing: 0.04em;
+        backdrop-filter: blur(14px);
+        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3);
+
+        &__indicator {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            animation: pulseDot 2s infinite ease-in-out;
+        }
+
+        &--demo {
+            background: rgba(245, 158, 11, 0.16);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.45);
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.25);
+
+            .dash-pill-acc__indicator {
+                background: #f59e0b;
+                box-shadow: 0 0 6px #f59e0b;
+            }
+        }
+
+        &--real {
+            background: rgba(16, 185, 129, 0.16);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.45);
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
+
+            .dash-pill-acc__indicator {
+                background: #10b981;
+                box-shadow: 0 0 6px #10b981;
+            }
+        }
+
+        &--institutional {
+            background: rgba(56, 189, 248, 0.14);
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+
+            .dash-pill-acc__indicator {
+                background: #0ea5e9;
+                box-shadow: 0 0 6px #0ea5e9;
+            }
+        }
+    }
+
+    &__divider {
+        height: 1px;
+        width: 100%;
+        background: linear-gradient(90deg, rgba(56, 189, 248, 0.3) 0%, rgba(168, 85, 247, 0.25) 50%, transparent 100%);
+        margin: 10px 0 8px;
+        position: relative;
+        z-index: 1;
+    }
+
+    &__message {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .dash-brand-welcome-title {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: var(--dash-text-dominant);
+        margin: 0;
+        letter-spacing: -0.01em;
+    }
+
+    .dash-brand-welcome-sub {
+        font-size: 0.82rem;
+        font-weight: 500;
+        color: var(--dash-text-muted);
+        margin: 0;
+    }
+}
+
+@keyframes pulseDot {
+    0%, 100% { transform: scale(1); opacity: 0.85; }
+    50% { transform: scale(1.3); opacity: 1; }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 2. MAIN DECK: CREATE ACCOUNT ON FAR LEFT + 5 SMALL CARDS (REDUCED UP TO 4X)
+// ─────────────────────────────────────────────────────────────────────────────
+.dash-main-deck {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 12px;
+    align-items: stretch;
+    width: 100%;
+
+    @media (max-width: 980px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+// ─── FAR LEFT CARD: CREATE ACCOUNT ───────────────────────────────────────────
+.dash-account-left-card {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 16px 18px;
+    border-radius: 16px;
+    background: var(--dash-surface);
+    backdrop-filter: blur(28px) saturate(190%);
+    -webkit-backdrop-filter: blur(28px) saturate(190%);
+    border: 1px solid var(--dash-border);
+    box-shadow: var(--dash-neumorph-card);
+    transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    &:hover {
+        border-color: var(--dash-border-glow);
+        box-shadow: var(--dash-neumorph-card-hover);
+        transform: translateY(-2px);
+    }
+
+    &__halo {
+        position: absolute;
+        top: -30px;
+        right: -30px;
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        background: #0284c7;
+        filter: blur(34px);
+        opacity: 0.22;
+        pointer-events: none;
+    }
+
+    &__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 1;
+    }
+
+    &__icon-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 11px;
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.18) 0%, rgba(217, 119, 6, 0.08) 100%);
+        border: 1px solid rgba(245, 158, 11, 0.4);
+        box-shadow: 0 0 14px rgba(245, 158, 11, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+
+        .text-amber {
+            color: #fbbf24;
+            filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.6));
+        }
+    }
+
+    &__badge {
+        font-size: 0.62rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        padding: 3px 8px;
+        border-radius: 9999px;
+        background: rgba(245, 158, 11, 0.12);
+        color: #fbbf24;
+        border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+
+    &__body {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        margin-bottom: 14px;
+        position: relative;
+        z-index: 1;
+    }
+
+    &__title {
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--dash-text-dominant);
+        margin: 0;
+        letter-spacing: -0.01em;
+    }
+
+    &__desc {
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: var(--dash-text-muted);
+        margin: 0;
+        line-height: 1.35;
+    }
+
+    &__action {
+        position: relative;
+        z-index: 1;
+
+        .dash-btn-puffy {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+}
+
+// ─── RIGHT DECK: 5 SMALL CARDS (REDUCED UP TO 4X) ───────────────────────────
+.dash-small-cards-deck {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+}
+
+.dash-small-cards-grid {
+    display: grid;
+    // Neat compact grid for the 5 small cards
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    width: 100%;
+
+    @media (max-width: 1180px) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.dash-micro-card {
     position: relative;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 22px 30px;
-    border-radius: 22px;
-    background: var(--dash-frosted-bg);
-    backdrop-filter: blur(30px) saturate(210%);
-    -webkit-backdrop-filter: blur(30px) saturate(210%);
+    gap: 10px;
+    padding: 12px 14px;
+    min-height: 64px;
+    border-radius: 14px;
+    background: var(--dash-surface);
+    backdrop-filter: blur(26px) saturate(180%);
+    -webkit-backdrop-filter: blur(26px) saturate(180%);
     border: 1px solid var(--dash-border);
-    box-shadow: var(--dash-spongy-shadow);
-    flex-wrap: wrap;
-    gap: 16px;
-    transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: var(--dash-neumorph-card);
+    cursor: pointer;
+    outline: none;
+    transition: transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.24s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease, background 0.2s ease;
 
-    &:hover {
-        border-color: var(--dash-border-glow);
-        box-shadow: var(--dash-spongy-shadow-hover);
-        transform: translateY(-2px);
-    }
-
-    @include mobile-screen {
-        padding: 16px 18px;
-        border-radius: 18px;
-    }
-
-    .dash-welcome-glow {
+    .dash-card-halo {
         position: absolute;
-        top: -40%;
-        left: -10%;
-        width: 360px;
-        height: 200px;
-        background: radial-gradient(circle, rgba(16, 185, 129, 0.22) 0%, transparent 70%);
-        filter: blur(40px);
+        top: -24px;
+        right: -24px;
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        filter: blur(22px);
+        opacity: 0.16;
+        transition: opacity 0.24s ease, transform 0.24s ease;
         pointer-events: none;
     }
 
-    .dash-welcome-glow-secondary {
+    &:hover {
+        transform: translateY(-3px) scale(1.015);
+        background: var(--dash-surface-hover);
+        box-shadow: var(--dash-neumorph-card-hover);
+
+        .dash-card-halo {
+            opacity: 0.55;
+            transform: scale(1.3);
+        }
+
+        .dash-micro-squircle {
+            transform: translateY(-1.5px) scale(1.08) rotateZ(2deg);
+        }
+
+        .dash-micro-card__arrow {
+            color: #38bdf8;
+            transform: translate(2px, -2px);
+        }
+    }
+
+    &:active {
+        transform: translateY(0) scale(0.99);
+    }
+
+    // Micro Themes with Glowing Accents
+    &.micro--blue {
+        .dash-card-halo { background: #0ea5e9; }
+        &:hover {
+            border-color: rgba(14, 165, 233, 0.55);
+            box-shadow: var(--dash-neumorph-card-hover), 0 0 16px var(--glow-blue);
+        }
+    }
+
+    &.micro--cyan {
+        .dash-card-halo { background: #06b6d4; }
+        &:hover {
+            border-color: rgba(6, 182, 212, 0.55);
+            box-shadow: var(--dash-neumorph-card-hover), 0 0 16px var(--glow-cyan);
+        }
+    }
+
+    &.micro--purple {
+        .dash-card-halo { background: #a855f7; }
+        &:hover {
+            border-color: rgba(168, 85, 247, 0.55);
+            box-shadow: var(--dash-neumorph-card-hover), 0 0 16px var(--glow-purple);
+        }
+    }
+
+    &.micro--amber {
+        .dash-card-halo { background: #f59e0b; }
+        &:hover {
+            border-color: rgba(245, 158, 11, 0.55);
+            box-shadow: var(--dash-neumorph-card-hover), 0 0 16px var(--glow-amber);
+        }
+    }
+
+    &.micro--rose {
+        .dash-card-halo { background: #f43f5e; }
+        &:hover {
+            border-color: rgba(244, 63, 94, 0.55);
+            box-shadow: var(--dash-neumorph-card-hover), 0 0 16px var(--glow-rose);
+        }
+    }
+
+    &__left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .dash-micro-squircle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25);
+        flex-shrink: 0;
+        transition: transform 0.22s ease;
+
+        body.theme--light & {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(241, 245, 249, 0.8) 100%);
+            border-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 3px 8px rgba(15, 23, 42, 0.05);
+        }
+
+        .text-blue { color: #38bdf8; filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.6)); body.theme--light & { color: #0284c7; } }
+        .text-cyan { color: #22d3ee; filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.6)); body.theme--light & { color: #06b6d4; } }
+        .text-purple { color: #c084fc; filter: drop-shadow(0 0 6px rgba(192, 132, 252, 0.6)); body.theme--light & { color: #9333ea; } }
+        .text-amber { color: #fbbf24; filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.6)); body.theme--light & { color: #d97706; } }
+        .text-rose { color: #fb7185; filter: drop-shadow(0 0 6px rgba(251, 113, 133, 0.6)); body.theme--light & { color: #e11d48; } }
+    }
+
+    &__info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+    }
+
+    &__title {
+        font-size: 0.86rem;
+        font-weight: 800;
+        color: var(--dash-text-dominant);
+        margin: 0;
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__sub {
+        font-size: 0.72rem;
+        font-weight: 500;
+        color: var(--dash-text-muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__arrow {
+        color: var(--dash-text-subtle);
+        flex-shrink: 0;
+        position: relative;
+        z-index: 1;
+        transition: all 0.2s ease;
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ✦ PUFFY / NEUMORPHIC FLOATING BUTTONS (COMPACT)
+// ─────────────────────────────────────────────────────────────────────────────
+.dash-btn-puffy {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 18px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-decoration: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+    outline: none;
+    border: none;
+    transition: all 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    &--cyan {
+        background: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);
+        color: #ffffff !important;
+        box-shadow:
+            0 6px 16px -2px rgba(6, 182, 212, 0.45),
+            0 0 18px rgba(6, 182, 212, 0.35),
+            inset 0 1.5px 1.5px rgba(255, 255, 255, 0.45),
+            inset 0 -1.5px 2px rgba(0, 0, 0, 0.2);
+
+        &:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow:
+                0 10px 22px -2px rgba(6, 182, 212, 0.6),
+                0 0 24px rgba(6, 182, 212, 0.5),
+                inset 0 1.5px 1.5px rgba(255, 255, 255, 0.6),
+                inset 0 -1.5px 2px rgba(0, 0, 0, 0.22);
+        }
+
+        &:active {
+            transform: translateY(1px) scale(0.98);
+            box-shadow:
+                0 2px 8px rgba(6, 182, 212, 0.3),
+                inset 0 2px 3px rgba(0, 0, 0, 0.25);
+        }
+    }
+
+    &--whatsapp {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: #ffffff !important;
+        box-shadow:
+            0 6px 16px -2px rgba(16, 185, 129, 0.45),
+            0 0 18px rgba(16, 185, 129, 0.35),
+            inset 0 1.5px 1.5px rgba(255, 255, 255, 0.45),
+            inset 0 -1.5px 2px rgba(0, 0, 0, 0.2);
+
+        &:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow:
+                0 10px 22px -2px rgba(16, 185, 129, 0.6),
+                0 0 24px rgba(16, 185, 129, 0.5),
+                inset 0 1.5px 1.5px rgba(255, 255, 255, 0.6),
+                inset 0 -1.5px 2px rgba(0, 0, 0, 0.22);
+        }
+
+        &:active {
+            transform: translateY(1px) scale(0.98);
+            box-shadow:
+                0 2px 8px rgba(16, 185, 129, 0.3),
+                inset 0 2px 3px rgba(0, 0, 0, 0.25);
+        }
+    }
+
+    @include mobile-screen {
+        width: 100%;
+        justify-content: center;
+        padding: 9px 14px;
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 3. COMMUNITY CARD: GLASSMORPHIC WHATSAPP SECTION (REDUCED SIZE)
+// ─────────────────────────────────────────────────────────────────────────────
+.dash-community-section {
+    width: 100%;
+}
+
+.dash-community-card {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-radius: 16px;
+    background: var(--dash-surface);
+    backdrop-filter: blur(26px) saturate(180%);
+    -webkit-backdrop-filter: blur(26px) saturate(180%);
+    border: 1px solid var(--dash-border);
+    box-shadow: var(--dash-neumorph-card);
+    flex-wrap: wrap;
+    gap: 14px;
+    transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    &:hover {
+        border-color: rgba(16, 185, 129, 0.45);
+        box-shadow: var(--dash-neumorph-card-hover), 0 0 20px var(--glow-emerald);
+        transform: translateY(-1.5px);
+    }
+
+    @include mobile-screen {
+        padding: 12px 14px;
+        border-radius: 14px;
+    }
+
+    &__halo {
         position: absolute;
-        bottom: -40%;
-        right: -10%;
-        width: 300px;
-        height: 180px;
-        background: radial-gradient(circle, rgba(6, 182, 212, 0.18) 0%, transparent 70%);
-        filter: blur(36px);
+        top: -30px;
+        left: -30px;
+        width: 160px;
+        height: 140px;
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.16) 0%, transparent 70%);
+        filter: blur(28px);
         pointer-events: none;
     }
 
     &__left {
         display: flex;
         align-items: center;
-        gap: 18px;
+        gap: 14px;
+        min-width: 0;
         position: relative;
         z-index: 1;
 
         @include mobile-screen {
-            gap: 14px;
+            gap: 10px;
         }
     }
 
-    .dash-welcome-avatar {
+    .dash-community-icon-squircle {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 52px;
-        height: 52px;
-        border-radius: 16px;
-        background: rgba(16, 185, 129, 0.15);
-        border: 1px solid rgba(16, 185, 129, 0.4);
-        box-shadow: 0 0 22px rgba(16, 185, 129, 0.35), inset 0 1.5px 1.5px rgba(255, 255, 255, 0.3);
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(5, 150, 105, 0.08) 100%);
+        border: 1px solid rgba(16, 185, 129, 0.35);
+        box-shadow: 0 0 12px rgba(16, 185, 129, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.3);
         flex-shrink: 0;
 
-        .welcome-avatar-icon {
-            color: #10b981;
-            filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.6));
-        }
-
-        @include mobile-screen {
-            width: 44px;
-            height: 44px;
+        .whatsapp-icon-svg {
+            color: #34d399;
+            filter: drop-shadow(0 0 6px rgba(52, 211, 153, 0.6));
         }
     }
 
-    .dash-welcome-texts {
+    &__text-block {
         display: flex;
         flex-direction: column;
-        gap: 4px;
+        gap: 2px;
     }
 
-    .dash-welcome-title {
-        font-size: 1.34rem;
+    .dash-community-title {
+        font-size: 0.98rem;
         font-weight: 800;
-        color: var(--dash-text-title);
+        color: var(--dash-text-dominant);
         margin: 0;
-        letter-spacing: -0.015em;
-        line-height: 1.3;
-
-        .dash-welcome-title-accent {
-            background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 900;
-            display: inline-block;
-        }
+        letter-spacing: -0.01em;
 
         @include mobile-screen {
-            font-size: 1.08rem;
+            font-size: 0.9rem;
         }
     }
 
-    .dash-welcome-sub {
-        font-size: 0.9rem;
+    .dash-community-quote {
+        font-size: 0.78rem;
         font-weight: 500;
         color: var(--dash-text-muted);
         margin: 0;
-        line-height: 1.45;
+        font-style: italic;
 
         @include mobile-screen {
-            font-size: 0.82rem;
+            font-size: 0.74rem;
         }
     }
 
     &__right {
-        display: flex;
-        align-items: center;
-        gap: 12px;
         position: relative;
         z-index: 1;
-        flex-wrap: wrap;
+
+        @include mobile-screen {
+            width: 100%;
+        }
     }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 2. TELEMETRY METRIC PILLS TICKER (FROSTED SPONGY GLOWING)
+// 4. TELEMETRY ROW: REFINED PEARL / GLASS TICKER (COMPACT)
 // ─────────────────────────────────────────────────────────────────────────────
 .dash-telemetry-row {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
+    gap: 10px;
     width: 100%;
 
     @media (max-width: 900px) {
@@ -314,42 +903,42 @@ body.theme--light,
 
     @media (max-width: 480px) {
         grid-template-columns: 1fr;
-        gap: 10px;
+        gap: 8px;
     }
 
     .telemetry-pill {
         display: flex;
         align-items: center;
-        gap: 12px;
-        padding: 12px 18px;
-        border-radius: 14px;
-        background: var(--dash-frosted-bg);
-        backdrop-filter: blur(28px) saturate(200%);
-        -webkit-backdrop-filter: blur(28px) saturate(200%);
+        gap: 9px;
+        padding: 9px 14px;
+        border-radius: 12px;
+        background: var(--dash-surface);
+        backdrop-filter: blur(22px) saturate(170%);
+        -webkit-backdrop-filter: blur(22px) saturate(170%);
         border: 1px solid var(--dash-border);
-        box-shadow: var(--dash-spongy-shadow);
-        transition: transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.24s ease;
+        box-shadow: var(--dash-neumorph-card);
+        transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
 
         &:hover {
             transform: translateY(-2px);
             border-color: var(--dash-border-glow);
-            box-shadow: var(--dash-spongy-shadow-hover);
+            box-shadow: var(--dash-neumorph-card-hover);
         }
 
         .telemetry-value {
-            font-size: 1.12rem;
-            font-weight: 800;
+            font-size: 0.96rem;
+            font-weight: 900;
             letter-spacing: -0.01em;
             flex-shrink: 0;
 
-            &.text-cyan { color: #38bdf8; filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.5)); }
-            &.text-emerald { color: #34d399; filter: drop-shadow(0 0 6px rgba(52, 211, 153, 0.5)); }
-            &.text-purple { color: #c084fc; filter: drop-shadow(0 0 6px rgba(192, 132, 252, 0.5)); }
-            &.text-amber { color: #fbbf24; filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.5)); }
+            &.text-cyan { color: #38bdf8; filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.5)); body.theme--light & { color: #0284c7; } }
+            &.text-emerald { color: #34d399; filter: drop-shadow(0 0 6px rgba(52, 211, 153, 0.5)); body.theme--light & { color: #059669; } }
+            &.text-purple { color: #c084fc; filter: drop-shadow(0 0 6px rgba(192, 132, 252, 0.5)); body.theme--light & { color: #7c3aed; } }
+            &.text-amber { color: #fbbf24; filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.5)); body.theme--light & { color: #d97706; } }
         }
 
         .telemetry-label {
-            font-size: 0.8rem;
+            font-size: 0.74rem;
             font-weight: 600;
             color: var(--dash-text-muted);
             white-space: nowrap;
@@ -359,726 +948,46 @@ body.theme--light,
     }
 }
 
-.dash-live-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #10b981;
-    box-shadow: 0 0 10px #10b981;
-    animation: spongyDotPulse 1.8s infinite;
-}
-
-@keyframes spongyDotPulse {
-    0%, 100% { transform: scale(0.9); opacity: 0.8; }
-    50% { transform: scale(1.35); opacity: 1; }
-}
-
-.dash-pill-acc {
-    font-size: 0.78rem;
-    font-weight: 800;
-    padding: 6px 14px;
-    border-radius: 10px;
-    letter-spacing: 0.05em;
-
-    &--demo {
-        background: rgba(245, 158, 11, 0.16);
-        color: #fbbf24;
-        border: 1px solid rgba(245, 158, 11, 0.45);
-        box-shadow: 0 0 14px rgba(245, 158, 11, 0.25);
-    }
-
-    &--real {
-        background: rgba(16, 185, 129, 0.16);
-        color: #34d399;
-        border: 1px solid rgba(16, 185, 129, 0.45);
-        box-shadow: 0 0 14px rgba(16, 185, 129, 0.25);
-    }
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
-// SECTION HEADERS WITH GLOWING ACCENTS
-// ─────────────────────────────────────────────────────────────────────────────
-.dash-section-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 4px;
-    margin-bottom: -6px;
-
-    .dash-section-title-wrap {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-
-        .dash-section-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #06b6d4;
-            box-shadow: 0 0 10px #06b6d4;
-
-            &--purple {
-                background: #a855f7;
-                box-shadow: 0 0 10px #a855f7;
-            }
-        }
-
-        .dash-section-title {
-            font-size: 1.12rem;
-            font-weight: 800;
-            color: var(--dash-text-title);
-            margin: 0;
-            letter-spacing: -0.015em;
-        }
-    }
-
-    .dash-section-tag {
-        font-size: 0.68rem;
-        font-weight: 800;
-        letter-spacing: 0.08em;
-        padding: 4px 10px;
-        border-radius: 6px;
-        background: rgba(255, 255, 255, 0.06);
-        color: var(--dash-text-subtle);
-        border: 1px solid var(--dash-border);
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// 2. LOADING CARDS IN ONE SINGLE LINE — FROSTED SPONGY GLOWING
-// ─────────────────────────────────────────────────────────────────────────────
-.dash-load-cards-row {
-    display: grid;
-    // On desktop: STRICTLY ONE SINGLE LINE (4 equal columns for ultra clean layout)
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 16px;
-    width: 100%;
-
-    @media (max-width: 1080px) {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    @media (max-width: 460px) {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-}
-
-.dash-load-card {
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 20px 22px 18px;
-    min-height: 142px;
-    border-radius: 18px;
-    background: var(--dash-frosted-bg);
-    backdrop-filter: blur(28px) saturate(200%);
-    -webkit-backdrop-filter: blur(28px) saturate(200%);
-    border: 1px solid var(--dash-border);
-    box-shadow: var(--dash-spongy-shadow);
-    cursor: pointer;
-    // Spongy spring bounce transition
-    transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.24s ease, background 0.24s ease;
-    outline: none;
-
-    @include mobile-screen {
-        padding: 16px 16px 14px;
-        min-height: 124px;
-    }
-
-    // Ambient glow halo behind each card
-    .dash-card-glow-halo {
-        position: absolute;
-        top: -30px;
-        right: -30px;
-        width: 110px;
-        height: 110px;
-        border-radius: 50%;
-        filter: blur(28px);
-        opacity: 0.2;
-        transition: opacity 0.3s ease, transform 0.3s ease;
-        pointer-events: none;
-    }
-
-    &:hover {
-        transform: translateY(-6px) scale(1.02);
-        background: var(--dash-frosted-bg-hover);
-        box-shadow: var(--dash-spongy-shadow-hover);
-
-        .dash-card-glow-halo {
-            opacity: 0.55;
-            transform: scale(1.4);
-        }
-
-        .dash-load-card__arrow {
-            opacity: 1;
-            transform: translate(3px, -3px);
-        }
-
-        .dash-load-card__icon-box {
-            transform: translateY(-2px) scale(1.06) rotateZ(2deg);
-            box-shadow: 0 10px 24px -2px rgba(0, 0, 0, 0.55), inset 0 2px 3px rgba(255, 255, 255, 0.55), inset 0 -2px 4px rgba(0, 0, 0, 0.4);
-        }
-    }
-
-    &:active {
-        transform: translateY(-1px) scale(0.99);
-    }
-
-    // Glowing tactile themes
-    &.card--indigo {
-        .dash-card-glow-halo { background: #6366f1; }
-        &:hover {
-            border-color: rgba(99, 102, 241, 0.65);
-            box-shadow: 0 16px 44px -4px rgba(0, 0, 0, 0.55), 0 0 28px var(--glow-indigo), inset 0 1.5px 2px rgba(255, 255, 255, 0.3);
-        }
-    }
-    &.card--cyan {
-        .dash-card-glow-halo { background: #06b6d4; }
-        &:hover {
-            border-color: rgba(6, 182, 212, 0.65);
-            box-shadow: 0 16px 44px -4px rgba(0, 0, 0, 0.55), 0 0 28px var(--glow-cyan), inset 0 1.5px 2px rgba(255, 255, 255, 0.3);
-        }
-    }
-    &.card--purple {
-        .dash-card-glow-halo { background: #a855f7; }
-        &:hover {
-            border-color: rgba(168, 85, 247, 0.65);
-            box-shadow: 0 16px 44px -4px rgba(0, 0, 0, 0.55), 0 0 28px var(--glow-purple), inset 0 1.5px 2px rgba(255, 255, 255, 0.3);
-        }
-    }
-    &.card--amber {
-        .dash-card-glow-halo { background: #f59e0b; }
-        &:hover {
-            border-color: rgba(245, 158, 11, 0.65);
-            box-shadow: 0 16px 44px -4px rgba(0, 0, 0, 0.55), 0 0 28px var(--glow-amber), inset 0 1.5px 2px rgba(255, 255, 255, 0.3);
-        }
-    }
-    &.card--emerald {
-        .dash-card-glow-halo { background: #10b981; }
-        &:hover {
-            border-color: rgba(168, 185, 129, 0.65);
-            box-shadow: 0 16px 44px -4px rgba(0, 0, 0, 0.55), 0 0 28px var(--glow-emerald), inset 0 1.5px 2px rgba(255, 255, 255, 0.3);
-        }
-    }
-
-    &__top {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 12px;
-        position: relative;
-        z-index: 1;
-    }
-
-    &__icon-box {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 44px;
-        height: 44px;
-        border-radius: 14px;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.03) 100%);
-        border: 1px solid rgba(255, 255, 255, 0.22);
-        box-shadow: 0 8px 18px -3px rgba(0, 0, 0, 0.45), inset 0 2px 2px rgba(255, 255, 255, 0.4), inset 0 -2px 3px rgba(0, 0, 0, 0.35);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
-
-        .text-indigo { color: #818cf8; filter: drop-shadow(0 0 8px rgba(129, 140, 248, 0.7)); }
-        .text-cyan { color: #22d3ee; filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.7)); }
-        .text-purple { color: #c084fc; filter: drop-shadow(0 0 8px rgba(192, 132, 252, 0.7)); }
-        .text-amber { color: #fbbf24; filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.7)); }
-        .text-emerald { color: #34d399; filter: drop-shadow(0 0 8px rgba(52, 211, 153, 0.7)); }
-    }
-
-    &__badge {
-        font-size: 0.7rem;
-        font-weight: 800;
-        padding: 4px 10px;
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.1);
-        color: var(--dash-text-title);
-        letter-spacing: 0.08em;
-        border: 1px solid var(--dash-border);
-    }
-
-    &__info {
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
-        position: relative;
-        z-index: 1;
-    }
-
-    &__title {
-        font-size: 1.05rem;
-        font-weight: 800;
-        color: var(--dash-text-title);
-        margin: 0;
-        letter-spacing: -0.015em;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-
-        @include mobile-screen {
-            font-size: 0.96rem;
-        }
-    }
-
-    &__sub {
-        font-size: 0.82rem;
-        font-weight: 600;
-        color: var(--dash-text-muted);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-
-        @include mobile-screen {
-            font-size: 0.76rem;
-        }
-    }
-
-    &__arrow {
-        position: absolute;
-        bottom: 14px;
-        right: 16px;
-        color: var(--dash-text-subtle);
-        opacity: 0.6;
-        transition: all 0.25s ease;
-        z-index: 1;
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// 3. SECONDARY INTELLIGENCE GRID (4 SPONGY GLOWING CARDS)
-// ─────────────────────────────────────────────────────────────────────────────
-.dash-intel-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 14px;
-    width: 100%;
-
-    @media (max-width: 1080px) {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    @media (max-width: 640px) {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-}
-
-.dash-intel-card {
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 16px 20px;
-    border-radius: 18px;
-    background: var(--dash-frosted-bg);
-    backdrop-filter: blur(28px) saturate(200%);
-    -webkit-backdrop-filter: blur(28px) saturate(200%);
-    border: 1px solid var(--dash-border);
-    box-shadow: var(--dash-spongy-shadow);
-    cursor: pointer;
-    transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.24s ease;
-
-    .dash-card-glow-halo {
-        position: absolute;
-        top: -24px;
-        right: -24px;
-        width: 90px;
-        height: 90px;
-        border-radius: 50%;
-        filter: blur(24px);
-        opacity: 0.18;
-        pointer-events: none;
-    }
-
-    &:hover {
-        transform: translateY(-5px) scale(1.015);
-        background: var(--dash-frosted-bg-hover);
-        box-shadow: var(--dash-spongy-shadow-hover);
-
-        .dash-intel-card__arrow {
-            opacity: 1;
-            transform: translate(3px, -3px);
-        }
-    }
-
-    &:active {
-        transform: translateY(-1px) scale(0.99);
-    }
-
-    &.mod--purple {
-        .dash-card-glow-halo { background: #a855f7; }
-        &:hover {
-            border-color: rgba(168, 85, 247, 0.6);
-            box-shadow: 0 14px 40px var(--glow-purple), inset 0 1.5px 1.5px rgba(255, 255, 255, 0.25);
-        }
-    }
-    &.mod--amber {
-        .dash-card-glow-halo { background: #f59e0b; }
-        &:hover {
-            border-color: rgba(245, 158, 11, 0.6);
-            box-shadow: 0 14px 40px var(--glow-amber), inset 0 1.5px 1.5px rgba(255, 255, 255, 0.25);
-        }
-    }
-    &.mod--rose {
-        .dash-card-glow-halo { background: #f43f5e; }
-        &:hover {
-            border-color: rgba(244, 63, 94, 0.6);
-            box-shadow: 0 14px 40px var(--glow-rose), inset 0 1.5px 1.5px rgba(255, 255, 255, 0.25);
-        }
-    }
-    &.mod--cyan {
-        .dash-card-glow-halo { background: #06b6d4; }
-        &:hover {
-            border-color: rgba(6, 182, 212, 0.6);
-            box-shadow: 0 14px 40px var(--glow-cyan), inset 0 1.5px 1.5px rgba(255, 255, 255, 0.25);
-        }
-    }
-
-    &__icon-box {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid var(--dash-border);
-        box-shadow: inset 0 1.5px 1.5px rgba(255, 255, 255, 0.18);
-        flex-shrink: 0;
-        position: relative;
-        z-index: 1;
-
-        .text-purple { color: #c084fc; filter: drop-shadow(0 0 6px rgba(192, 132, 252, 0.6)); }
-        .text-amber { color: #fbbf24; filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.6)); }
-        .text-rose { color: #fb7185; filter: drop-shadow(0 0 6px rgba(251, 113, 133, 0.6)); }
-        .text-cyan { color: #22d3ee; filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.6)); }
-    }
-
-    &__text {
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
-        flex: 1;
-        min-width: 0;
-        position: relative;
-        z-index: 1;
-    }
-
-    &__title {
-        font-size: 0.98rem;
-        font-weight: 800;
-        color: var(--dash-text-title);
-        margin: 0;
-        letter-spacing: -0.01em;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    &__desc {
-        font-size: 0.82rem;
-        font-weight: 500;
-        color: var(--dash-text-muted);
-        margin: 0;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    &__arrow-circle {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.06);
-        flex-shrink: 0;
-        position: relative;
-        z-index: 1;
-    }
-
-    &__arrow {
-        color: var(--dash-text-subtle);
-        opacity: 0.7;
-        transition: all 0.25s ease;
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// 4. INSTITUTIONAL PLATFORM HIGHLIGHTS (3 SPONGY CARDS)
-// ─────────────────────────────────────────────────────────────────────────────
-.dash-features-row {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
-    width: 100%;
-
-    @media (max-width: 960px) {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-
-    .dash-feature-card {
-        display: flex;
-        align-items: flex-start;
-        gap: 16px;
-        padding: 20px 22px;
-        border-radius: 18px;
-        background: var(--dash-frosted-bg);
-        backdrop-filter: blur(28px) saturate(200%);
-        -webkit-backdrop-filter: blur(28px) saturate(200%);
-        border: 1px solid var(--dash-border);
-        box-shadow: var(--dash-spongy-shadow);
-        transition: transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.24s ease;
-
-        &:hover {
-            transform: translateY(-3px);
-            border-color: var(--dash-border-glow);
-            box-shadow: var(--dash-spongy-shadow-hover);
-        }
-
-        .dash-feature-icon-box {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid var(--dash-border);
-            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15);
-            flex-shrink: 0;
-
-            .text-cyan { color: #38bdf8; filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.5)); }
-            .text-emerald { color: #34d399; filter: drop-shadow(0 0 6px rgba(52, 211, 153, 0.5)); }
-            .text-amber { color: #fbbf24; filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.5)); }
-        }
-
-        .dash-feature-content {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-
-            .dash-feature-title {
-                font-size: 1.02rem;
-                font-weight: 800;
-                color: var(--dash-text-title);
-                margin: 0;
-                letter-spacing: -0.01em;
-            }
-
-            .dash-feature-desc {
-                font-size: 0.84rem;
-                font-weight: 500;
-                color: var(--dash-text-muted);
-                margin: 0;
-                line-height: 1.45;
-            }
-        }
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// 5. PARTNER & COMMUNITY FROSTED SPONGY ROW
-// ─────────────────────────────────────────────────────────────────────────────
-.dash-partner-row {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px;
-    width: 100%;
-
-    @include mobile-screen {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-}
-
-.dash-partner-box {
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 24px;
-    border-radius: 20px;
-    background: var(--dash-frosted-bg);
-    backdrop-filter: blur(28px) saturate(200%);
-    -webkit-backdrop-filter: blur(28px) saturate(200%);
-    border: 1px solid var(--dash-border);
-    box-shadow: var(--dash-spongy-shadow);
-    gap: 16px;
-    transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.24s ease;
-
-    .dash-card-glow-halo {
-        position: absolute;
-        top: -40px;
-        right: -40px;
-        width: 130px;
-        height: 130px;
-        border-radius: 50%;
-        filter: blur(34px);
-        opacity: 0.2;
-        pointer-events: none;
-    }
-
-    &:hover {
-        transform: translateY(-5px) scale(1.015);
-        box-shadow: var(--dash-spongy-shadow-hover);
-    }
-
-    &:active {
-        transform: translateY(-1px) scale(0.99);
-    }
-
-    &--deriv {
-        border-color: rgba(245, 158, 11, 0.3);
-        .dash-card-glow-halo { background: #f59e0b; }
-        &:hover {
-            border-color: rgba(245, 158, 11, 0.65);
-            box-shadow: 0 16px 44px var(--glow-amber), inset 0 1.5px 1.5px rgba(255, 255, 255, 0.28);
-        }
-    }
-
-    &--community {
-        border-color: rgba(16, 185, 129, 0.3);
-        .dash-card-glow-halo { background: #10b981; }
-        &:hover {
-            border-color: rgba(16, 185, 129, 0.65);
-            box-shadow: 0 16px 44px var(--glow-emerald), inset 0 1.5px 1.5px rgba(255, 255, 255, 0.28);
-        }
-    }
-
-    &__left {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        min-width: 0;
-        position: relative;
-        z-index: 1;
-
-        .partner-icon-circle {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
-            flex-shrink: 0;
-            box-shadow: inset 0 1.5px 1.5px rgba(255, 255, 255, 0.25);
-
-            &--gold {
-                background: rgba(245, 158, 11, 0.16);
-                border: 1px solid rgba(245, 158, 11, 0.4);
-                color: #f59e0b;
-            }
-            &--emerald {
-                background: rgba(16, 185, 129, 0.16);
-                border: 1px solid rgba(16, 185, 129, 0.4);
-                color: #10b981;
-            }
-        }
-
-        .partner-title {
-            font-size: 1.02rem;
-            font-weight: 800;
-            color: var(--dash-text-title);
-            margin: 0 0 3px 0;
-            letter-spacing: -0.01em;
-        }
-
-        .partner-desc {
-            font-size: 0.84rem;
-            font-weight: 500;
-            color: var(--dash-text-muted);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: block;
-        }
-    }
-
-    .partner-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px 20px;
-        border-radius: 12px;
-        font-size: 0.86rem;
-        font-weight: 800;
-        text-decoration: none;
-        flex-shrink: 0;
-        position: relative;
-        z-index: 1;
-        transition: transform 0.22s ease, box-shadow 0.22s ease;
-
-        &:hover {
-            transform: translateY(-2px);
-        }
-
-        &--gold {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            color: #ffffff;
-            box-shadow: 0 4px 18px rgba(245, 158, 11, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.35);
-        }
-
-        &--emerald {
-            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-            color: #ffffff;
-            box-shadow: 0 4px 18px rgba(16, 185, 129, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.35);
-        }
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// 6. WORKSPACE CONTAINER (FROSTED SPONGY & GLOWING)
+// 5. STRATEGY WORKSPACE & LOCAL SAVED BOTS (COMPACT)
 // ─────────────────────────────────────────────────────────────────────────────
 .dash-workspace-card {
     position: relative;
     overflow: hidden;
-    border-radius: 20px;
-    padding: 22px 28px;
-    background: var(--dash-frosted-bg);
-    backdrop-filter: blur(28px) saturate(200%);
-    -webkit-backdrop-filter: blur(28px) saturate(200%);
+    border-radius: 16px;
+    padding: 16px 20px;
+    background: var(--dash-surface);
+    backdrop-filter: blur(26px) saturate(180%);
+    -webkit-backdrop-filter: blur(26px) saturate(180%);
     border: 1px solid var(--dash-border);
-    box-shadow: var(--dash-spongy-shadow);
-    transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: var(--dash-neumorph-card);
+    transition: all 0.26s cubic-bezier(0.34, 1.56, 0.64, 1);
 
-    .dash-card-glow-halo {
+    .dash-card-halo {
         position: absolute;
-        top: -50px;
-        left: -50px;
-        width: 150px;
-        height: 150px;
+        top: -40px;
+        left: -40px;
+        width: 140px;
+        height: 140px;
         border-radius: 50%;
-        background: #10b981;
-        filter: blur(48px);
-        opacity: 0.14;
+        background: #0284c7;
+        filter: blur(40px);
+        opacity: 0.1;
         pointer-events: none;
     }
 
     &:hover {
         border-color: var(--dash-border-glow);
-        box-shadow: var(--dash-spongy-shadow-hover);
+        box-shadow: var(--dash-neumorph-card-hover);
     }
 
     &__header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        margin-bottom: 16px;
+        margin-bottom: 12px;
         flex-wrap: wrap;
-        gap: 12px;
+        gap: 10px;
         position: relative;
         z-index: 1;
     }
@@ -1086,113 +995,134 @@ body.theme--light,
     &__title-wrap {
         display: flex;
         align-items: center;
-        gap: 14px;
+        gap: 10px;
 
         .dash-workspace-icon-wrap {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 42px;
-            height: 42px;
-            border-radius: 12px;
-            background: rgba(16, 185, 129, 0.16);
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: rgba(16, 185, 129, 0.14);
             border: 1px solid rgba(16, 185, 129, 0.35);
-            color: #10b981;
-            box-shadow: inset 0 1.5px 1.5px rgba(255, 255, 255, 0.2);
+            color: #34d399;
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.3);
+
+            body.theme--light & {
+                color: #059669;
+            }
         }
     }
 
     &__title {
-        font-size: 1.05rem;
+        font-size: 0.98rem;
         font-weight: 800;
-        color: var(--dash-text-title);
-        margin: 0 0 3px 0;
-        letter-spacing: -0.015em;
+        color: var(--dash-text-dominant);
+        margin: 0 0 2px 0;
+        letter-spacing: -0.01em;
     }
 
     &__sub {
-        font-size: 0.84rem;
+        font-size: 0.76rem;
         font-weight: 500;
         color: var(--dash-text-muted);
     }
 
     &__btns {
         display: flex;
-        gap: 10px;
+        gap: 7px;
         position: relative;
         z-index: 1;
 
         .dash-btn-tactile {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px 18px;
+            gap: 6px;
+            padding: 6px 14px;
             border-radius: 10px;
-            font-size: 0.82rem;
+            font-size: 0.74rem;
             font-weight: 700;
-            background: rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.08);
             border: 1px solid var(--dash-border);
-            color: var(--dash-text-title);
+            color: var(--dash-text-dominant);
             cursor: pointer;
-            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.12);
-            transition: all 0.22s ease;
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15);
+            transition: all 0.2s ease;
+
+            body.theme--light & {
+                background: rgba(255, 255, 255, 0.7);
+            }
 
             &:hover {
-                background: rgba(255, 255, 255, 0.12);
+                background: rgba(255, 255, 255, 0.18);
                 border-color: var(--dash-border-glow);
-                transform: translateY(-2px);
+                transform: translateY(-1px);
+
+                body.theme--light & {
+                    background: #ffffff;
+                }
             }
 
             &--highlight {
                 background: rgba(16, 185, 129, 0.14);
-                border-color: rgba(16, 185, 129, 0.4);
+                border-color: rgba(16, 185, 129, 0.35);
                 color: #34d399;
+
+                body.theme--light & {
+                    color: #059669;
+                }
 
                 &:hover {
                     background: rgba(16, 185, 129, 0.25);
-                    border-color: #34d399;
-                    box-shadow: 0 0 18px rgba(16, 185, 129, 0.35);
+                    border-color: #10b981;
+                    box-shadow: 0 0 14px rgba(16, 185, 129, 0.35);
                 }
             }
         }
     }
 
     .dash-workspace-empty {
-        padding: 30px 20px;
+        padding: 22px 14px;
         text-align: center;
-        background: rgba(255, 255, 255, 0.018);
-        border: 1px dashed rgba(255, 255, 255, 0.12);
-        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1.5px dashed rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
 
+        body.theme--light & {
+            background: rgba(15, 23, 42, 0.02);
+            border-color: rgba(15, 23, 42, 0.1);
+        }
+
         .dash-empty-icon {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 56px;
-            height: 56px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.06);
             color: var(--dash-text-subtle);
-            margin-bottom: 10px;
+            margin-bottom: 7px;
         }
 
         .empty-title {
-            font-size: 1rem;
+            font-size: 0.92rem;
             font-weight: 800;
-            color: var(--dash-text-title);
-            margin: 0 0 6px 0;
+            color: var(--dash-text-dominant);
+            margin: 0 0 3px 0;
         }
 
         .empty-text {
-            font-size: 0.86rem;
+            font-size: 0.78rem;
             color: var(--dash-text-muted);
             margin: 0;
-            max-width: 480px;
-            line-height: 1.45;
+            max-width: 420px;
+            line-height: 1.4;
         }
     }
 }

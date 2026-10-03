@@ -65,6 +65,7 @@ const OverlordAiPage = lazyRetry(() => import('../overlord-ai'), 'overlord_ai');
 const CopyTradingPage = lazyRetry(() => import('../copy-trading/copy-trading'), 'copy_trading');
 const DTraderPage = lazyRetry(() => import('../dtrader'), 'dtrader');
 const AutoflipperPage = lazyRetry(() => import('../autoflipper/autoflipper'), 'autoflipper');
+const AutoTrades = lazyRetry(() => import('../autotrades'), 'autotrades');
 
 import { TabErrorBoundary } from '@/components/shared/TabErrorBoundary';
 import { copyTradingService } from '@/pages/copy-trading/services/copy-trading.service';
@@ -136,6 +137,7 @@ const AppWrapper = observer(() => {
         'copy_trading',
         'dtrader',
         'autoflipper',
+        'autotrades',
     ];
     const { isDesktop } = useDevice();
     const location = useLocation();
@@ -516,18 +518,6 @@ const AppWrapper = observer(() => {
                 ),
             },
             {
-                key: 'easy_tool',
-                id: 'id-easy-tool',
-                label: <TabIcon iconKey='easy_tool' label='Easy Tool' />,
-                content: (
-                    <TabErrorBoundary tabId='id-easy-tool' tabName='Easy Tool'>
-                        <Suspense fallback={<ChunkLoader message={localize('Please wait, loading Easy Tool...')} />}>
-                            <EasyTool />
-                        </Suspense>
-                    </TabErrorBoundary>
-                ),
-            },
-            {
                 key: 'marketkiller',
                 id: 'id-marketkiller',
                 label: <TabIcon iconKey='marketkiller' label='Marketkiller' />,
@@ -568,63 +558,13 @@ const AppWrapper = observer(() => {
                 ),
             },
             {
-                key: 'digitflow',
-                id: 'id-digitflow',
-                label: <TabIcon iconKey='digitflow' label='DigitFlow' />,
+                key: 'autotrades',
+                id: 'id-autotrades',
+                label: <TabIcon iconKey='autotrades' label='Auto Trades' />,
                 content: (
-                    <TabErrorBoundary tabId='id-digitflow' tabName='DigitFlow'>
-                        <Suspense fallback={<ChunkLoader message={localize('Please wait, loading DigitFlow...')} />}>
-                            <DigitFlowPage />
-                        </Suspense>
-                    </TabErrorBoundary>
-                ),
-            },
-            {
-                key: 'elite_pro',
-                id: 'id-elite-pro',
-                label: <TabIcon iconKey='elite_pro' label='Elite Pro' />,
-                content: (
-                    <TabErrorBoundary tabId='id-elite-pro' tabName='Elite Pro'>
-                        <Suspense fallback={<ChunkLoader message={localize('Please wait, loading Elite Pro...')} />}>
-                            <EliteProPage />
-                        </Suspense>
-                    </TabErrorBoundary>
-                ),
-            },
-            {
-                key: 'poverty_hunter',
-                id: 'id-poverty-hunter',
-                label: <TabIcon iconKey='poverty_hunter' label='Poverty Hunter' />,
-                content: (
-                    <TabErrorBoundary tabId='id-poverty-hunter' tabName='Poverty Hunter'>
-                        <Suspense
-                            fallback={<ChunkLoader message={localize('Please wait, loading Poverty Hunter...')} />}
-                        >
-                            <PovertyHunterPage />
-                        </Suspense>
-                    </TabErrorBoundary>
-                ),
-            },
-            {
-                key: 'auto_x_eo',
-                id: 'id-auto-x-eo',
-                label: <TabIcon iconKey='auto_x_eo' label='AUTO X E/O' />,
-                content: (
-                    <TabErrorBoundary tabId='id-auto-x-eo' tabName='AUTO X E/O'>
-                        <Suspense fallback={<ChunkLoader message={localize('Please wait, loading AUTO X E/O...')} />}>
-                            <AutoXEoPage />
-                        </Suspense>
-                    </TabErrorBoundary>
-                ),
-            },
-            {
-                key: 'overlord_ai',
-                id: 'id-overlord-ai',
-                label: <TabIcon iconKey='overlord_ai' label='OVERLORD AI' />,
-                content: (
-                    <TabErrorBoundary tabId='id-overlord-ai' tabName='OVERLORD AI'>
-                        <Suspense fallback={<ChunkLoader message={localize('Please wait, loading OVERLORD AI...')} />}>
-                            <OverlordAiPage />
+                    <TabErrorBoundary tabId='id-autotrades' tabName='Auto Trades'>
+                        <Suspense fallback={<ChunkLoader message={localize('Please wait, loading Auto Trades Suite...')} />}>
+                            <AutoTrades />
                         </Suspense>
                     </TabErrorBoundary>
                 ),
@@ -649,18 +589,6 @@ const AppWrapper = observer(() => {
                     <TabErrorBoundary tabId='id-dtrader' tabName='DTrader'>
                         <Suspense fallback={<ChunkLoader message={localize('Please wait, loading DTrader...')} />}>
                             <DTraderPage />
-                        </Suspense>
-                    </TabErrorBoundary>
-                ),
-            },
-            {
-                key: 'autoflipper',
-                id: 'id-autoflipper',
-                label: <TabIcon iconKey='autoflipper' label='AutoFlipper' />,
-                content: (
-                    <TabErrorBoundary tabId='id-autoflipper' tabName='AutoFlipper'>
-                        <Suspense fallback={<ChunkLoader message={localize('Please wait, loading AutoFlipper...')} />}>
-                            <AutoflipperPage />
                         </Suspense>
                     </TabErrorBoundary>
                 ),
@@ -693,12 +621,21 @@ const AppWrapper = observer(() => {
             });
     }, [siteConfig, allTabDescriptors]);
 
-    const currentTabKey = (
+    const rawTabKey = (
         hash[active_hash_tab] ??
         location.hash?.replace('#', '') ??
         hash[0] ??
         'dashboard'
     ).toLowerCase();
+
+    const currentTabKey = React.useMemo(() => {
+        const autoTradeSubtabs = ['elite_pro', 'auto_x_eo', 'poverty_hunter', 'overlord_ai', 'autoflipper', 'autotrades'];
+        const analysisSubtabs = ['easy_tool', 'easy-tool', 'digitflow'];
+        if (autoTradeSubtabs.includes(rawTabKey)) return 'autotrades';
+        if (analysisSubtabs.includes(rawTabKey)) return 'analysis_tool';
+        return rawTabKey;
+    }, [rawTabKey]);
+
     const filteredActiveIndex = Math.max(
         0,
         activeTabsList.findIndex(t => t.key.toLowerCase() === currentTabKey)
@@ -728,13 +665,14 @@ const AppWrapper = observer(() => {
 
     if (!store) return null;
 
-    // 1. Remove run panel and drawer from dashboard, trading bots, and dtrader
+    // 1. Remove run panel and drawer from dashboard, trading bots, dtrader, and autotrades
     const shouldHideRunPanelAndDrawer = [
         'dashboard',
         'trading_bots',
         'free_bots',
         'trading-bots',
         'dtrader',
+        'autotrades',
     ].includes(currentTabKey);
 
     return (

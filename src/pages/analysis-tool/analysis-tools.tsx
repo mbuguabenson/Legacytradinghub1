@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import AnalysisTool from './analysis-tool';
 import AllAnalysis from './all-analysis';
 import Signals from '../signals';
@@ -735,7 +735,7 @@ const AnalysisTools: React.FC = () => {
                                 onClick={() => setShowTradeConfig(false)}
                                 aria-label='Close'
                             >
-                                ×
+                                ├ù
                             </button>
                         </div>
                         <div className='analysis-tools__trade-grid'>
@@ -898,7 +898,7 @@ const AnalysisTools: React.FC = () => {
                                     setShowTradeConfig(false);
                                 }}
                             >
-                                ▶ Run
+                                Γû╢ Run
                             </button>
                         </div>
                     </div>

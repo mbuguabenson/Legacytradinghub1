@@ -124,27 +124,25 @@ main {
             }
 
             &__list {
-                background: var(--general-section-1, #181c25) !important;
-                border: 1px solid var(--border-normal, #262c3b) !important;
+                // ── Flat tab-strip (dark mode default) ──
+                background: #111827 !important;
+                border: none !important;
+                border-bottom: 2px solid #1e2a3a !important;
                 border-radius: 0 !important;
-                padding: 3px 6px !important;
-                margin-top: 0 !important;
-                margin-bottom: 4px !important;
+                padding: 0 8px !important;
+                margin: 0 0 0 0 !important;
                 justify-content: flex-start !important;
-                align-items: center !important;
+                align-items: stretch !important;
                 display: flex !important;
                 flex-wrap: nowrap !important;
-                gap: 4px !important;
-                overflow-x: auto !important;
-                overflow-y: visible !important;
-                width: 100% !important;
+                gap: 0 !important;
                 overflow-x: auto !important;
                 overflow-y: hidden !important;
-                flex-wrap: nowrap !important;
+                width: 100% !important;
                 -webkit-overflow-scrolling: touch !important;
                 scrollbar-width: none !important;
-                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25) !important;
-                transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease !important;
+                box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35) !important;
+                transition: background 0.25s ease !important;
 
                 &::-webkit-scrollbar {
                     display: none !important;
@@ -152,42 +150,36 @@ main {
                     height: 0 !important;
                 }
 
-                // Add a pseudo-element to fix flexbox ignoring right padding on overflow
                 &::after {
                     content: '';
-                    min-width: 6px;
+                    min-width: 8px;
                 }
 
+                // ── Light mode strip ──
                 :global(.theme--light) &,
                 :global(body.theme--light) &,
                 body.theme--light &,
                 .theme--light & {
-                    background: #ffffff !important;
-                    border-bottom: 1px solid #e2e8f0 !important;
-                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+                    background: #f0f4f8 !important;
+                    border-bottom: 2px solid #dde3ec !important;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
                 }
 
                 @include mobile-or-tablet-screen {
-                    padding: 4px 6px !important;
+                    padding: 0 6px !important;
                     margin: 0 !important;
-                    width: 100% !important;
                     border-radius: 0 !important;
-                    gap: 4px !important;
-                    background: #131722 !important;
-                    border-left: none !important;
-                    border-right: none !important;
+                    gap: 0 !important;
                     overflow-x: auto !important;
                     -webkit-overflow-scrolling: touch !important;
                     overscroll-behavior-x: contain !important;
-                    scroll-padding: 0 16px !important;
 
                     :global(.theme--light) &,
                     :global(body.theme--light) &,
                     body.theme--light &,
                     .theme--light & {
-                        background: #ffffff !important;
-                        border-top-color: #e2e8f0 !important;
-                        border-bottom-color: #e2e8f0 !important;
+                        background: #f0f4f8 !important;
+                        border-bottom-color: #dde3ec !important;
                     }
                 }
 
@@ -204,33 +196,34 @@ main {
                 }
 
                 &--border-bottom {
-                    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                    border-bottom: 2px solid #1e2a3a;
 
                     @include mobile-or-tablet-screen {
-                        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+                        border-bottom: 2px solid #1e2a3a;
                     }
 
                     :global(.theme--light) &,
                     :global(body.theme--light) &,
                     body.theme--light &,
                     .theme--light & {
-                        border-bottom: 1px solid #e2e8f0;
+                        border-bottom: 2px solid #dde3ec;
                     }
                 }
             }
 
             &__item {
+                // ── Inactive flat tab (dark mode) ──
                 background: transparent !important;
-                color: #94a3b8 !important;
+                color: #7a8ba8 !important;
                 border-radius: 0 !important;
                 width: auto !important;
-                height: 30px !important;
+                height: 46px !important;
                 min-width: 0 !important;
                 max-width: none !important;
                 display: inline-flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                padding: 0 10px !important;
+                padding: 0 16px !important;
                 margin: 0 !important;
                 box-sizing: border-box !important;
                 position: relative !important;
@@ -238,82 +231,68 @@ main {
                 white-space: nowrap !important;
                 cursor: pointer !important;
                 border: none !important;
-                border-bottom: 2px solid transparent !important;
-                font-size: 12px !important;
-                font-weight: 600 !important;
-                letter-spacing: 0.01em !important;
+                border-bottom: 3px solid transparent !important;
+                font-size: 12.5px !important;
+                font-weight: 500 !important;
+                letter-spacing: 0.02em !important;
+                text-transform: uppercase !important;
                 font-family: var(--ph-font, 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif) !important;
-                transition: all 0.18s ease !important;
+                transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease !important;
 
                 @include mobile-or-tablet-screen {
-                    padding: 0 12px !important;
-                    height: 36px !important;
-                    font-size: 13px !important;
+                    padding: 0 14px !important;
+                    height: 37px !important;
+                    font-size: 12px !important;
                 }
 
                 svg {
                     width: 14px !important;
                     height: 14px !important;
-                    margin-inline-end: 5px !important;
+                    margin-inline-end: 6px !important;
                     fill: none;
-                    stroke: #94a3b8 !important;
-                    color: #94a3b8 !important;
+                    stroke: #7a8ba8 !important;
+                    color: #7a8ba8 !important;
                     transition: stroke 0.18s ease, color 0.18s ease;
 
                     @include mobile-or-tablet-screen {
-                        width: 16px !important;
-                        height: 16px !important;
-                        margin-inline-end: 4px !important;
+                        width: 15px !important;
+                        height: 15px !important;
                     }
 
-                    path,
-                    circle,
-                    rect,
-                    polygon,
-                    line,
-                    polyline {
-                        stroke: #94a3b8 !important;
+                    path, circle, rect, polygon, line, polyline {
+                        stroke: #7a8ba8 !important;
                     }
                 }
 
+                // ── Light mode inactive ──
                 :global(.theme--light) &,
                 :global(body.theme--light) &,
                 body.theme--light &,
                 .theme--light & {
                     background: transparent !important;
-                    color: #64748b !important;
+                    color: #5c6b88 !important;
 
                     svg {
-                        stroke: #64748b !important;
-                        color: #64748b !important;
+                        stroke: #5c6b88 !important;
+                        color: #5c6b88 !important;
 
-                        path,
-                        circle,
-                        rect,
-                        polygon,
-                        line,
-                        polyline {
-                            stroke: #64748b !important;
+                        path, circle, rect, polygon, line, polyline {
+                            stroke: #5c6b88 !important;
                         }
                     }
                 }
 
                 &:hover {
-                    background: rgba(255, 255, 255, 0.04) !important;
-                    color: #ffffff !important;
-                    z-index: 10 !important;
+                    background: rgba(255, 255, 255, 0.05) !important;
+                    color: #b8cce4 !important;
+                    border-bottom-color: rgba(99, 160, 220, 0.35) !important;
 
                     svg {
-                        stroke: #ffffff !important;
-                        color: #ffffff !important;
+                        stroke: #b8cce4 !important;
+                        color: #b8cce4 !important;
 
-                        path,
-                        circle,
-                        rect,
-                        polygon,
-                        line,
-                        polyline {
-                            stroke: #ffffff !important;
+                        path, circle, rect, polygon, line, polyline {
+                            stroke: #b8cce4 !important;
                         }
                     }
 
@@ -321,80 +300,63 @@ main {
                     :global(body.theme--light) &,
                     body.theme--light &,
                     .theme--light & {
-                        background: #f1f5f9 !important;
-                        color: #0f172a !important;
+                        background: rgba(0, 0, 0, 0.04) !important;
+                        color: #1e3a5f !important;
+                        border-bottom-color: rgba(79, 70, 229, 0.3) !important;
 
                         svg {
-                            stroke: #0f172a !important;
-                            color: #0f172a !important;
+                            stroke: #1e3a5f !important;
+                            color: #1e3a5f !important;
 
-                            path,
-                            circle,
-                            rect,
-                            polygon,
-                            line,
-                            polyline {
-                                stroke: #0f172a !important;
+                            path, circle, rect, polygon, line, polyline {
+                                stroke: #1e3a5f !important;
                             }
                         }
                     }
                 }
 
+                // ── ACTIVE tab flat (dark mode): solid tinted bg + vivid bottom accent ──
                 &.dc-tabs__active {
-                    background: rgba(255, 68, 79, 0.06) !important;
-                    color: #ffffff !important;
-                    border-bottom: 2px solid var(--brand-coral, #ff444f) !important;
-                    box-shadow: none !important;
+                    background: rgba(14, 165, 233, 0.1) !important;
+                    color: #38bdf8 !important;
                     border-radius: 0 !important;
+                    border: none !important;
+                    border-bottom: 3px solid #0ea5e9 !important;
+                    box-shadow: none !important;
                     transform: none !important;
                     z-index: 5 !important;
                     font-weight: 700 !important;
 
                     &::after {
-                        content: '';
-                        position: absolute;
-                        bottom: 0;
-                        left: 0;
-                        right: 0;
-                        height: 2px;
-                        background: var(--brand-coral, #ff444f) !important;
-                        border-radius: 1px 1px 0 0;
+                        display: none !important;
                     }
 
                     svg {
-                        stroke: var(--brand-coral, #ff444f) !important;
-                        color: var(--brand-coral, #ff444f) !important;
+                        stroke: #38bdf8 !important;
+                        color: #38bdf8 !important;
 
-                        path,
-                        circle,
-                        rect,
-                        polygon,
-                        line,
-                        polyline {
-                            stroke: var(--brand-coral, #ff444f) !important;
+                        path, circle, rect, polygon, line, polyline {
+                            stroke: #38bdf8 !important;
                         }
                     }
 
+                    // ── ACTIVE tab flat (light mode) ──
                     :global(.theme--light) &,
                     :global(body.theme--light) &,
                     body.theme--light &,
                     .theme--light & {
-                        background: rgba(255, 68, 79, 0.04) !important;
-                        color: #0f172a !important;
-                        border-bottom-color: var(--brand-coral, #ff444f) !important;
+                        background: rgba(79, 70, 229, 0.08) !important;
+                        color: #4338ca !important;
+                        border: none !important;
+                        border-bottom: 3px solid #4f46e5 !important;
                         box-shadow: none !important;
 
                         svg {
-                            stroke: var(--brand-coral, #ff444f) !important;
-                            color: var(--brand-coral, #ff444f) !important;
+                            stroke: #4338ca !important;
+                            color: #4338ca !important;
 
-                            path,
-                            circle,
-                            rect,
-                            polygon,
-                            line,
-                            polyline {
-                                stroke: var(--brand-coral, #ff444f) !important;
+                            path, circle, rect, polygon, line, polyline {
+                                stroke: #4338ca !important;
                             }
                         }
                     }
@@ -1152,6 +1114,7 @@ main {
 [data-active-tab='auto_x_eo']         { --tab-accent: #fb7185; }   // Rose          – AUTO X E/O
 [data-active-tab='overlord_ai']       { --tab-accent: #c084fc; }   // Lavender      – OVERLORD AI
 [data-active-tab='copy_trading']      { --tab-accent: #00FF88; }   // Cyber Emerald – Copy Trading
+[data-active-tab='autotrades']        { --tab-accent: #38bdf8; }   // Cyan Blue     – Auto Trades
 
 // ─── Cyber Glass Tab Bar Styling ──────────────────────────────────────────────
 .main__tabs {

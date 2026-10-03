@@ -40,7 +40,23 @@ export const TopBarTradeController: React.FC<TopBarTradeControllerProps> = ({ cu
         };
     }, []);
 
-    const normalizedTab = (currentTabKey || '').toLowerCase();
+    const [activeAutoTradeSubtab, setActiveAutoTradeSubtab] = useState<string>(() => {
+        return (typeof window !== 'undefined' ? sessionStorage.getItem('legacy_autotrades_subtab') : '') || 'elite_pro';
+    });
+
+    useEffect(() => {
+        const handleSubtabChange = (e: Event) => {
+            const customEvent = e as CustomEvent<{ subtab: string }>;
+            if (customEvent.detail?.subtab) {
+                setActiveAutoTradeSubtab(customEvent.detail.subtab);
+            }
+        };
+        window.addEventListener('PH_AUTOTRADES_SUBTAB_CHANGE', handleSubtabChange);
+        return () => window.removeEventListener('PH_AUTOTRADES_SUBTAB_CHANGE', handleSubtabChange);
+    }, []);
+
+    const rawTab = (currentTabKey || '').toLowerCase();
+    const normalizedTab = rawTab === 'autotrades' ? activeAutoTradeSubtab : rawTab;
     const currentStatus = engineStatuses[normalizedTab] || { isRunning: false };
 
     // Trigger action on the active trading engine

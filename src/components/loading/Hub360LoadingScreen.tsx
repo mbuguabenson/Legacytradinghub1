@@ -9,7 +9,7 @@ interface Hub360LoadingScreenProps {
 }
 
 export const Hub360LoadingScreen: React.FC<Hub360LoadingScreenProps> = ({
-    title = '360 Trading Hub',
+    title = 'Legacy Trading Hub',
     subtitle = 'Initializing Deriv Bot account...',
     onComplete,
 }) => {

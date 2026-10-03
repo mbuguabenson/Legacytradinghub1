@@ -1,5 +1,6 @@
 .lux-welcome-screen {
-    --lux-cyan: #22d3ee;
+    --lux-cyan: #00f5ff;
+    --lux-lime: #d7f23a;
     --lux-blue: #2b8cff;
     position: fixed;
     inset: 0;
@@ -7,11 +8,13 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1.2rem;
-    overflow: hidden;
+    padding: 16px;
+    overflow-y: auto;
+    overflow-x: hidden;
     cursor: pointer;
-    font-family: 'Roboto', 'Inter', 'IBM Plex Sans', system-ui, sans-serif;
-    background: #0a0618;
+    font-family: 'Outfit', 'Inter', 'Segoe UI', -apple-system, sans-serif;
+    // ─── Original Emerald & Deep Forest Ambient Gradient ───
+    background: radial-gradient(120% 90% at 50% 0%, #0f5a3c 0%, #08301f 45%, #04150e 100%);
     transition:
         opacity 0.5s ease,
         transform 0.5s ease;
@@ -27,306 +30,388 @@
     }
 }
 
-.lux-bg {
+// ─── Original Ambient Glow & Neon Rings ─────────────────────
+.lux-glow {
     position: absolute;
-    inset: 0;
-    background: url('/welcome-astronaut.jpg') center / cover no-repeat;
-    animation: lux-drift 14s ease-in-out infinite alternate;
+    border-radius: 50%;
+    pointer-events: none;
+
+    &--top {
+        top: -25%;
+        left: 50%;
+        width: 75vmax;
+        height: 75vmax;
+        transform: translateX(-50%);
+        background: radial-gradient(circle, rgba(32, 140, 90, 0.45), transparent 65%);
+        filter: blur(35px);
+        animation: lux-breathe 4s ease-in-out infinite;
+    }
+
+    &--ring {
+        bottom: -42vmin;
+        left: 50%;
+        width: 70vmin;
+        height: 70vmin;
+        transform: translateX(-50%) scale(0.6);
+        background: radial-gradient(
+            circle,
+            transparent 38%,
+            rgba(215, 242, 58, 0.85) 52%,
+            rgba(150, 210, 40, 0.45) 62%,
+            transparent 76%
+        );
+        filter: blur(14px);
+        opacity: 0;
+        animation: lux-ring-rise 3.2s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+    }
+
+    &--ring-2 {
+        width: 95vmin;
+        height: 95vmin;
+        bottom: -60vmin;
+        filter: blur(28px);
+        animation-delay: 0.35s;
+        animation-duration: 3.6s;
+    }
 }
 
-.lux-bg-overlay {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(90% 70% at 50% 50%, rgba(10, 6, 24, 0.15), rgba(10, 6, 24, 0.7));
-}
-
-// ─── Glass card ─────────────────────────────────────────────────────────────
+// ─── Translucent Neumorphic Glass Card ──────────────────────
 .lux-card {
     position: relative;
+    z-index: 10;
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: min(470px, 96vw);
-    max-height: 96vh;
-    overflow: hidden;
-    padding: 2.2rem 2rem 1.6rem;
-    border-radius: 22px;
-    background: linear-gradient(160deg, rgba(20, 24, 48, 0.55), rgba(10, 14, 30, 0.62));
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    backdrop-filter: blur(14px) saturate(130%);
-    -webkit-backdrop-filter: blur(14px) saturate(130%);
+    width: min(500px, 95vw);
+    max-height: 94vh;
+    padding: 22px 20px 18px;
+    border-radius: 26px;
+    background: linear-gradient(145deg, rgba(20, 36, 42, 0.65), rgba(7, 20, 22, 0.78));
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
     box-shadow:
-        0 24px 60px rgba(0, 0, 0, 0.55),
+        0 24px 60px rgba(0, 0, 0, 0.6),
+        0 0 40px rgba(0, 245, 255, 0.08),
         inset 1px 1px 0 rgba(255, 255, 255, 0.2),
-        inset -1px -1px 8px rgba(0, 0, 0, 0.3);
-    animation: lux-card-in 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-    color: #e8eef9;
+        inset -1px -1px 8px rgba(0, 0, 0, 0.4);
+    animation: lux-card-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+    color: #e6f1f5;
     text-align: center;
+    box-sizing: border-box;
 
-    &__head {
-        display: flex;
+    // Header Badge: Official BrandLogo Wrapper
+    &__header-badge {
+        display: inline-flex;
         align-items: center;
-        gap: 1.2rem;
-    }
+        justify-content: center;
+        padding: 6px 16px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        box-shadow:
+            0 8px 24px rgba(0, 0, 0, 0.35),
+            inset 1px 1px 0 rgba(255, 255, 255, 0.2);
+        margin-bottom: 14px;
 
-    &__logo {
-        display: grid;
-        place-items: center;
-        width: 56px;
-        height: 56px;
-        border-radius: 14px;
-        background: #fff;
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-        animation: lux-float 3.2s ease-in-out infinite;
-
-        svg {
-            width: 38px;
-            height: 38px;
+        .lth-brand-logo {
+            padding: 0;
+            background: transparent !important;
+            &:hover {
+                background: transparent !important;
+                transform: none;
+            }
         }
     }
 
-    &__titles {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        line-height: 1;
-    }
+    // Titles
+    &__welcome-title {
+        margin: 0 0 4px;
+        font-size: 20px;
+        font-weight: 500;
+        color: #ffffff;
+        letter-spacing: -0.01em;
 
-    &__brand {
-        font-size: 3rem;
-        font-weight: 800;
-        letter-spacing: 0.14em;
-        color: var(--lux-cyan);
-        text-shadow: 0 0 18px rgba(34, 211, 238, 0.45);
-    }
-
-    &__brand-sub {
-        margin-top: 0.4rem;
-        font-size: 1.15rem;
-        font-weight: 600;
-        letter-spacing: 0.42em;
-        color: rgba(232, 238, 249, 0.8);
-    }
-
-    &__welcome {
-        margin: 1.4rem 0 0.2rem;
-        font-size: 1.7rem;
-        font-weight: 400;
-
-        strong {
+        .lux-highlight {
             color: var(--lux-cyan);
             font-weight: 700;
+            text-shadow: 0 0 12px rgba(0, 245, 255, 0.45);
         }
     }
 
-    &__tagline {
-        margin: 0 0 1.4rem;
-        font-size: 1.25rem;
-        color: rgba(232, 238, 249, 0.6);
-    }
-}
-
-// ─── Step indicator ─────────────────────────────────────────────────────────
-.lux-steps {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    margin: 0 0 1.4rem;
-    padding: 0;
-    list-style: none;
-
-    &__item {
-        display: flex;
-        flex: 1;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    &__dot {
-        display: grid;
-        place-items: center;
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        font-size: 1.2rem;
-        font-weight: 600;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        color: rgba(232, 238, 249, 0.55);
-        transition: all 0.3s ease;
-    }
-
-    &__label {
-        font-size: 0.85rem;
-        letter-spacing: 0.04em;
-        color: rgba(232, 238, 249, 0.45);
-    }
-
-    &__item--done &__dot {
-        background: rgba(43, 140, 255, 0.35);
-        border-color: var(--lux-blue);
-        color: #bfe0ff;
-    }
-
-    &__item--active &__dot {
-        background: rgba(34, 211, 238, 0.2);
-        border-color: var(--lux-cyan);
-        color: var(--lux-cyan);
-        box-shadow: 0 0 14px rgba(34, 211, 238, 0.55);
-        animation: lux-pulse 1.4s ease-in-out infinite;
-    }
-
-    &__item--done &__label,
-    &__item--active &__label {
-        color: rgba(232, 238, 249, 0.85);
-    }
-}
-
-// ─── Feature tiles ──────────────────────────────────────────────────────────
-.lux-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.9rem;
-    width: 100%;
-    margin-bottom: 1.4rem;
-
-    &__tile {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.7rem;
-        padding: 1.2rem 0.4rem;
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        animation: lux-rise 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-    }
-
-    &__icon {
-        display: grid;
-        place-items: center;
-        width: 42px;
-        height: 42px;
-        border-radius: 50%;
-        font-size: 1.9rem;
-        background: rgba(34, 211, 238, 0.12);
-        border: 1px solid rgba(34, 211, 238, 0.3);
-    }
-
-    &__name {
-        font-size: 1.15rem;
-        font-weight: 600;
-        color: rgba(232, 238, 249, 0.88);
-    }
-}
-
-// ─── Status / progress ──────────────────────────────────────────────────────
-.lux-status {
-    margin: 0;
-    font-size: 1.3rem;
-    color: rgba(232, 238, 249, 0.85);
-}
-
-.lux-hint {
-    margin: 0.3rem 0 1rem;
-    font-size: 1.1rem;
-    color: var(--lux-cyan);
-}
-
-.lux-progress {
-    &__track {
-        width: 100%;
-        height: 9px;
-        border-radius: 9px;
-        background: rgba(0, 0, 0, 0.4);
-        box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.55);
-        overflow: hidden;
-    }
-
-    &__fill {
-        height: 100%;
-        border-radius: 9px;
-        background: linear-gradient(90deg, #1e90ff, var(--lux-cyan));
-        box-shadow: 0 0 12px rgba(34, 211, 238, 0.7);
-        transition: width 0.12s linear;
-    }
-
-    &__pct {
-        align-self: flex-end;
-        margin-top: 0.5rem;
-        font-size: 1.2rem;
-        font-weight: 600;
-        font-variant-numeric: tabular-nums;
-        color: var(--lux-cyan);
-    }
-}
-
-// ─── Powered by Deriv ───────────────────────────────────────────────────────
-.lux-powered {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    margin-top: 1.1rem;
-    padding: 0.5rem 1.2rem;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    font-size: 1.15rem;
-    color: rgba(232, 238, 249, 0.7);
-
-    strong {
-        color: #fff;
-        font-weight: 700;
+    &__subtitle {
+        margin: 0 0 18px;
+        font-size: 12px;
+        font-weight: 400;
+        color: rgba(220, 235, 245, 0.65);
         letter-spacing: 0.02em;
     }
+}
 
-    &__logo {
-        width: 22px;
-        height: 22px;
-        display: block;
+// ─── 5-Step Process Nodes ──────────────────────────────────
+.lux-steps {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 18px;
+    position: relative;
+
+    .lux-step-node {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        flex: 1;
+
+        .lux-step-circle {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 11px;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            color: rgba(220, 235, 245, 0.5);
+            transition: all 0.3s ease;
+
+            .lux-check-icon {
+                width: 13px;
+                height: 13px;
+                stroke: currentColor;
+            }
+        }
+
+        .lux-step-label {
+            font-size: 8.5px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            color: rgba(220, 235, 245, 0.45);
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        &--done {
+            .lux-step-circle {
+                background: rgba(0, 245, 255, 0.25);
+                border-color: var(--lux-cyan);
+                color: #ffffff;
+                box-shadow: 0 0 10px rgba(0, 245, 255, 0.4);
+            }
+            .lux-step-label {
+                color: rgba(220, 235, 245, 0.85);
+            }
+        }
+
+        &--active {
+            .lux-step-circle {
+                background: rgba(0, 245, 255, 0.35);
+                border-color: #ffffff;
+                color: #ffffff;
+                box-shadow:
+                    0 0 16px rgba(0, 245, 255, 0.8),
+                    inset 0 0 8px rgba(255, 255, 255, 0.4);
+                animation: lux-pulse 1.4s infinite;
+            }
+            .lux-step-label {
+                color: var(--lux-cyan);
+                font-weight: 700;
+            }
+        }
     }
 }
 
-.lux-copy {
-    margin: 0.9rem 0 0;
-    font-size: 1rem;
-    color: rgba(232, 238, 249, 0.4);
+// ─── 6 Feature Tiles with 3D Icons (3x2 Grid) ───────────────
+.lux-feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 18px;
+
+    .lux-feature-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 7px;
+        padding: 12px 6px 10px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow:
+            inset 1px 1px 0 rgba(255, 255, 255, 0.1),
+            0 4px 14px rgba(0, 0, 0, 0.25);
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+        animation: lux-rise 0.5s ease both;
+
+        &:hover {
+            transform: translateY(-2px);
+            border-color: rgba(0, 245, 255, 0.35);
+
+            .lux-feature-icon-wrapper {
+                transform: scale(1.08) translateY(-2px);
+                box-shadow:
+                    inset 2px 2px 4px rgba(255, 255, 255, 0.6),
+                    inset -2px -2px 6px rgba(0, 0, 0, 0.4),
+                    0 10px 22px rgba(0, 245, 255, 0.35);
+            }
+            .lux-3d-svg {
+                transform: scale(1.06);
+            }
+        }
+
+        .lux-feature-icon-wrapper {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            border: 1px solid transparent;
+            box-shadow:
+                inset 2px 2px 4px rgba(255, 255, 255, 0.35),
+                inset -2px -2px 6px rgba(0, 0, 0, 0.5),
+                0 6px 14px rgba(0, 0, 0, 0.4);
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+
+            .lux-3d-svg {
+                width: 32px;
+                height: 32px;
+                display: block;
+                filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+                transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            }
+        }
+
+        .lux-feature-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: #f1f8fc;
+            letter-spacing: -0.01em;
+            white-space: nowrap;
+        }
+    }
 }
 
-.lux-bar-a,
-.lux-bar-b,
-.lux-bar-c {
-    transform-box: fill-box;
-    transform-origin: bottom;
-    animation: lux-bar-grow 1.6s ease-in-out infinite;
+// ─── Status Text ────────────────────────────────────────────
+.lux-status-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 12px;
+
+    .lux-status-main {
+        font-size: 12.5px;
+        font-weight: 400;
+        color: rgba(220, 235, 245, 0.75);
+    }
+
+    .lux-status-sub {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--lux-cyan);
+    }
 }
 
-.lux-bar-b {
-    animation-delay: 0.2s;
+// ─── Progress Bar & Info ────────────────────────────────────
+.lux-progress-wrap {
+    width: 100%;
+    margin-bottom: 16px;
+
+    .lux-progress-track {
+        width: 100%;
+        height: 7px;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+        overflow: hidden;
+
+        .lux-progress-fill {
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #0ea5e9 0%, var(--lux-cyan) 60%, var(--lux-lime) 100%);
+            box-shadow:
+                0 0 14px rgba(0, 245, 255, 0.8),
+                0 0 20px rgba(215, 242, 58, 0.5);
+            transition: width 0.15s ease-out;
+        }
+    }
+
+    .lux-progress-info {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 4px;
+
+        .lux-pct-label {
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--lux-cyan);
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 8px rgba(0, 245, 255, 0.5);
+        }
+    }
 }
 
-.lux-bar-c {
-    animation-delay: 0.4s;
+// ─── Footer with Official Deriv Logo ────────────────────────
+.lux-footer-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+
+    .lux-powered-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        font-size: 11px;
+        color: rgba(220, 235, 245, 0.7);
+
+        .lux-deriv-logo {
+            width: 17px;
+            height: 17px;
+            display: block;
+        }
+
+        .lux-deriv-text {
+            font-size: 12px;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 0.02em;
+        }
+    }
+
+    .lux-copyright {
+        margin: 0;
+        font-size: 9.5px;
+        color: rgba(220, 235, 245, 0.35);
+        letter-spacing: 0.02em;
+    }
 }
 
+// ─── Keyframe Animations ─────────────────────────────────────
 @keyframes lux-card-in {
     from {
         opacity: 0;
-        transform: translateY(24px) scale(0.95);
-        filter: blur(8px);
+        transform: translateY(20px) scale(0.96);
     }
     to {
         opacity: 1;
-        transform: none;
-        filter: none;
+        transform: translateY(0) scale(1);
     }
 }
 
 @keyframes lux-rise {
     from {
         opacity: 0;
-        transform: translateY(12px);
+        transform: translateY(10px);
     }
     to {
         opacity: 1;
@@ -334,48 +419,83 @@
     }
 }
 
-@keyframes lux-float {
-    50% {
-        transform: translateY(-4px);
-    }
-}
-
 @keyframes lux-pulse {
-    50% {
-        box-shadow: 0 0 22px rgba(34, 211, 238, 0.85);
-    }
-}
-
-@keyframes lux-drift {
-    from {
-        transform: scale(1.04) translateY(0);
-    }
-    to {
-        transform: scale(1.12) translateY(-1.5%);
-    }
-}
-
-@keyframes lux-bar-grow {
     0%,
     100% {
-        transform: scaleY(0.78);
+        transform: scale(1);
     }
     50% {
-        transform: scaleY(1);
+        transform: scale(1.1);
+        box-shadow: 0 0 20px rgba(0, 245, 255, 0.95);
     }
 }
 
-@media (max-height: 640px) {
+@keyframes lux-breathe {
+    50% {
+        opacity: 0.7;
+        transform: translateX(-50%) scale(1.06);
+    }
+}
+
+@keyframes lux-ring-rise {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.6);
+    }
+    40% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.9;
+        transform: translateX(-50%) scale(1.05);
+    }
+}
+
+@media (max-width: 480px) {
     .lux-card {
-        padding: 1.4rem 1.4rem 1.2rem;
+        padding: 16px 12px 12px;
+        border-radius: 20px;
+
+        &__welcome-title {
+            font-size: 16px;
+        }
+
+        &__subtitle {
+            font-size: 10.5px;
+            margin-bottom: 12px;
+        }
     }
 
-    .lux-grid__tile {
-        padding: 0.7rem 0.3rem;
+    .lux-feature-grid {
+        gap: 6px;
+
+        .lux-feature-card {
+            padding: 8px 4px 6px;
+
+            .lux-feature-icon-wrapper {
+                width: 36px;
+                height: 36px;
+
+                .lux-3d-svg {
+                    width: 26px;
+                    height: 26px;
+                }
+            }
+
+            .lux-feature-title {
+                font-size: 9.5px;
+            }
+        }
     }
 
-    .lux-copy {
-        display: none;
+    .lux-steps .lux-step-node .lux-step-circle {
+        width: 24px;
+        height: 24px;
+        font-size: 9.5px;
+    }
+
+    .lux-steps .lux-step-node .lux-step-label {
+        font-size: 7.5px;
     }
 }
 
