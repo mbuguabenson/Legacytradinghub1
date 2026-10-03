@@ -277,6 +277,13 @@
         box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7) !important;
     }
 
+    @media (min-width: 769px) and (max-width: 1279px) {
+        &:not(.acc-panel--mobile) {
+            left: 0 !important;
+            right: auto !important;
+        }
+    }
+
     &__mobile-backdrop {
         position: fixed !important;
         top: 0 !important;
@@ -839,6 +846,14 @@
             color: #38bdf8;
             border: 1px solid #0284c7;
         }
+    }
+}
+
+.deriv-wrapper__left,
+.auth-actions--left {
+    .acc-panel:not(.acc-panel--mobile) {
+        left: 0 !important;
+        right: auto !important;
     }
 }
 

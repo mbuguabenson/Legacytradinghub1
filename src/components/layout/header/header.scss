@@ -25,6 +25,18 @@
         .deriv-wrapper {
             height: 100% !important;
         }
+
+        .deriv-wrapper__left {
+            flex: 1 1 auto;
+            min-width: 0;
+            overflow: visible !important;
+        }
+
+        .deriv-wrapper__right {
+            flex: 0 0 auto;
+            width: auto;
+            overflow: visible !important;
+        }
     }
 
     &--mobile {
@@ -39,6 +51,18 @@
 
         .deriv-wrapper {
             height: 100% !important;
+        }
+
+        .deriv-wrapper__left {
+            flex: 1 1 auto;
+            min-width: 0;
+            overflow: visible !important;
+        }
+
+        .deriv-wrapper__right {
+            flex: 0 0 auto;
+            width: auto;
+            overflow: visible !important;
         }
     }
 
@@ -305,6 +329,31 @@
     padding-block: 8px;
     align-items: center;
     margin-inline-end: 1.6rem;
+
+    &--left {
+        margin-inline-start: 6px;
+        margin-inline-end: 0;
+        padding-block: 0;
+        display: flex;
+        align-items: center;
+        min-width: 0;
+
+        .account-info {
+            display: flex;
+            align-items: center;
+            min-width: 0;
+        }
+
+        .acc-info__wrapper {
+            margin-right: 0;
+        }
+    }
+
+    &--right {
+        @include mobile-or-tablet-screen {
+            margin-inline-end: 0;
+        }
+    }
 
     @include mobile-or-tablet-screen {
         margin-inline-end: 0.2rem;
@@ -856,6 +905,14 @@ body.theme--light,
             height: 14px;
         }
     }
+
+    @media (max-width: 768px) {
+        display: none !important;
+    }
+}
+
+.app-header--mobile .app-header__transfer-btn {
+    display: none !important;
 }
 
 // ─── Global Icon Visibility (Light/Dark Theme) ──────────────────────────────

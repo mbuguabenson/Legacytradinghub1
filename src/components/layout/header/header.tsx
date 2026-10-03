@@ -113,7 +113,26 @@ const HeaderFastToggle = observer(() => {
 // Main AppHeader
 // ─────────────────────────────────────────────────────────────────────────────
 const AppHeader = observer(() => {
-    const { isDesktop } = useDevice();
+    const { isDesktop: uiIsDesktop, isTablet: uiIsTablet, isMobile: uiIsMobile } = useDevice();
+    const [windowWidth, setWindowWidth] = useState(() => (typeof window !== 'undefined' ? window.innerWidth : 1440));
+
+    useEffect(() => {
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    // Responsive device states:
+    // Mobile: viewport width <= 768px (or uiIsMobile)
+    // Tablet: 768px < viewport width < 1280px (or uiIsTablet, or touch tablet)
+    // Desktop: viewport width >= 1280px without touch tablet mode
+    const isTouchTablet = typeof navigator !== 'undefined' && navigator.maxTouchPoints > 1 && windowWidth <= 1366;
+    const isMobile = uiIsMobile || windowWidth <= 768;
+    const isTablet = (uiIsTablet || isTouchTablet || (windowWidth > 768 && windowWidth < 1280)) && !isMobile;
+    const isDesktop = !isMobile && !isTablet && uiIsDesktop && windowWidth >= 1280 && !isTouchTablet;
+
     const { isAuthorizing, activeLoginid, setIsAuthorizing, authData } = useApiBase();
     const { client } = useStore() ?? {};
     const [authTimeout, setAuthTimeout] = useState(false);
@@ -220,48 +239,57 @@ const AppHeader = observer(() => {
         (position: 'left' | 'right' = 'right') => {
             // Show account switcher and logout when user is fully authenticated
             if (activeLoginid && !is_account_regenerating) {
+                // On mobile and tablet: account card and balance are on the left side
                 if (position === 'left' && !isDesktop) {
                     return (
-                        <div className='auth-actions'>
+                        <div className='auth-actions auth-actions--left'>
                             <div className='account-info'>
                                 <AccountSwitcher activeAccount={activeAccount} />
                             </div>
                         </div>
                     );
                 } else if (position === 'right') {
+                    const showAccountSwitcherOnRight = isDesktop;
+                    const showTransferOnRight = !isMobile;
+                    if (!showAccountSwitcherOnRight && !showTransferOnRight) {
+                        return null;
+                    }
                     return (
-                        <div className='auth-actions'>
-                            {isDesktop && (
+                        <div className='auth-actions auth-actions--right'>
+                            {showAccountSwitcherOnRight && (
                                 <div className='account-info'>
                                     <AccountSwitcher activeAccount={activeAccount} />
                                 </div>
                             )}
-                            <Button
-                                primary
-                                className='app-header__transfer-btn'
-                                disabled={client?.is_logging_out || !authData?.currency}
-                                onClick={handleTransfer}
-                            >
-                                {isDesktop ? (
-                                    <Localize i18n_default_text='Transfer' />
-                                ) : (
-                                    <svg
-                                        width='16'
-                                        height='16'
-                                        viewBox='0 0 24 24'
-                                        fill='none'
-                                        stroke='currentColor'
-                                        strokeWidth='2'
-                                        strokeLinecap='round'
-                                        strokeLinejoin='round'
-                                    >
-                                        <path d='M17 1l4 4-4 4' />
-                                        <path d='M3 11V9a4 4 0 014-4h14' />
-                                        <path d='M7 23l-4-4 4-4' />
-                                        <path d='M21 13v2a4 4 0 01-4 4H3' />
-                                    </svg>
-                                )}
-                            </Button>
+                            {/* Hide or remove transfer icon button on mobile; show on tablet & desktop */}
+                            {showTransferOnRight && (
+                                <Button
+                                    primary
+                                    className='app-header__transfer-btn'
+                                    disabled={client?.is_logging_out || !authData?.currency}
+                                    onClick={handleTransfer}
+                                >
+                                    {isDesktop ? (
+                                        <Localize i18n_default_text='Transfer' />
+                                    ) : (
+                                        <svg
+                                            width='16'
+                                            height='16'
+                                            viewBox='0 0 24 24'
+                                            fill='none'
+                                            stroke='currentColor'
+                                            strokeWidth='2'
+                                            strokeLinecap='round'
+                                            strokeLinejoin='round'
+                                        >
+                                            <path d='M17 1l4 4-4 4' />
+                                            <path d='M3 11V9a4 4 0 014-4h14' />
+                                            <path d='M7 23l-4-4 4-4' />
+                                            <path d='M21 13v2a4 4 0 01-4 4H3' />
+                                        </svg>
+                                    )}
+                                </Button>
+                            )}
                         </div>
                     );
                 }
@@ -319,6 +347,7 @@ const AppHeader = observer(() => {
         [
             isAuthorizing,
             isDesktop,
+            isMobile,
             activeLoginid,
             client,
             activeAccount,
