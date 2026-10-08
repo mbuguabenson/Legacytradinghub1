@@ -4,7 +4,7 @@ import { BridgeEvent, BridgeMessage, createMessage, isValidBridgeMessage } from 
 import { secureSessionService } from '@/services/secure-session.service';
 import { getAppId } from '@/components/shared/utils/config/config';
 import { makeBridgeLogger, generateInstanceId } from './bridge-diagnostics';
-import { getAccountsList, getActiveToken, getLegacyDTraderToken, resolveValidDerivWSToken } from '@/utils/token-bridge';
+import { getAccountsList, getActiveToken, getLegacyDTraderToken, isInvalidBearerToken, resolveValidDerivWSToken } from '@/utils/token-bridge';
 import { OAuthTokenExchangeService } from '@/services/oauth-token-exchange.service';
 
 export interface BridgeDiagnosticInfo {
@@ -195,15 +195,9 @@ export class ParentBridgeClient {
     ) {
         if (!targetWindow || targetWindow === window) return;
         try {
-            // For Deriv DTrader iframe, if legacy token is available prefer it, otherwise use active token (OAuth2 or PAT)
-            let tokenToUse = tok;
-            if (tok && tok.startsWith('ey')) {
-                const legacy = getLegacyDTraderToken(loginid) || localStorage.getItem('token1');
-                if (legacy) {
-                    tokenToUse = legacy;
-                }
-            }
-
+            // Preserve active token (OAuth2 Bearer or PAT) and legacy token without destructive downgrades
+            const tokenToUse = tok;
+            const legacyToken = getLegacyDTraderToken(loginid) || localStorage.getItem('legacy_dtrader_token') || localStorage.getItem('token1') || '';
             const effectiveOtpUrl = otpUrlParam || this.cachedOtpUrl || '';
 
             const hasToken =
@@ -289,6 +283,7 @@ export class ParentBridgeClient {
                 token: effectiveToken,
                 token1: effectiveToken,
                 access_token: effectiveToken,
+                legacy_token: legacyToken,
                 loginid: activeAccId,
                 loginId: activeAccId,
                 acct1: activeAccId,
@@ -346,15 +341,10 @@ export class ParentBridgeClient {
             postBoth(structuredMsg);
             // 1. Dispatch expected NewdtraderBridge Auth Handshake
             postBoth({
+                ...payloadData,
                 type: 'NEWDTRADER_BRIDGE_AUTH',
                 msg_type: 'authorization',
-                token: effectiveToken,
                 accountName: activeAccId,
-                appId: appIdStr || '121856',
-                currency: currency || 'USD',
-                'client.accounts': rawClientAccounts,
-                active_loginid: activeLoginId,
-                ...payloadData,
             });
             // 2. Dispatch legacy authorize fallback
             postBoth({
@@ -411,7 +401,7 @@ export class ParentBridgeClient {
      * Fetches a One-Time Token from the server and posts it to the iframe.
      * Called when the iframe sends REQUEST_TOKEN.
      */
-    private async sendOTT(targetWindow: Window, replyOrigin: string) {
+    private async sendOTT(targetWindow: Window, _replyOrigin?: string) {
         const ott = await secureSessionService.getOTT();
         if (!ott) {
             this.logger.debug('OTT_FETCH_FAILED', {});
@@ -651,7 +641,11 @@ export class ParentBridgeClient {
             'https://profhubdtrader.vercel.app',
             'https://deriv-dtrader.vercel.app',
         ]);
-        if (!validOrigins.has(event.origin)) {
+        const isLocalOrigin =
+            event.origin.startsWith('http://localhost:') ||
+            event.origin.startsWith('http://127.0.0.1:') ||
+            (typeof window !== 'undefined' && event.origin === window.location.origin);
+        if (!validOrigins.has(event.origin) && !isLocalOrigin && !event.origin.includes('vercel.app')) {
             return;
         }
 
@@ -672,7 +666,7 @@ export class ParentBridgeClient {
         // 1. Ingest session from DTrader if it sent auth credentials
         this.ingestSessionFromIframe(parsedData);
 
-        // On message from the iframe, only reply with auth if we have a real session
+        // On message from the iframe, reply with auth
         if (event.source && typeof (event.source as Window).postMessage === 'function') {
             const msgType = parsedData?.type || parsedData?.action || '';
             const session = sessionManager.getSession();
@@ -684,6 +678,18 @@ export class ParentBridgeClient {
             const syncToken = getActiveToken(loginid) || getActiveToken() || '';
             const currency = session?.currency || localStorage.getItem('client.currency') || 'USD';
             const appIdStr = String(session?.appId || getAppId() || '121856');
+
+            if (msgType === 'REQUEST_AUTH') {
+                if (syncToken && loginid && !loginid.includes('100000')) {
+                    this.sendAuthPayloadToWindow(event.source as Window, syncToken, loginid, currency, appIdStr, this.cachedOtpUrl);
+                }
+                return;
+            } else if (msgType === 'ACCOUNT_SWITCHED' && parsedData?.account_id) {
+                const newAccId = parsedData.account_id;
+                localStorage.setItem('active_loginid', newAccId);
+                window.dispatchEvent(new CustomEvent('account_switched', { detail: { loginid: newAccId } }));
+                return;
+            }
 
             if (syncToken && loginid && !loginid.includes('100000')) {
                 this.sendAuthPayloadToWindow(event.source as Window, syncToken, loginid, currency, appIdStr);

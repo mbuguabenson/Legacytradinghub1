@@ -5,6 +5,12 @@ import { runInAction } from 'mobx';
 import { useStore } from '@/hooks/useStore';
 import './matches-killer.scss';
 
+// Defensive number formatter to guarantee .toFixed never crashes the UI
+const safeToFixed = (val: any, decimals = 2, fallback = '0.00'): string => {
+    const num = Number(val);
+    return Number.isFinite(num) ? num.toFixed(decimals) : fallback;
+};
+
 // ── Shared Digit Card ──────────────────────────────────────────────────────────
 const DigitIntelCard = ({ stat, isLatest, ranksMost, ranks2nd, ranksLeast }: any) => {
     const isMost = stat.digit === ranksMost;
@@ -36,12 +42,15 @@ const DigitIntelCard = ({ stat, isLatest, ranksMost, ranks2nd, ranksLeast }: any
             <div className='di-stats'>
                 <div className='di-s-row'>
                     <span className='s-lbl font-bold'>Strength</span>
-                    <span className='s-pct font-black'>{stat.percentage.toFixed(1)}%</span>
+                    <span className='s-pct font-black'>{safeToFixed(stat.percentage, 1, '0.0')}%</span>
                 </div>
 
                 {/* Glowing Progress Bar */}
                 <div className='di-progress'>
-                    <div className='di-fill' style={{ width: `${Math.min(stat.percentage * 5, 100)}%` }} />
+                    <div
+                        className='di-fill'
+                        style={{ width: `${Math.min((Number(stat.percentage) || 0) * 5, 100)}%` }}
+                    />
                 </div>
             </div>
 
@@ -110,7 +119,7 @@ const MatchesKiller = observer(() => {
                             <div className='market-name font-black'>{symbol.replace('_', ' ')}</div>
                             <div className='price-label uppercase tracking-widest font-bold'>Current Price</div>
                             <div className='price-val font-bold'>
-                                ${Number(current_price).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                ${safeToFixed(current_price, 2)}
                             </div>
                         </div>
 
@@ -127,11 +136,11 @@ const MatchesKiller = observer(() => {
                                 <div className='pl-label uppercase tracking-widest font-bold'>SESSION P/L</div>
                                 <div
                                     className={classNames('pl-val font-black', {
-                                        pos: session_pl >= 0,
-                                        neg: session_pl < 0,
+                                        pos: (Number(session_pl) || 0) >= 0,
+                                        neg: (Number(session_pl) || 0) < 0,
                                     })}
                                 >
-                                    {session_pl >= 0 ? '+' : ''}${session_pl.toFixed(2)}
+                                    {(Number(session_pl) || 0) >= 0 ? '+' : ''}${safeToFixed(session_pl, 2)}
                                 </div>
                             </div>
                             <div className='wl-row font-black'>
@@ -424,7 +433,7 @@ const MatchesKiller = observer(() => {
                                     value={matches_settings.stake}
                                     onChange={e =>
                                         runInAction(() => {
-                                            marketkiller.matches_settings.stake = parseFloat(e.target.value);
+                                            marketkiller.matches_settings.stake = parseFloat(e.target.value) || 0.35;
                                         })
                                     }
                                 />
@@ -439,7 +448,7 @@ const MatchesKiller = observer(() => {
                                     value={matches_settings.duration}
                                     onChange={e =>
                                         runInAction(() => {
-                                            marketkiller.matches_settings.duration = parseInt(e.target.value);
+                                            marketkiller.matches_settings.duration = parseInt(e.target.value) || 1;
                                         })
                                     }
                                 />
@@ -453,9 +462,54 @@ const MatchesKiller = observer(() => {
                                     value={matches_settings.martingale_multiplier}
                                     onChange={e =>
                                         runInAction(() => {
-                                            marketkiller.matches_settings.martingale_multiplier = parseFloat(
-                                                e.target.value
-                                            );
+                                            marketkiller.matches_settings.martingale_multiplier =
+                                                parseFloat(e.target.value) || 1.5;
+                                        })
+                                    }
+                                />
+                            </div>
+                            <div className='str-row'>
+                                <label className='uppercase tracking-widest font-bold'>Max Stake ($)</label>
+                                <input
+                                    type='number'
+                                    step='1'
+                                    min='1'
+                                    className='font-black'
+                                    value={matches_settings.max_stake ?? 50}
+                                    onChange={e =>
+                                        runInAction(() => {
+                                            marketkiller.matches_settings.max_stake = parseFloat(e.target.value) || 50;
+                                        })
+                                    }
+                                />
+                            </div>
+                            <div className='str-row'>
+                                <label className='uppercase tracking-widest font-bold'>Take Profit ($)</label>
+                                <input
+                                    type='number'
+                                    step='1'
+                                    min='1'
+                                    className='font-black'
+                                    value={matches_settings.take_profit ?? 10}
+                                    onChange={e =>
+                                        runInAction(() => {
+                                            marketkiller.matches_settings.take_profit =
+                                                parseFloat(e.target.value) || 10;
+                                        })
+                                    }
+                                />
+                            </div>
+                            <div className='str-row'>
+                                <label className='uppercase tracking-widest font-bold'>Stop Loss ($)</label>
+                                <input
+                                    type='number'
+                                    step='1'
+                                    min='1'
+                                    className='font-black'
+                                    value={matches_settings.stop_loss ?? 15}
+                                    onChange={e =>
+                                        runInAction(() => {
+                                            marketkiller.matches_settings.stop_loss = parseFloat(e.target.value) || 15;
                                         })
                                     }
                                 />
@@ -489,6 +543,48 @@ const MatchesKiller = observer(() => {
                             </div>
                         </div>
 
+                        {matches_settings.take_profit > 0 &&
+                            (Number(session_pl) || 0) >= matches_settings.take_profit && (
+                                <div
+                                    style={{
+                                        background: 'rgba(16, 185, 129, 0.15)',
+                                        border: '1px solid rgba(16, 185, 129, 0.5)',
+                                        color: '#10b981',
+                                        padding: '0.6rem 0.8rem',
+                                        borderRadius: '0.5rem',
+                                        fontSize: '0.75rem',
+                                        fontWeight: 800,
+                                        textAlign: 'center',
+                                        letterSpacing: '0.05em',
+                                        textTransform: 'uppercase',
+                                        margin: '0.75rem 0',
+                                    }}
+                                >
+                                    🎯 Take Profit Reached (+${safeToFixed(session_pl, 2)})
+                                </div>
+                            )}
+
+                        {matches_settings.stop_loss > 0 &&
+                            (Number(session_pl) || 0) <= -Math.abs(matches_settings.stop_loss) && (
+                                <div
+                                    style={{
+                                        background: 'rgba(239, 68, 68, 0.15)',
+                                        border: '1px solid rgba(239, 68, 68, 0.5)',
+                                        color: '#ef4444',
+                                        padding: '0.6rem 0.8rem',
+                                        borderRadius: '0.5rem',
+                                        fontSize: '0.75rem',
+                                        fontWeight: 800,
+                                        textAlign: 'center',
+                                        letterSpacing: '0.05em',
+                                        textTransform: 'uppercase',
+                                        margin: '0.75rem 0',
+                                    }}
+                                >
+                                    🛑 Stop Loss Triggered (${safeToFixed(session_pl, 2)})
+                                </div>
+                            )}
+
                         <button
                             className={classNames('activate-btn uppercase tracking-widest font-black', {
                                 running: is_running,
@@ -507,7 +603,7 @@ const MatchesKiller = observer(() => {
                     <div className='lp-top'>
                         <div className='lp-metric'>
                             <span className='lp-lbl uppercase tracking-widest font-black'>Total Capital</span>
-                            <span className='lp-val font-black'>${total_stake_used.toFixed(2)}</span>
+                            <span className='lp-val font-black'>${safeToFixed(total_stake_used, 2)}</span>
                         </div>
                         <div className='lp-metric'>
                             <span className='lp-lbl uppercase tracking-widest font-black'>Engagements</span>
@@ -521,11 +617,16 @@ const MatchesKiller = observer(() => {
                             <span className='lp-lbl uppercase tracking-widest font-black'>Misses</span>
                             <span className='lp-val font-black'>{losses}</span>
                         </div>
-                        <div className={classNames('lp-metric hero', { pos: session_pl >= 0, neg: session_pl < 0 })}>
+                        <div
+                            className={classNames('lp-metric hero', {
+                                pos: (Number(session_pl) || 0) >= 0,
+                                neg: (Number(session_pl) || 0) < 0,
+                            })}
+                        >
                             <div className='hero-bg'></div>
                             <span className='lp-lbl uppercase tracking-widest font-black'>Net Profitability</span>
                             <span className='lp-val font-black'>
-                                {session_pl >= 0 ? '+' : ''}${session_pl.toFixed(2)}
+                                {(Number(session_pl) || 0) >= 0 ? '+' : ''}${safeToFixed(session_pl, 2)}
                             </span>
                         </div>
                     </div>
@@ -581,7 +682,7 @@ const MatchesKiller = observer(() => {
                                         <td className='t-mkt'>{j.market}</td>
                                         <td className='t-typ'>{j.type}</td>
                                         <td className='t-tgt font-black'>{j.prediction}</td>
-                                        <td className='t-stk'>${j.stake.toFixed(2)}</td>
+                                        <td className='t-stk'>${safeToFixed(j.stake, 2)}</td>
                                         <td className='t-tim'>{j.time}</td>
                                         <td className='t-pts'>
                                             {j.entry || '---'} / {j.exit || '---'}
@@ -589,10 +690,15 @@ const MatchesKiller = observer(() => {
                                         <td
                                             className={classNames(
                                                 't-out uppercase tracking-widest font-black',
-                                                j.status.toLowerCase()
+                                                String(j.status || '').toLowerCase()
                                             )}
                                         >
                                             {j.status}
+                                            {j.profit !== undefined && (
+                                                <span style={{ marginLeft: '0.4rem', fontSize: '0.75rem', opacity: 0.9 }}>
+                                                    ({Number(j.profit) >= 0 ? '+' : ''}${safeToFixed(j.profit, 2)})
+                                                </span>
+                                            )}
                                         </td>
                                     </tr>
                                 ))}

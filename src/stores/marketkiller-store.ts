@@ -101,7 +101,10 @@ export default class MarketkillerStore {
         enable_multiple_predictions: true,
         max_predictions: 6,
         martingale_enabled: true,
-        martingale_multiplier: 0.5,
+        martingale_multiplier: 1.5,
+        max_stake: 50,
+        take_profit: 10,
+        stop_loss: 15,
     };
 
     @observable accessor matches_ranks = {
@@ -115,6 +118,7 @@ export default class MarketkillerStore {
     private main_tick_unsub: { unsubscribe: () => void } | null = null;
     private recent_powers: number[][] = [];
     private ribbon_unsubs: Map<string, { unsubscribe: () => void }> = new Map();
+    private poc_unsubs: Set<() => void> = new Set();
 
     // ── Rate-Limit Guard ──────────────────────────────────────────────────────
     // directBuy fires all trades in parallel (no proposal subscription limit).
@@ -300,6 +304,14 @@ export default class MarketkillerStore {
         this.is_running = !this.is_running;
         if (!this.is_running) {
             this.consecutive_losses = 0;
+            this.is_executing = false;
+        } else {
+            this.consecutive_losses = 0;
+            const tp = Number(this.matches_settings.take_profit) || 0;
+            const sl = Number(this.matches_settings.stop_loss) || 0;
+            if ((tp > 0 && this.session_pl >= tp) || (sl > 0 && this.session_pl <= -Math.abs(sl))) {
+                this.session_pl = 0;
+            }
         }
     };
 
@@ -448,6 +460,12 @@ export default class MarketkillerStore {
             } catch (_) {}
         });
         this.ribbon_unsubs.clear();
+        this.poc_unsubs.forEach(cleanupFn => {
+            try {
+                cleanupFn();
+            } catch (_) {}
+        });
+        this.poc_unsubs.clear();
     };
 
     @action
@@ -540,10 +558,26 @@ export default class MarketkillerStore {
 
     @action
     private evaluateOnetrader = () => {
+        if (this.is_executing) return;
+
+        // Take Profit & Stop Loss Gate
+        const tp = Number(this.matches_settings.take_profit) || 0;
+        const sl = Number(this.matches_settings.stop_loss) || 0;
+        if (tp > 0 && this.session_pl >= tp) {
+            console.log(`[Marketkiller] 🎯 Take Profit reached (+${this.session_pl} >= +${tp}). Halting.`);
+            this.is_running = false;
+            return;
+        }
+        if (sl > 0 && this.session_pl <= -Math.abs(sl)) {
+            console.log(`[Marketkiller] 🛑 Stop Loss reached (${this.session_pl} <= -${sl}). Halting.`);
+            this.is_running = false;
+            return;
+        }
+
         // Recovery Engine Overrides
         let current_symbol = this.symbol;
         let current_type = this.onetrader_settings.contract_type;
-        let current_stake = this.onetrader_settings.stake;
+        let current_stake = Number(this.onetrader_settings.stake) || 0.35;
         let current_barrier = this.onetrader_settings.barrier;
 
         const is_recovery_step = this.onetrader_settings.enable_recovery && this.consecutive_losses > 0;
@@ -554,7 +588,7 @@ export default class MarketkillerStore {
             if (step) {
                 current_symbol = step.symbol;
                 current_type = step.contract_type;
-                current_stake *= step.stake_multiplier;
+                current_stake *= Number(step.stake_multiplier) || 1;
                 current_barrier = step.barrier ?? current_barrier;
             }
         }
@@ -564,12 +598,12 @@ export default class MarketkillerStore {
             if (this.signal_power < 55) return; // Wait for better signal
         }
 
-        const tradesToExecute = Array(this.onetrader_settings.bulk_count).fill({
+        const tradesToExecute = Array.from({ length: this.onetrader_settings.bulk_count || 1 }).map(() => ({
             type: current_type,
             symbol: current_symbol,
             barrier: current_barrier,
             stake: current_stake,
-        });
+        }));
 
         this.executeConcurrentTrades(tradesToExecute);
         runInAction(() => {
@@ -588,6 +622,22 @@ export default class MarketkillerStore {
 
     @action
     private evaluateMatchesKiller = () => {
+        if (this.is_executing) return;
+
+        // Take Profit & Stop Loss Gate
+        const tp = Number(this.matches_settings.take_profit) || 0;
+        const sl = Number(this.matches_settings.stop_loss) || 0;
+        if (tp > 0 && this.session_pl >= tp) {
+            console.log(`[Marketkiller] 🎯 Take Profit reached (+${this.session_pl} >= +${tp}). Engine stopped.`);
+            this.is_running = false;
+            return;
+        }
+        if (sl > 0 && this.session_pl <= -Math.abs(sl)) {
+            console.log(`[Marketkiller] 🛑 Stop Loss reached (${this.session_pl} <= -${sl}). Engine stopped.`);
+            this.is_running = false;
+            return;
+        }
+
         const most = this.matches_ranks.most;
         const second = this.matches_ranks.second;
         const least = this.matches_ranks.least;
@@ -609,6 +659,12 @@ export default class MarketkillerStore {
         const shouldTradeDigit = (digit: number) => {
             const stat = this.digit_stats.find(s => s.digit === digit);
             if (!stat) return false;
+
+            // Rule 1: Top 3 Ranking
+            if (enabled[0]) {
+                const top3 = [most, second, least];
+                if (!top3.includes(digit)) return false;
+            }
 
             const powers = this.recent_powers;
             const len = powers.length;
@@ -641,7 +697,7 @@ export default class MarketkillerStore {
             // Probability Gate (C4 logic)
             if (enabled[4]) {
                 const { c4_op: op, c4_val: val } = this.matches_settings;
-                const power = stat.percentage;
+                const power = Number(stat.percentage) || 0;
                 if (op === '>' && power <= val) return false;
                 if (op === '>=' && power < val) return false;
                 if (op === '==' && Math.abs(power - val) > 0.1) return false;
@@ -655,12 +711,13 @@ export default class MarketkillerStore {
         const valid_targets = final_targets.filter(shouldTradeDigit);
 
         if (valid_targets.length > 0) {
+            const calculatedStake = this.calculateMatchesStake();
             // Execute ALL valid targets in a single concurrent burst
             const trades = valid_targets.map(digit => ({
                 type: 'DIGITMATCH',
                 symbol: this.symbol,
                 barrier: digit,
-                stake: this.calculateMatchesStake(),
+                stake: calculatedStake,
             }));
 
             console.log(`[Marketkiller] Placing ${trades.length} simultaneous trades for digits:`, valid_targets);
@@ -686,11 +743,18 @@ export default class MarketkillerStore {
     };
 
     private calculateMatchesStake = () => {
-        let stake = this.matches_settings.stake || 0.35;
+        let baseStake = Number(this.matches_settings.stake) || 0.35;
+        baseStake = Math.max(baseStake, 0.35);
+
+        let finalStake = baseStake;
         if (this.matches_settings.martingale_enabled && this.consecutive_losses > 0) {
-            stake = stake * Math.pow(this.matches_settings.martingale_multiplier, this.consecutive_losses);
+            const mult = Number(this.matches_settings.martingale_multiplier) || 1.5;
+            finalStake = baseStake * Math.pow(mult, this.consecutive_losses);
         }
-        return Number(Math.max(stake, 0.35).toFixed(2));
+
+        const maxStake = Number(this.matches_settings.max_stake) || 50;
+        finalStake = Math.min(Math.max(finalStake, 0.35), maxStake);
+        return Number(finalStake.toFixed(2));
     };
 
     @action
@@ -709,10 +773,9 @@ export default class MarketkillerStore {
         // All api.send() calls are started in a plain synchronous .map() loop
         // — NO await between them. Every WebSocket message is queued in the
         // SAME JavaScript event loop tick before any suspension occurs.
-        // This gives the absolute minimum gap between sends and guarantees all
-        // contracts open on the same entry tick → same entry AND exit spot.
         const sendPromises: Promise<any>[] = tradeConfigs.map(config => {
-            const safeStake = Number(Math.max(config.stake || 0.35, 0.35).toFixed(2));
+            const rawStake = Number(config.stake);
+            const safeStake = Number((Number.isFinite(rawStake) && rawStake >= 0.35 ? rawStake : 0.35).toFixed(2));
             const rawBarrier =
                 config.barrier !== undefined && config.barrier !== null ? config.barrier : config.prediction;
             const currency = this.root_store?.client?.currency || 'USD';
@@ -722,7 +785,7 @@ export default class MarketkillerStore {
                 basis: 'stake',
                 contract_type: config.type,
                 currency,
-                duration: this.matches_settings.duration || 1,
+                duration: Number(this.matches_settings.duration) || 1,
                 duration_unit: 't',
                 underlying_symbol: config.symbol,
             };
@@ -767,52 +830,124 @@ export default class MarketkillerStore {
             `[Marketkiller] Burst complete: ${successfulTrades.length}/${tradeConfigs.length} confirmed on same tick.`
         );
 
-        // ── Journal & Settlement Tracking ─────────────────────────────────────
-        successfulTrades.forEach(({ trade, config }) => {
-            const contractId = trade.buy.contract_id;
-
+        if (successfulTrades.length === 0) {
             runInAction(() => {
-                this.total_stake_used += config.stake;
+                this.is_executing = false;
+            });
+            return;
+        }
+
+        // ── Burst Tracking & Settlement ─────────────────────────────────────
+        const pendingContractIds = new Set<string>();
+        let burstWon = false;
+        let burstLossCount = 0;
+        let safetyTimeoutId: any = null;
+
+        const finalizeBurst = () => {
+            if (safetyTimeoutId) {
+                clearTimeout(safetyTimeoutId);
+                safetyTimeoutId = null;
+            }
+            runInAction(() => {
+                // If any contract in the burst won, consider the burst a win and reset martingale
+                if (burstWon) {
+                    this.consecutive_losses = 0;
+                } else if (burstLossCount > 0) {
+                    this.consecutive_losses++;
+                }
+
+                // Check Take Profit & Stop Loss
+                const tp = Number(this.matches_settings.take_profit) || 0;
+                const sl = Number(this.matches_settings.stop_loss) || 0;
+                if (tp > 0 && this.session_pl >= tp) {
+                    console.log(`[Marketkiller] 🎯 TAKE PROFIT REACHED (+${this.session_pl} >= +${tp})! Stopping engine.`);
+                    this.is_running = false;
+                } else if (sl > 0 && this.session_pl <= -Math.abs(sl)) {
+                    console.log(`[Marketkiller] 🛑 STOP LOSS HIT (${this.session_pl} <= -${sl})! Stopping engine.`);
+                    this.is_running = false;
+                }
+            });
+
+            // Smooth 500ms cooldown after settlement before allowing next burst
+            setTimeout(() => {
+                runInAction(() => {
+                    this.is_executing = false;
+                });
+            }, 500);
+        };
+
+        successfulTrades.forEach(({ trade, config }) => {
+            const contractId = String(trade.buy.contract_id);
+            pendingContractIds.add(contractId);
+
+            const safeStake = Number(config.stake) || 0.35;
+            runInAction(() => {
+                const currentTotalStake = Number(this.total_stake_used) || 0;
+                this.total_stake_used = Number((currentTotalStake + safeStake).toFixed(2));
                 this.total_runs++;
                 this.trades_journal.unshift({
                     id: contractId,
                     market: config.symbol,
                     type: config.type,
                     prediction: config.barrier,
-                    stake: config.stake,
+                    stake: safeStake,
                     time: new Date().toLocaleTimeString(),
                     entry: trade.buy?.entry_spot_display_value ?? undefined,
                     exit: undefined,
+                    profit: undefined,
                     status: 'PENDING',
                 });
+                if (this.trades_journal.length > 100) {
+                    this.trades_journal = this.trades_journal.slice(0, 100);
+                }
             });
 
-            const sub = api_base.api.onMessage().subscribe((res: any) => {
-                const data = res?.data || res;
-                const poc = data?.proposal_open_contract;
-                if (data?.msg_type === 'proposal_open_contract' && poc?.contract_id === contractId && poc?.is_sold) {
-                    runInAction(() => {
-                        if (poc.status === 'won') {
-                            this.wins++;
-                            this.consecutive_losses = 0;
-                        } else {
-                            this.losses++;
-                            this.consecutive_losses++;
-                        }
-                        this.session_pl += poc.profit;
-
-                        const jIdx = this.trades_journal.findIndex(j => j.id === contractId);
-                        if (jIdx !== -1) {
-                            this.trades_journal[jIdx].status = poc.status.toUpperCase();
-                            this.trades_journal[jIdx].exit = poc.exit_tick_display_value ?? poc.exit_tick;
-                            this.trades_journal[jIdx].entry = poc.entry_tick_display_value ?? poc.entry_tick;
-                            this.trades_journal[jIdx].profit = poc.profit;
-                        }
-                    });
+            let sub: any = null;
+            const cleanupSub = () => {
+                if (sub) {
                     try {
                         sub.unsubscribe();
-                    } catch (_) {
-                        /* ignore */
+                    } catch (_) {}
+                    this.poc_unsubs.delete(cleanupSub);
+                    sub = null;
+                }
+            };
+            this.poc_unsubs.add(cleanupSub);
+
+            sub = api_base.api.onMessage().subscribe((res: any) => {
+                const data = res?.data || res;
+                const poc = data?.proposal_open_contract;
+                if (data?.msg_type === 'proposal_open_contract' && String(poc?.contract_id) === contractId && poc?.is_sold) {
+                    cleanupSub();
+
+                    runInAction(() => {
+                        const rawProfit = Number(poc.profit);
+                        const safeProfit = Number.isFinite(rawProfit) ? rawProfit : 0;
+
+                        if (poc.status === 'won') {
+                            this.wins++;
+                            burstWon = true;
+                        } else {
+                            this.losses++;
+                            burstLossCount++;
+                        }
+
+                        // Guaranteed defensive numeric addition
+                        const currentPl = Number(this.session_pl) || 0;
+                        this.session_pl = Number((currentPl + safeProfit).toFixed(2));
+
+                        const jIdx = this.trades_journal.findIndex(j => String(j.id) === contractId);
+                        if (jIdx !== -1) {
+                            this.trades_journal[jIdx].status = String(poc.status || 'CLOSED').toUpperCase();
+                            this.trades_journal[jIdx].exit = poc.exit_tick_display_value ?? poc.exit_tick;
+                            this.trades_journal[jIdx].entry = poc.entry_tick_display_value ?? poc.entry_tick;
+                            this.trades_journal[jIdx].profit = safeProfit;
+                        }
+                    });
+
+                    pendingContractIds.delete(contractId);
+                    if (pendingContractIds.size === 0) {
+                        finalizeBurst();
                     }
                 }
             });
@@ -820,7 +955,7 @@ export default class MarketkillerStore {
             api_base.api
                 .send({
                     proposal_open_contract: 1,
-                    contract_id: contractId,
+                    contract_id: Number(contractId),
                     subscribe: 1,
                 })
                 .catch((e: any) => {
@@ -828,13 +963,18 @@ export default class MarketkillerStore {
                 });
         });
 
-        // Release execution lock after trades are initiated and settled (or timeout)
-        // We wait a small buffer to ensure the socket isn't flooded and ticks have progressed.
-        setTimeout(() => {
-            runInAction(() => {
-                this.is_executing = false;
-            });
-        }, 1500);
+        // Safety timeout fallback (e.g. dropped socket packet)
+        const durationTicks = Number(this.matches_settings.duration) || 1;
+        const safetyTimeoutMs = Math.max(12000, durationTicks * 2500 + 4000);
+        safetyTimeoutId = setTimeout(() => {
+            if (pendingContractIds.size > 0) {
+                console.warn(
+                    `[Marketkiller] Safety timeout reached (${safetyTimeoutMs}ms). Finalizing burst for remaining ${pendingContractIds.size} contract(s).`
+                );
+                pendingContractIds.clear();
+                finalizeBurst();
+            }
+        }, safetyTimeoutMs);
     };
 
     @action
@@ -850,6 +990,8 @@ export default class MarketkillerStore {
 
     @action
     public executeOneShot = async () => {
+        if (this.is_executing) return;
+
         const sortedDigits = [...this.digit_stats].sort((a, b) => b.count - a.count).map(s => s.digit);
 
         // Ensure we fetch EXACTLY the number of active slots chosen by the user. Unedited slots will default to '0'.
@@ -861,11 +1003,12 @@ export default class MarketkillerStore {
 
         if (targets.length === 0) return;
 
+        const stake = this.calculateMatchesStake();
         const trades = targets.map(digit => ({
             type: 'DIGITMATCH',
             symbol: this.symbol,
             barrier: digit,
-            stake: this.matches_settings.stake,
+            stake,
         }));
 
         await this.executeConcurrentTrades(trades);
@@ -873,11 +1016,13 @@ export default class MarketkillerStore {
 
     @action
     public executeSingleManualTrade = async (digit: number) => {
+        if (this.is_executing) return;
+
         const trade = {
             type: 'DIGITMATCH',
             symbol: this.symbol,
             barrier: digit,
-            stake: this.matches_settings.stake,
+            stake: this.calculateMatchesStake(),
         };
 
         await this.executeConcurrentTrades([trade]);

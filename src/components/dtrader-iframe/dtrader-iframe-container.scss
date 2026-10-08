@@ -256,24 +256,15 @@
         }
     }
 
-    /* Crop Redundant DTrader Header on mobile only */
+    /* Crop Redundant DTrader Header when cropHeader is enabled */
     &--cropped-header {
-        @media (max-width: 926px) {
-            .dtrader-container__stage {
-                overflow: hidden;
-            }
-
-            .dtrader-container__iframe {
-                margin-top: -56px;
-                height: calc(100% + 56px);
-            }
+        .dtrader-container__stage {
+            overflow: hidden;
         }
 
-        @media (min-width: 927px) {
-            .dtrader-container__iframe {
-                margin-top: 0;
-                height: 100%;
-            }
+        .dtrader-container__iframe {
+            margin-top: -56px;
+            height: calc(100% + 56px);
         }
     }
 

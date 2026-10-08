@@ -2,6 +2,11 @@ import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '@/hooks/useStore';
 
+const safeToFixed = (val: any, decimals = 1, fallback = '0.0'): string => {
+    const num = Number(val);
+    return Number.isFinite(num) ? num.toFixed(decimals) : fallback;
+};
+
 const Onetrader = observer(() => {
     const { marketkiller } = useStore();
     const {
@@ -81,7 +86,7 @@ const Onetrader = observer(() => {
                                         </svg>
                                         <div className='core-display'>
                                             <span className='digit'>{stat.digit}</span>
-                                            <span className='pct'>{stat.percentage.toFixed(1)}%</span>
+                                            <span className='pct'>{safeToFixed(stat.percentage, 1)}%</span>
                                         </div>
                                     </div>
                                 );
@@ -142,13 +147,13 @@ const Onetrader = observer(() => {
                         <div className='radar-stats'>
                             <div className='radar-metric'>
                                 <span className='label'>POWER</span>
-                                <span className='value' style={{ color: signal_power > 55 ? '#10b981' : '#f59e0b' }}>
-                                    {signal_power.toFixed(1)}%
+                                <span className='value' style={{ color: (Number(signal_power) || 0) > 55 ? '#10b981' : '#f59e0b' }}>
+                                    {safeToFixed(signal_power, 1)}%
                                 </span>
                             </div>
                             <div className='radar-metric'>
                                 <span className='label'>STABILITY</span>
-                                <span className='value'>{signal_stability.toFixed(0)}</span>
+                                <span className='value'>{safeToFixed(signal_stability, 0, '0')}</span>
                             </div>
                         </div>
                         <div className='strategy-selector'>
@@ -243,18 +248,22 @@ const Onetrader = observer(() => {
     );
 });
 
-const StatProgress = ({ label, val1, val2, color1, color2 }: any) => (
-    <div className='stat-progress-item'>
-        <label>{label}</label>
-        <div className='progress-track'>
-            <div className='segment' style={{ width: `${val1}%`, background: color1 }} />
-            <div className='segment' style={{ width: `${val2}%`, background: color2 }} />
+const StatProgress = ({ label, val1, val2, color1, color2 }: any) => {
+    const num1 = Number(val1) || 0;
+    const num2 = Number(val2) || 0;
+    return (
+        <div className='stat-progress-item'>
+            <label>{label}</label>
+            <div className='progress-track'>
+                <div className='segment' style={{ width: `${Math.min(num1, 100)}%`, background: color1 }} />
+                <div className='segment' style={{ width: `${Math.min(num2, 100)}%`, background: color2 }} />
+            </div>
+            <div className='progress-labels'>
+                <span>{safeToFixed(num1, 1)}%</span>
+                <span>{safeToFixed(num2, 1)}%</span>
+            </div>
         </div>
-        <div className='progress-labels'>
-            <span>{val1.toFixed(1)}%</span>
-            <span>{val2.toFixed(1)}%</span>
-        </div>
-    </div>
-);
+    );
+};
 
 export default Onetrader;

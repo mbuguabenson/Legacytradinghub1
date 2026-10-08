@@ -6,7 +6,6 @@ import {
     getActiveToken,
     getLegacyDTraderToken,
     isInvalidBearerToken,
-    isLegacyToken,
 } from '@/utils/token-bridge';
 import { ParentBridgeClient } from '../iframe-bridge';
 import { generateOAuthURL } from '@/components/shared';
@@ -246,6 +245,14 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
         };
     }, [currentToken, currentLoginId]);
 
+    // Cache initial wsUrl so async arrival does not force iframe src reload
+    const initialWsUrlRef = useRef<string>(wsUrl);
+    useEffect(() => {
+        if (!initialWsUrlRef.current && wsUrl) {
+            initialWsUrlRef.current = wsUrl;
+        }
+    }, [wsUrl]);
+
     // Build the query parameter URL for Embedded Mode with complete session tokens & OTP WebSocket URL
     const iframeSrc = useMemo(() => {
         try {
@@ -254,16 +261,13 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
             const hasValidAccount =
                 Boolean(currentLoginId &&
                 !currentLoginId.includes('100000') &&
-                (currentLoginId.startsWith('CR') ||
-                    currentLoginId.startsWith('VR') ||
-                    currentLoginId.startsWith('MF') ||
-                    currentLoginId.startsWith('MX')));
+                /^(CR|VR|VRTC|VRW|MF|MX|MLT|DEM)\d+$/i.test(currentLoginId));
 
             const hasValidToken = Boolean(currentToken && !isInvalidBearerToken(currentToken));
 
             if (hasValidToken && hasValidAccount) {
                 const acc = currentLoginId;
-                const cur = acc.startsWith('VR') ? 'USD' : (localStorage.getItem('client.currency') || 'USD');
+                const cur = acc.startsWith('VR') || acc.startsWith('DEM') ? 'USD' : (localStorage.getItem('client.currency') || 'USD');
 
                 // Supply all standard, OAuth, and legacy parameter names to ensure
                 // seamless authentication regardless of how child stores read them
@@ -276,10 +280,11 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
                 url.searchParams.set('cur1', cur);
                 url.searchParams.set('currency', cur);
 
-                if (wsUrl) {
-                    url.searchParams.set('ws_url', wsUrl);
-                    url.searchParams.set('otp_url', wsUrl);
-                    url.searchParams.set('otpUrl', wsUrl);
+                const effectiveWs = initialWsUrlRef.current || wsUrl;
+                if (effectiveWs) {
+                    url.searchParams.set('ws_url', effectiveWs);
+                    url.searchParams.set('otp_url', effectiveWs);
+                    url.searchParams.set('otpUrl', effectiveWs);
                 }
 
                 // Pass secondary accounts if available (acct2, token2, cur2, etc.)
@@ -290,7 +295,7 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
                         if (id !== acc && tok && !isInvalidBearerToken(tok)) {
                             url.searchParams.set(`acct${idx}`, id);
                             url.searchParams.set(`token${idx}`, tok);
-                            url.searchParams.set(`cur${idx}`, id.startsWith('VR') ? 'USD' : 'USD');
+                            url.searchParams.set(`cur${idx}`, id.startsWith('VR') || id.startsWith('DEM') ? 'USD' : 'USD');
                             idx++;
                             if (idx > 5) break;
                         }
@@ -300,6 +305,8 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
                 url.searchParams.set('is_embedded', 'true');
             }
 
+            url.searchParams.set('app_id', appId);
+            url.searchParams.set('appId', appId);
             url.searchParams.set('theme', currentTheme);
 
             if (isMobileApp) {
@@ -310,7 +317,7 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
         } catch {
             return baseUrl;
         }
-    }, [baseUrl, currentToken, currentLoginId, currentTheme, isMobileApp, wsUrl]);
+    }, [baseUrl, appId, currentToken, currentLoginId, currentTheme, isMobileApp]);
 
     // Safety fallback timeout: ensure loading overlay clears even if iframe onLoad is delayed
     useEffect(() => {
@@ -349,6 +356,27 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
             bridgeRef.current.dispatchAuth(wsUrl || undefined);
         }
     }, [wsUrl, currentToken, currentLoginId]);
+
+    // Listen for child events (e.g. REQUEST_AUTH when child socket gets AuthorizationRequired or ACCOUNT_SWITCHED)
+    useEffect(() => {
+        const handleWindowMessage = (event: MessageEvent) => {
+            const data = event.data;
+            if (!data) return;
+            const parsed = typeof data === 'string' ? (() => { try { return JSON.parse(data); } catch { return null; } })() : data;
+            if (!parsed || typeof parsed !== 'object') return;
+
+            if (parsed.type === 'REQUEST_AUTH') {
+                if (bridgeRef.current) {
+                    bridgeRef.current.dispatchAuth(wsUrl || undefined);
+                }
+            } else if (parsed.type === 'ACCOUNT_SWITCHED' && parsed.account_id) {
+                setCurrentLoginId(parsed.account_id);
+            }
+        };
+
+        window.addEventListener('message', handleWindowMessage);
+        return () => window.removeEventListener('message', handleWindowMessage);
+    }, [wsUrl]);
 
     const handleIframeLoad = () => {
         setIsLoading(false);
@@ -414,12 +442,21 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
                             </svg>
                         </div>
                         <span className='brand-title'>ProfHub DTrader</span>
-                        {currentToken && currentLoginId && (
+                        {currentToken && currentLoginId ? (
                             <div className={classNames('account-pill', { 'account-pill--demo': isDemo })}>
                                 <span className='account-pill__dot' />
                                 <span className='account-pill__id'>{currentLoginId}</span>
                                 <span className='account-pill__badge'>{isDemo ? 'DEMO' : 'REAL'}</span>
                             </div>
+                        ) : (
+                            <button
+                                type='button'
+                                className='action-btn action-btn--login'
+                                onClick={handleInitiateLogin}
+                                title='Sign in with Deriv'
+                            >
+                                <span>Sign In</span>
+                            </button>
                         )}
                     </div>
 
@@ -489,7 +526,7 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
                     src={iframeSrc}
                     title='DTrader Embedded Terminal'
                     className={classNames('dtrader-container__iframe', {
-                        'dtrader-container__iframe--visible': !isLoading,
+                        'dtrader-container__iframe--visible': !isLoading && isIframeLoaded,
                     })}
                     allow='clipboard-write; fullscreen; camera; geolocation; microphone; display-capture; autoplay; encrypted-media; web-share'
                     referrerPolicy='no-referrer-when-downgrade'
