@@ -524,6 +524,27 @@ export const TabIcon: React.FC<TTabIconProps> = ({ iconKey, label }) => {
                     </svg>
                 );
 
+            case 'apex_3':
+                return (
+                    <svg
+                        width='18'
+                        height='18'
+                        viewBox='0 0 24 24'
+                        fill='none'
+                        stroke='currentColor'
+                        strokeWidth='1.8'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                    >
+                        <circle cx='12' cy='12' r='9' />
+                        <circle cx='12' cy='12' r='4' />
+                        <path d='M12 3v4' />
+                        <path d='M12 17v4' />
+                        <path d='M3 12h4' />
+                        <path d='M17 12h4' />
+                    </svg>
+                );
+
             default:
                 return (
                     <svg

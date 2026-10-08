@@ -1,0 +1,512 @@
+/* ==========================================================================
+   APEX 3.0 — Advanced Probability & Execution Engine Stylesheet
+   Quantitative dark-first aesthetic, glassmorphism, responsive grid
+   ========================================================================== */
+
+.apex-container {
+    --apex-bg: #090d16;
+    --apex-surface: rgba(15, 23, 42, 0.75);
+    --apex-surface-card: rgba(18, 28, 51, 0.65);
+    --apex-surface-hover: rgba(30, 45, 78, 0.7);
+    --apex-border: rgba(255, 255, 255, 0.08);
+    --apex-border-highlight: rgba(56, 189, 248, 0.35);
+    
+    --apex-text-primary: #f8fafc;
+    --apex-text-secondary: #94a3b8;
+    --apex-text-muted: #64748b;
+    
+    --apex-cyan: #38bdf8;
+    --apex-emerald: #10b981;
+    --apex-emerald-glow: rgba(16, 185, 129, 0.35);
+    --apex-rose: #f43f5e;
+    --apex-rose-glow: rgba(244, 63, 94, 0.35);
+    --apex-amber: #f59e0b;
+    --apex-violet: #8b5cf6;
+    
+    min-height: calc(100vh - 80px);
+    background-color: var(--apex-bg);
+    color: var(--apex-text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    padding: 1rem 1.5rem 3rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    transition: background-color 0.3s ease, color 0.3s ease;
+
+    &.apex-container--light {
+        --apex-bg: #f8fafc;
+        --apex-surface: rgba(255, 255, 255, 0.9);
+        --apex-surface-card: #ffffff;
+        --apex-surface-hover: #f1f5f9;
+        --apex-border: rgba(0, 0, 0, 0.08);
+        --apex-border-highlight: rgba(14, 165, 233, 0.4);
+        --apex-text-primary: #0f172a;
+        --apex-text-secondary: #475569;
+        --apex-text-muted: #94a3b8;
+    }
+
+    /* Common Card / Glass Styles */
+    .apex-card {
+        background: var(--apex-surface-card);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--apex-border);
+        border-radius: 12px;
+        padding: 1.25rem;
+        box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.25);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+        &:hover {
+            border-color: rgba(255, 255, 255, 0.14);
+        }
+    }
+
+    /* Header Bar */
+    .apex-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+        padding: 1rem 1.25rem;
+        background: var(--apex-surface);
+        border: 1px solid var(--apex-border);
+        border-radius: 14px;
+        backdrop-filter: blur(16px);
+
+        .apex-header__brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+
+            .apex-brand-icon {
+                width: 36px;
+                height: 36px;
+                background: linear-gradient(135deg, #0284c7, #2563eb);
+                border-radius: 10px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 0 16px rgba(14, 165, 233, 0.4);
+                color: #ffffff;
+            }
+
+            .apex-brand-titles {
+                display: flex;
+                flex-direction: column;
+
+                .apex-title-text {
+                    font-size: 1.2rem;
+                    font-weight: 800;
+                    letter-spacing: 0.05em;
+                    background: linear-gradient(90deg, #38bdf8, #818cf8);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                }
+
+                .apex-subtitle-text {
+                    font-size: 0.72rem;
+                    color: var(--apex-text-muted);
+                    font-weight: 500;
+                    text-transform: uppercase;
+                    letter-spacing: 0.08em;
+                }
+            }
+        }
+
+        .apex-header__controls {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+
+        .apex-header__status-pills {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+    }
+
+    /* Glowing Last Digit HUD */
+    .apex-hud-digit-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem 1rem;
+        background: radial-gradient(circle at center, rgba(56, 189, 248, 0.12) 0%, rgba(15, 23, 42, 0.4) 80%);
+        border: 1px solid var(--apex-border-highlight);
+        border-radius: 16px;
+        position: relative;
+        overflow: hidden;
+
+        .hud-digit-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            color: var(--apex-cyan);
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+
+        .hud-digit-display {
+            font-size: 4.5rem;
+            font-weight: 900;
+            line-height: 1;
+            font-family: 'JetBrains Mono', monospace, sans-serif;
+            transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            
+            &.digit-under {
+                color: var(--apex-emerald);
+                text-shadow: 0 0 28px var(--apex-emerald-glow);
+            }
+
+            &.digit-over {
+                color: var(--apex-rose);
+                text-shadow: 0 0 28px var(--apex-rose-glow);
+            }
+        }
+
+        .hud-price-row {
+            margin-top: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+
+            .hud-price-label {
+                font-size: 0.72rem;
+                color: var(--apex-text-muted);
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+
+            .hud-price-val {
+                font-family: 'JetBrains Mono', monospace, sans-serif;
+                font-weight: 700;
+                color: var(--apex-text-primary);
+            }
+        }
+    }
+
+    /* Badges & Tags */
+    .apex-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+
+        &--prime {
+            background: rgba(16, 185, 129, 0.18);
+            border: 1px solid var(--apex-emerald);
+            color: var(--apex-emerald);
+            box-shadow: 0 0 10px var(--apex-emerald-glow);
+        }
+
+        &--excellent {
+            background: rgba(56, 189, 248, 0.18);
+            border: 1px solid var(--apex-cyan);
+            color: var(--apex-cyan);
+        }
+
+        &--good {
+            background: rgba(139, 92, 246, 0.18);
+            border: 1px solid var(--apex-violet);
+            color: var(--apex-violet);
+        }
+
+        &--watch {
+            background: rgba(245, 158, 11, 0.18);
+            border: 1px solid var(--apex-amber);
+            color: var(--apex-amber);
+        }
+
+        &--notrade {
+            background: rgba(244, 63, 94, 0.18);
+            border: 1px solid var(--apex-rose);
+            color: var(--apex-rose);
+        }
+
+        &--under {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: var(--apex-emerald);
+        }
+
+        &--over {
+            background: rgba(244, 63, 94, 0.15);
+            border: 1px solid rgba(244, 63, 94, 0.4);
+            color: var(--apex-rose);
+        }
+    }
+
+    /* 3-Column Responsive Grid on Desktop */
+    .apex-main-grid {
+        display: grid;
+        grid-template-columns: 340px 1fr 340px;
+        gap: 1.25rem;
+        align-items: start;
+
+        @media (max-width: 1400px) {
+            grid-template-columns: 300px 1fr 300px;
+        }
+
+        @media (max-width: 1100px) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Market Scanner Panel */
+    .apex-scanner-card {
+        .scanner-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+
+            .scanner-actions {
+                display: flex;
+                gap: 0.4rem;
+            }
+        }
+
+        .scanner-table-wrap {
+            max-height: 480px;
+            overflow-y: auto;
+            border-radius: 8px;
+            border: 1px solid var(--apex-border);
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 0.8rem;
+
+                th {
+                    position: sticky;
+                    top: 0;
+                    background: var(--apex-surface);
+                    padding: 0.6rem 0.5rem;
+                    text-align: left;
+                    font-size: 0.7rem;
+                    color: var(--apex-text-muted);
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                    border-bottom: 1px solid var(--apex-border);
+                    z-index: 2;
+                }
+
+                td {
+                    padding: 0.6rem 0.5rem;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+                    white-space: nowrap;
+                }
+
+                tr {
+                    cursor: pointer;
+                    transition: background 0.15s ease;
+
+                    &:hover {
+                        background: var(--apex-surface-hover);
+                    }
+
+                    &.selected {
+                        background: rgba(56, 189, 248, 0.12);
+                        border-left: 3px solid var(--apex-cyan);
+                    }
+
+                    &.best-market-row {
+                        background: rgba(16, 185, 129, 0.08);
+                    }
+                }
+            }
+        }
+    }
+
+    /* Distribution Cards */
+    .distribution-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+
+        @media (max-width: 640px) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .distribution-card {
+        background: rgba(10, 16, 30, 0.6);
+        border: 1px solid var(--apex-border);
+        border-radius: 10px;
+        padding: 1rem;
+
+        .dist-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--apex-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .dist-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+
+            .dist-val {
+                font-family: 'JetBrains Mono', monospace;
+                font-weight: 700;
+            }
+        }
+
+        .dist-bar-track {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.75rem;
+
+            .dist-bar-fill {
+                height: 100%;
+                border-radius: 4px;
+                transition: width 0.3s ease;
+
+                &.fill-under {
+                    background: linear-gradient(90deg, #10b981, #059669);
+                }
+
+                &.fill-over {
+                    background: linear-gradient(90deg, #f43f5e, #e11d48);
+                }
+            }
+        }
+
+        .dist-overlap-note {
+            font-size: 0.7rem;
+            color: var(--apex-text-muted);
+            margin-top: 0.5rem;
+            line-height: 1.3;
+        }
+    }
+
+    /* 50 Tick Digit Chart */
+    .apex-chart-card {
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .digit-chart-svg {
+            width: 100%;
+            height: 220px;
+            background: rgba(5, 9, 18, 0.8);
+            border: 1px solid var(--apex-border);
+            border-radius: 10px;
+            overflow: visible;
+        }
+    }
+
+    /* Button Styles */
+    .apex-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        padding: 0.45rem 0.85rem;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid transparent;
+        transition: all 0.2s ease;
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--apex-text-primary);
+
+        &:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        &:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        &--primary {
+            background: linear-gradient(135deg, #0284c7, #2563eb);
+            color: #ffffff;
+            box-shadow: 0 0 12px rgba(14, 165, 233, 0.3);
+
+            &:hover:not(:disabled) {
+                background: linear-gradient(135deg, #0369a1, #1d4ed8);
+            }
+        }
+
+        &--success {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #ffffff;
+            box-shadow: 0 0 12px var(--apex-emerald-glow);
+
+            &:hover:not(:disabled) {
+                background: linear-gradient(135deg, #059669, #047857);
+            }
+        }
+
+        &--danger {
+            background: linear-gradient(135deg, #f43f5e, #e11d48);
+            color: #ffffff;
+
+            &:hover:not(:disabled) {
+                background: linear-gradient(135deg, #e11d48, #be123c);
+            }
+        }
+
+        &--warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #ffffff;
+        }
+
+        &--sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.72rem;
+            border-radius: 6px;
+        }
+    }
+
+    /* Modal Styling */
+    .apex-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(6px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+        padding: 1rem;
+    }
+
+    .apex-modal-box {
+        background: #0f172a;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 16px;
+        padding: 1.75rem;
+        max-width: 500px;
+        width: 100%;
+        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8);
+        color: #f8fafc;
+    }
+}

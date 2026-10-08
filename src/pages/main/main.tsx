@@ -53,6 +53,7 @@ const CopyTradingPage = lazyRetry(() => import('../copy-trading/copy-trading'), 
 const DTraderPage = lazyRetry(() => import('../dtrader'), 'dtrader');
 const AutoTrades = lazyRetry(() => import('../autotrades'), 'autotrades');
 const AiIntelligence = lazyRetry(() => import('../ai-intelligence'), 'ai_intelligence');
+const Apex3Page = lazyRetry(() => import('../apex-3'), 'apex_3');
 
 import { TabErrorBoundary } from '@/components/shared/TabErrorBoundary';
 import { copyTradingService } from '@/pages/copy-trading/services/copy-trading.service';
@@ -126,6 +127,7 @@ const AppWrapper = observer(() => {
         'dtrader',
         'autoflipper',
         'autotrades',
+        'apex_3',
     ];
     const { isDesktop } = useDevice();
     const location = useLocation();
@@ -555,6 +557,18 @@ const AppWrapper = observer(() => {
                     </TabErrorBoundary>
                 ),
             },
+            {
+                key: 'apex_3',
+                id: 'id-apex-3',
+                label: <TabIcon iconKey='apex_3' label='APEX 3.0' />,
+                content: (
+                    <TabErrorBoundary tabId='id-apex-3' tabName='APEX 3.0'>
+                        <Suspense fallback={<ChunkLoader message={localize('Please wait, loading APEX 3.0 Engine...')} />}>
+                            <Apex3Page />
+                        </Suspense>
+                    </TabErrorBoundary>
+                ),
+            },
         ],
         [is_chart_modal_visible, is_trading_view_modal_visible, handleTabChange]
     );
@@ -637,6 +651,7 @@ const AppWrapper = observer(() => {
         'trading-bots',
         'dtrader',
         'autotrades',
+        'apex_3',
     ].includes(currentTabKey);
 
     return (

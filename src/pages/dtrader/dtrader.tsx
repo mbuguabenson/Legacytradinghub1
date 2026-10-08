@@ -41,6 +41,7 @@ const DTraderPage: React.FC = observer(() => {
                 theme={theme}
                 height='100%'
                 showToolbar={false}
+                cropHeader={false}
             />
         </div>
     );
