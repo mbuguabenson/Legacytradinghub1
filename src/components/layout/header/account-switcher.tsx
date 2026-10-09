@@ -405,7 +405,6 @@ const AccountSwitcher = observer(({ activeAccount, forceDropdown = false }: TAcc
 
             try {
                 const { OAuthTokenExchangeService } = await import('@/services/oauth-token-exchange.service');
-                const { getAppId } = await import('@/components/shared/utils/config/config');
 
                 // Method 1: Deriv Options REST API (Official Reset Demo Balance)
                 const authInfo = OAuthTokenExchangeService.getAuthInfo();
