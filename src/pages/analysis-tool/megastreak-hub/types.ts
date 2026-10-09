@@ -13,6 +13,7 @@ export type TSignalStatus =
 export type TMarketStability = 'STABLE' | 'MODERATE' | 'CHOPPY' | 'UNSTABLE';
 export type TDirection = 'UNDER' | 'OVER' | 'NEUTRAL';
 export type TContractDirection = 'UNDER 6' | 'OVER 3';
+export type TViewMode = 'beginner' | 'pro';
 
 export interface TTickItem {
     quote: number;

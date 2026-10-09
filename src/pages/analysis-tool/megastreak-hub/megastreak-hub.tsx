@@ -8,6 +8,8 @@ import { StatisticalDistribution } from './components/StatisticalDistribution';
 import { EntryConditionsPanel } from './components/EntryConditionsPanel';
 import { SignalMonitorPanel } from './components/SignalMonitorPanel';
 import { SignalLog } from './components/SignalLog';
+import { BeginnerActionCard } from './components/BeginnerActionCard';
+import { BeginnerGuideModal } from './components/BeginnerGuideModal';
 import './megastreak-hub.scss';
 
 export const MegastreakHub: React.FC = observer(() => {
@@ -20,6 +22,8 @@ export const MegastreakHub: React.FC = observer(() => {
         };
     }, [engine]);
 
+    const isBeginner = engine.view_mode === 'beginner';
+
     return (
         <div className='megastreak-hub-root'>
             {/* Top Navigation / Brand Ribbon */}
@@ -31,17 +35,48 @@ export const MegastreakHub: React.FC = observer(() => {
                     <div className='brand-text'>
                         <div className='brand-title-row'>
                             <span className='brand-title'>MEGASTREAK HUB</span>
-                            <span className='brand-version'>v2.0 PRO</span>
+                            <span className='brand-version'>v2.0</span>
                         </div>
-                        <span className='brand-desc'>Live Digit Analysis & Market Intelligence</span>
+                        <span className='brand-desc'>Live Digit Analysis & Signal Assistant</span>
                     </div>
+                </div>
+
+                {/* Beginner vs Pro View Mode Switcher */}
+                <div className='nav-middle-cluster'>
+                    <div className='mode-switcher-group'>
+                        <button
+                            type='button'
+                            className={`mode-btn ${isBeginner ? 'active-beginner' : ''}`}
+                            onClick={() => engine.setViewMode('beginner')}
+                            title='Simple step-by-step layout for new traders'
+                        >
+                            ⚡ Beginner Mode
+                        </button>
+                        <button
+                            type='button'
+                            className={`mode-btn ${!isBeginner ? 'active-pro' : ''}`}
+                            onClick={() => engine.setViewMode('pro')}
+                            title='Full technical metrics, distributions, and logs'
+                        >
+                            📊 Pro Analytics
+                        </button>
+                    </div>
+
+                    <button
+                        type='button'
+                        className='guide-nav-btn'
+                        onClick={() => engine.toggleGuide()}
+                        title='How to use Megastreak Hub'
+                    >
+                        📘 How to Trade
+                    </button>
                 </div>
 
                 <div className='top-status-group'>
                     <div className='connection-status-pill'>
                         <span className={`status-dot ${engine.is_connected ? 'online' : 'offline'}`} />
                         <span className='status-text'>
-                            {engine.is_connected ? 'Deriv Stream Live' : 'Reconnecting...'}
+                            {engine.is_connected ? 'Live' : 'Reconnecting...'}
                         </span>
                     </div>
 
@@ -52,7 +87,14 @@ export const MegastreakHub: React.FC = observer(() => {
                 </div>
             </div>
 
-            {/* Desktop 3-Column + Bottom Log Layout */}
+            {/* Beginner Mode: Prominent Action Blueprint on top */}
+            {isBeginner && (
+                <div className='megastreak-beginner-banner-wrapper'>
+                    <BeginnerActionCard engine={engine} />
+                </div>
+            )}
+
+            {/* Main Grid Layout */}
             <div className='megastreak-main-grid'>
                 {/* Column 1: Market Scanner (Left) */}
                 <aside className='megastreak-column col-scanner'>
@@ -77,6 +119,9 @@ export const MegastreakHub: React.FC = observer(() => {
             <footer className='megastreak-bottom-row'>
                 <SignalLog engine={engine} />
             </footer>
+
+            {/* Beginner Interactive Walkthrough Guide Modal */}
+            <BeginnerGuideModal engine={engine} />
         </div>
     );
 });

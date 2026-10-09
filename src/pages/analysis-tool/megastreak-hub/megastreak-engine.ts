@@ -15,6 +15,7 @@ import {
     TMarketScanSummary,
     TMegastreakConfig,
     TSignalLogItem,
+    TViewMode,
 } from './types';
 
 export class MegastreakEngine {
@@ -58,6 +59,10 @@ export class MegastreakEngine {
 
     // Activity Log
     @observable accessor signal_logs: TSignalLogItem[] = [];
+
+    // User Interface Mode: Beginner vs Pro
+    @observable accessor view_mode: TViewMode = 'beginner';
+    @observable accessor is_guide_open: boolean = false;
 
     // Private subscriptions
     private tickSubscription: { unsubscribe: () => void } | null = null;
@@ -1086,5 +1091,15 @@ export class MegastreakEngine {
     @action
     public clearLog() {
         this.signal_logs = [];
+    }
+
+    @action
+    public setViewMode(mode: TViewMode) {
+        this.view_mode = mode;
+    }
+
+    @action
+    public toggleGuide() {
+        this.is_guide_open = !this.is_guide_open;
     }
 }
