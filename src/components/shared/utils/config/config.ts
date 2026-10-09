@@ -974,7 +974,7 @@ export const getLegacyServerURL = () => {
     return `${DERIV_WS_BASE}?app_id=${encodeURIComponent(appId)}&l=en&brand=deriv`;
 };
 
-export const getDefaultServerURL = () => DERIV_PUBLIC_WS_BASE;
+export const getDefaultServerURL = () => getLegacyServerURL();
 
 /**
  * Gets the WebSocket URL for the current session.
@@ -983,43 +983,30 @@ export const getDefaultServerURL = () => DERIV_PUBLIC_WS_BASE;
  *   WebSocket URL returned by the Deriv REST API. This is a single-use URL that
  *   embeds the session token, so no separate `authorize` call is needed.
  *
- * - Unauthenticated users (no auth_info): returns the public WebSocket URL so
- *   market data (active_symbols, ticks) works before login.
+ * - Unauthenticated users (no auth_info): returns the official Deriv v3 WebSocket URL
+ *   so market data (active_symbols, ticks) works before login.
  *
  * The legacy `use_legacy_deriv_ws` sessionStorage flag is explicitly cleared on
  * every call so transient network errors from previous sessions can never
  * permanently prevent OTP authentication.
  */
 export const getSocketURL = async (): Promise<string> => {
-    // Always clear the legacy fallback flag
-    try { sessionStorage.removeItem('use_legacy_deriv_ws'); } catch {}
-
+    // Proactively refresh OAuth token if it is close to expiration
     try {
         let authInfo = OAuthTokenExchangeService.getAuthInfo({ allowExpiredWithRefresh: true });
 
         const tokenNeedsRefresh =
             !!authInfo?.refresh_token && !!authInfo.expires_at && Date.now() >= authInfo.expires_at - 300000;
         if (tokenNeedsRefresh && authInfo?.refresh_token) {
-            const refreshedAuth = await OAuthTokenExchangeService.refreshAccessToken(authInfo.refresh_token);
-            if (refreshedAuth.access_token) {
-                authInfo = OAuthTokenExchangeService.getAuthInfo({ allowExpiredWithRefresh: false });
-            }
-        }
-
-        if (authInfo?.access_token) {
-            const wsUrl = await DerivWSAccountsService.getAuthenticatedWebSocketURL(authInfo.access_token);
-            if (wsUrl) {
-                console.log('[getSocketURL] Using OTP-authenticated Deriv WebSocket endpoint');
-                return wsUrl;
-            }
+            await OAuthTokenExchangeService.refreshAccessToken(authInfo.refresh_token);
         }
     } catch (error) {
-        console.warn('[getSocketURL] OTP flow failed, using public market data endpoint:', error);
+        console.warn('[getSocketURL] OAuth token refresh check notice:', error);
     }
 
-    // For public market data, use the documented endpoint
-    console.log('[getSocketURL] Using documented Deriv public market data endpoint');
-    return DERIV_PUBLIC_WS_BASE;
+    // Always use the authoritative Deriv v3 WebSocket endpoint (wss://ws.derivws.com/websockets/v3)
+    // for all @deriv/deriv-api, bot-skeleton, DTrader, and real-time tick streaming consumers.
+    return getLegacyServerURL();
 };
 
 export const getDebugServiceWorker = () => {

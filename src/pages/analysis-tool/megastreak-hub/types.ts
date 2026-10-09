@@ -105,3 +105,62 @@ export interface TSignalLogItem {
     digit?: number;
     price?: number;
 }
+
+export interface TColoredDigitItem {
+    index: number; // 1 (latest) to 50 (oldest)
+    digit: number; // 0 to 9
+    quote: number;
+    priceFormatted: string;
+    epoch: number;
+    color: string;
+    bgGlow: string;
+    borderColor: string;
+    isEven: boolean;
+    isUnder6: boolean;
+    isOver3: boolean;
+    isLatest: boolean;
+    isPrevious: boolean;
+}
+
+export interface TRealEntryPoint {
+    id: string;
+    name: string;
+    contractType: string;
+    actionText: string;
+    barrier: number | string;
+    winningDigits: number[];
+    baseWinRatePct: number;
+    estimatedWinRatePct: number;
+    edgePct: number;
+    recommendedDuration: string;
+    status: 'ENTER_NOW' | 'CONFIRMING' | 'FORMING' | 'STANDBY' | 'STOPPED';
+    statusLabel: string;
+    confidenceScore: number;
+    entryRuleReason: string;
+    stopLossGuard: string;
+    expectedPayout: string;
+    isPrimaryRecommended: boolean;
+}
+
+export interface TParityAnalysis {
+    evenCount: number;
+    oddCount: number;
+    evenPct: number;
+    oddPct: number;
+    currentParity: 'EVEN' | 'ODD';
+    currentParityStreak: number;
+    longestParityStreak: number;
+    longestParityType: 'EVEN' | 'ODD';
+    streakDescription: string;
+}
+
+export interface TStreakAnalysis {
+    currentStreakType: 'UNDER' | 'OVER' | 'EVEN' | 'ODD' | 'REPEAT' | 'NONE';
+    currentStreakCount: number;
+    currentStreakLabel: string;
+    longestUnderStreak: number;
+    longestOverStreak: number;
+    repeatDigitCount: number;
+    lastRepeatDigit: number | null;
+}
+

@@ -115,7 +115,7 @@ export class ParentBridgeClient {
                     DerivWSAccountsService.fetchOTPWebSocketURL(targetToken, targetLoginId)
                         .catch(() => DerivWSAccountsService.getAuthenticatedWebSocketURL(targetToken))
                         .then(url => {
-                            if (url) {
+                            if (url && !url.includes('options/ws')) {
                                 this.cachedOtpUrl = url;
                                 if (this.iframeWindow) {
                                     const currency = sessionManager.getSession()?.currency || localStorage.getItem('client.currency') || 'USD';
@@ -199,7 +199,8 @@ export class ParentBridgeClient {
             const tokenToUse = tok;
             const legacyToken = getLegacyDTraderToken(loginid) || localStorage.getItem('legacy_dtrader_token') || localStorage.getItem('token1') || '';
             const fallbackWsUrl = `wss://ws.derivws.com/websockets/v3?app_id=${encodeURIComponent(appIdStr || '121856')}&l=en&brand=deriv`;
-            const effectiveOtpUrl = otpUrlParam || this.cachedOtpUrl || fallbackWsUrl;
+            const rawOtpUrl = otpUrlParam || this.cachedOtpUrl || fallbackWsUrl;
+            const effectiveOtpUrl = rawOtpUrl && !rawOtpUrl.includes('options/ws') ? rawOtpUrl : fallbackWsUrl;
 
             const hasToken =
                 Boolean(tokenToUse && !isInvalidBearerToken(tokenToUse));

@@ -409,37 +409,21 @@ const AccountSwitcher = observer(({ activeAccount, forceDropdown = false }: TAcc
 
                 // Method 1: Deriv Options REST API (Official Reset Demo Balance)
                 const authInfo = OAuthTokenExchangeService.getAuthInfo();
-                const appId = getAppId() || '121856';
                 const currentLoginId = activeLoginid || localStorage.getItem('active_loginid') || client?.loginid;
 
                 if (authInfo?.access_token && currentLoginId) {
                     try {
-                        const res = await fetch(
-                            `https://api.derivws.com/trading/v1/options/accounts/${encodeURIComponent(currentLoginId)}/reset-demo-balance`,
-                            {
-                                method: 'POST',
-                                headers: {
-                                    Authorization: `Bearer ${authInfo.access_token}`,
-                                    'Content-Type': 'application/json',
-                                    'X-App-Id': appId,
-                                } as any,
-                                body: JSON.stringify({ amount: 10000 }),
-                            }
-                        );
-
-                        if (res.ok) {
-                            const data = await res.json().catch(() => null);
-                            const newBalance = data?.balance ?? data?.data?.balance ?? 10000;
+                        const { DerivWSAccountsService } = await import('@/services/derivws-accounts.service');
+                        const resetResult = await DerivWSAccountsService.resetDemoBalance(authInfo.access_token, currentLoginId);
+                        if (resetResult && resetResult.balance !== undefined) {
                             if (client?.setBalance) {
-                                client.setBalance(String(newBalance));
+                                client.setBalance(String(resetResult.balance));
                             }
                             success = true;
-                        } else {
-                            const errData = await res.json().catch(() => null);
-                            errorMessage = errData?.error?.message || `Server returned ${res.status}`;
                         }
                     } catch (restErr: any) {
-                        console.warn('[AccountSwitcher] REST reset failed, trying WS fallback:', restErr?.message);
+                        console.warn('[AccountSwitcher] Options REST reset failed, trying WS fallback:', restErr?.message);
+                        errorMessage = restErr?.message;
                     }
                 }
 

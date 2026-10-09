@@ -67,8 +67,7 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [isIframeLoaded, setIsIframeLoaded] = useState<boolean>(false);
     const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
-    const [iframeKey, setIframeKey] = useState<number>(0);
-    const [wsUrl, setWsUrl] = useState<string>('');
+    const [wsUrl, setWsUrl] = useState<string>(() => `wss://ws.derivws.com/websockets/v3?app_id=${encodeURIComponent(appId)}&l=en&brand=deriv`);
 
     // Robust token resolver checking all local storage sources for tokens (both legacy and modern OAuth2 JWT)
     const resolveToken = useCallback((explicitToken?: string, loginid?: string) => {
@@ -219,34 +218,17 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
         return () => window.removeEventListener('message', handleIframeMessage);
     }, []);
 
-    // Actively prefetch authenticated OTP WebSocket URL for DTrader iframe
+    // Ensure authoritative Deriv v3 WebSocket URL for DTrader iframe
     useEffect(() => {
-        let isCancelled = false;
-        const tok = currentToken || OAuthTokenExchangeService.getAccessToken();
-        const acc = currentLoginId;
-        if (!tok || !acc) return;
-
-        DerivWSAccountsService.fetchOTPWebSocketURL(tok, acc)
-            .catch(() => DerivWSAccountsService.getAuthenticatedWebSocketURL(tok))
-            .then(url => {
-                if (!isCancelled && url) {
-                    setWsUrl(url);
-                    if (bridgeRef.current) {
-                        bridgeRef.current.dispatchAuth(url);
-                    }
-                }
-            })
-            .catch(err => {
-                console.warn('[DTraderIframeContainer] OTP prefetch note:', err);
-            });
-
-        return () => {
-            isCancelled = true;
-        };
-    }, [currentToken, currentLoginId]);
+        const canonicalWs = `wss://ws.derivws.com/websockets/v3?app_id=${encodeURIComponent(appId)}&l=en&brand=deriv`;
+        setWsUrl(canonicalWs);
+        if (bridgeRef.current) {
+            bridgeRef.current.dispatchAuth(canonicalWs);
+        }
+    }, [appId]);
 
     // Cache initial wsUrl so async arrival does not force iframe src reload
-    const initialWsUrlRef = useRef<string>(wsUrl);
+    const initialWsUrlRef = useRef<string>(`wss://ws.derivws.com/websockets/v3?app_id=${encodeURIComponent(appId)}&l=en&brand=deriv`);
     useEffect(() => {
         if (!initialWsUrlRef.current && wsUrl) {
             initialWsUrlRef.current = wsUrl;
@@ -281,7 +263,8 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
                 url.searchParams.set('currency', cur);
 
                 const fallbackWs = `wss://ws.derivws.com/websockets/v3?app_id=${encodeURIComponent(appId)}&l=en&brand=deriv`;
-                const effectiveWs = initialWsUrlRef.current || wsUrl || fallbackWs;
+                const rawWs = initialWsUrlRef.current || wsUrl || fallbackWs;
+                const effectiveWs = rawWs && !rawWs.includes('options/ws') ? rawWs : fallbackWs;
                 url.searchParams.set('ws_url', effectiveWs);
                 url.searchParams.set('otp_url', effectiveWs);
                 url.searchParams.set('otpUrl', effectiveWs);
@@ -311,7 +294,8 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
             // Always ensure ws_url is passed so DTrader never defaults to non-authenticated public endpoint
             if (!url.searchParams.has('ws_url')) {
                 const fallbackWs = `wss://ws.derivws.com/websockets/v3?app_id=${encodeURIComponent(appId)}&l=en&brand=deriv`;
-                const effectiveWs = initialWsUrlRef.current || wsUrl || fallbackWs;
+                const rawWs = initialWsUrlRef.current || wsUrl || fallbackWs;
+                const effectiveWs = rawWs && !rawWs.includes('options/ws') ? rawWs : fallbackWs;
                 url.searchParams.set('ws_url', effectiveWs);
                 url.searchParams.set('otp_url', effectiveWs);
                 url.searchParams.set('otpUrl', effectiveWs);

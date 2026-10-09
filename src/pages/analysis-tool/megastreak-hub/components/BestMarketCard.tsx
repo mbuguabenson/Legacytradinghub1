@@ -13,11 +13,11 @@ export const BestMarketCard: React.FC<BestMarketCardProps> = observer(({ engine 
     const currentSymbol = engine.selected_symbol;
 
     return (
-        <div className='megastreak-best-market-card curved-card'>
+        <div className='megastreak-best-market-card'>
             <div className='best-market-left'>
                 <div className='best-market-badge-pill'>
                     <span className='star-icon'>⭐</span>
-                    <span className='badge-text'>BEST MARKET PICK</span>
+                    <span className='badge-text'>ALGORITHMIC TOP PICK</span>
                 </div>
 
                 {pick ? (
@@ -25,6 +25,13 @@ export const BestMarketCard: React.FC<BestMarketCardProps> = observer(({ engine 
                         <div className='market-titles'>
                             <span className='market-name'>{pick.displayName}</span>
                             <span className='market-code'>{pick.symbol}</span>
+                            {pick.currentPrice > 0 && (
+                                <span className='market-live-price'>
+                                    {pick.symbol === currentSymbol && engine.current_price > 0
+                                        ? engine.formatted_price
+                                        : pick.currentPrice.toFixed(pick.pipSize)}
+                                </span>
+                            )}
                         </div>
                         <div className='market-metrics-pills'>
                             <span className={`direction-pill ${pick.preferredDirection.startsWith('UNDER') ? 'under' : 'over'}`}>
@@ -34,13 +41,23 @@ export const BestMarketCard: React.FC<BestMarketCardProps> = observer(({ engine 
                                 <span className='score-icon'>🎯</span> Score {pick.score}/100
                             </span>
                             <span className={`stability-pill ${pick.stability.toLowerCase()}`}>
-                                🛡️ {pick.stability}
+                                🛡️ {pick.stability} Flow
+                            </span>
+                            <span className='stat-preview-pill'>
+                                {pick.preferredDirection === 'UNDER 6'
+                                    ? `Under: ${pick.under05Pct}% (${pick.last7ConfirmUnder}/7)`
+                                    : `Over: ${pick.over49Pct}% (${pick.last7ConfirmOver}/7)`}
                             </span>
                         </div>
                     </div>
                 ) : (
                     <div className='best-market-empty'>
-                        <span>{isScanning ? `Scanning Volatilities & Jumps (${progress}%)...` : 'Searching for the best setup among Volatilities & Jump Indices...'}</span>
+                        <span className='empty-pulse-dot' />
+                        <span>
+                            {isScanning
+                                ? `Analyzing Volatilities & Jump Indices (${progress}%)...`
+                                : 'Analyzing real-time markets for highest statistical edge...'}
+                        </span>
                     </div>
                 )}
             </div>
@@ -57,7 +74,7 @@ export const BestMarketCard: React.FC<BestMarketCardProps> = observer(({ engine 
                     </button>
                 ) : pick && pick.symbol === currentSymbol ? (
                     <div className='currently-loaded-pill'>
-                        <span className='check-icon'>✓</span> Active Market
+                        <span className='check-icon'>✓</span> Active In View
                     </div>
                 ) : null}
 
@@ -67,7 +84,7 @@ export const BestMarketCard: React.FC<BestMarketCardProps> = observer(({ engine 
                     onClick={() => engine.scanAllMarkets()}
                     disabled={isScanning}
                 >
-                    {isScanning ? `Scanning (${progress}%)` : '🔍 Find Best Market'}
+                    {isScanning ? `Scanning (${progress}%)` : '🔍 Scan All Markets'}
                 </button>
             </div>
         </div>
