@@ -1,3 +1,4 @@
+import '@testing-library/jest-dom';
 import { useTranslations } from '@deriv-com/translations';
 import { useDevice } from '@deriv-com/ui';
 import { render, screen } from '@testing-library/react';
@@ -7,8 +8,8 @@ import MenuHeader from '../menu-header';
 const mockOpenLanguageSetting = jest.fn();
 
 jest.mock('@deriv-com/ui', () => ({
-    ...jest.requireActual('@deriv-com/ui'),
     useDevice: jest.fn(() => ({ isDesktop: false })),
+    Text: ({ children, className }: any) => <span className={className}>{children}</span>,
 }));
 
 jest.mock('@deriv-com/translations', () => ({

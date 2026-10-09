@@ -64,6 +64,10 @@
             width: auto;
             overflow: visible !important;
         }
+
+        .app-header__logo {
+            display: none !important;
+        }
     }
 
     button,

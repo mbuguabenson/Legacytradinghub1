@@ -13,14 +13,8 @@ export const AppLogo = () => {
     const logoConfig = brandConfig.platform.logo;
     const logoUrl = logoConfig.link_url || '/';
 
-    // On mobile: show compact logo (icon + "LTH")
-    if (!isDesktop) {
-        return (
-            <a href={logoUrl} className='app-header__logo app-header__logo--mobile' aria-label={localize('Home')}>
-                <BrandLogo height={24} fill='var(--text-general)' compact />
-            </a>
-        );
-    }
+    // On mobile mode: remove logo completely
+    if (!isDesktop) return null;
 
     return (
         <a href={logoUrl} className='app-header__logo' aria-label={localize('Home')}>

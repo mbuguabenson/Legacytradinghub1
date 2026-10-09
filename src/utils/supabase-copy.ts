@@ -323,11 +323,10 @@ export const getDefaultTabConfig = (): TabConfigItem[] => [
     { key: 'autotrades', label: 'Auto Trades', enabled: true, order: 9 },
     { key: 'copy_trading', label: 'Copy Trading', enabled: true, order: 10 },
     { key: 'dtrader', label: 'DTrader', enabled: true, order: 11 },
-    { key: 'apex_3', label: 'APEX 3.0', enabled: true, order: 12 },
 ];
 
 // Bump this when new tabs are added or removed to force clients to pick up new defaults
-const TAB_CONFIG_VERSION = 30;
+const TAB_CONFIG_VERSION = 31;
 
 export const getSiteConfig = (): SiteConfig => {
     try {

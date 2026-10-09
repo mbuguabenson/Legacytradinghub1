@@ -10,9 +10,7 @@
         text-decoration: none;
 
         @include mobile-or-tablet-screen {
-            padding-inline-start: 0.2rem;
-            padding-inline-end: 0.3rem;
-            height: 26px;
+            display: none !important;
         }
 
         &-text {
@@ -200,18 +198,18 @@
     }
 }
 
-// ─── Mobile Logo Overrides ─────────────────────────────────────────
+// ─── Mobile Logo Overrides (Removed on Mobile Mode) ────────────────
 .app-header__logo--mobile {
-    padding-inline-start: 0.4rem;
-    padding-inline-end: 0.4rem;
-    height: 28px;
+    display: none !important;
+}
 
-    .lth-brand-logo {
-        padding: 1px 3px;
-        border-radius: 8px;
-    }
+.app-header--mobile .app-header__logo {
+    display: none !important;
+}
 
-    .lth-brand-logo__row {
-        gap: 6px;
+@media (max-width: 768px) {
+    .app-header__logo,
+    .app-header__logo--mobile {
+        display: none !important;
     }
 }

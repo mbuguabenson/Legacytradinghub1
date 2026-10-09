@@ -1242,16 +1242,15 @@ export const generateOAuthURL = async (prompt?: string, domainConfig = getDomain
                 state: csrfToken,
                 code_challenge: codeChallenge,
                 code_challenge_method: 'S256',
+                affiliate_token: DERIV_AFFILIATE_CONFIG.referralCode,
+                referral_code: DERIV_AFFILIATE_CONFIG.referralCode,
+                t: DERIV_AFFILIATE_CONFIG.affiliateToken,
+                utm_source: DERIV_AFFILIATE_CONFIG.referralCode,
+                utm_medium: 'affiliate',
+                utm_campaign: DERIV_AFFILIATE_CONFIG.affiliateToken,
             });
 
-            // If prompt is registration, add registration params per Deriv OAuth docs
-            if (prompt === 'registration') {
-                params.set('prompt', 'registration');
-                params.set('utm_source', DERIV_AFFILIATE_CONFIG.referralCode);
-                params.set('utm_medium', 'affiliate');
-                params.set('utm_campaign', DERIV_AFFILIATE_CONFIG.affiliateToken);
-                params.set('t', DERIV_AFFILIATE_CONFIG.affiliateToken);
-            } else if (prompt) {
+            if (prompt) {
                 params.set('prompt', prompt);
             }
 
