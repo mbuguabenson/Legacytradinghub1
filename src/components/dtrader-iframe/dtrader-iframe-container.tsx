@@ -280,12 +280,11 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
                 url.searchParams.set('cur1', cur);
                 url.searchParams.set('currency', cur);
 
-                const effectiveWs = initialWsUrlRef.current || wsUrl;
-                if (effectiveWs) {
-                    url.searchParams.set('ws_url', effectiveWs);
-                    url.searchParams.set('otp_url', effectiveWs);
-                    url.searchParams.set('otpUrl', effectiveWs);
-                }
+                const fallbackWs = `wss://ws.derivws.com/websockets/v3?app_id=${encodeURIComponent(appId)}&l=en&brand=deriv`;
+                const effectiveWs = initialWsUrlRef.current || wsUrl || fallbackWs;
+                url.searchParams.set('ws_url', effectiveWs);
+                url.searchParams.set('otp_url', effectiveWs);
+                url.searchParams.set('otpUrl', effectiveWs);
 
                 // Pass secondary accounts if available (acct2, token2, cur2, etc.)
                 try {
@@ -309,6 +308,15 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
             url.searchParams.set('appId', appId);
             url.searchParams.set('theme', currentTheme);
 
+            // Always ensure ws_url is passed so DTrader never defaults to non-authenticated public endpoint
+            if (!url.searchParams.has('ws_url')) {
+                const fallbackWs = `wss://ws.derivws.com/websockets/v3?app_id=${encodeURIComponent(appId)}&l=en&brand=deriv`;
+                const effectiveWs = initialWsUrlRef.current || wsUrl || fallbackWs;
+                url.searchParams.set('ws_url', effectiveWs);
+                url.searchParams.set('otp_url', effectiveWs);
+                url.searchParams.set('otpUrl', effectiveWs);
+            }
+
             if (isMobileApp) {
                 url.searchParams.set('is_mobile_app', 'true');
             }
@@ -317,7 +325,7 @@ export const DTraderIframeContainer: React.FC<DTraderIframeContainerProps> = ({
         } catch {
             return baseUrl;
         }
-    }, [baseUrl, appId, currentToken, currentLoginId, currentTheme, isMobileApp]);
+    }, [baseUrl, appId, currentToken, currentLoginId, currentTheme, isMobileApp, wsUrl]);
 
     // Safety fallback timeout: ensure loading overlay clears even if iframe onLoad is delayed
     useEffect(() => {

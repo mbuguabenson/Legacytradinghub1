@@ -198,7 +198,8 @@ export class ParentBridgeClient {
             // Preserve active token (OAuth2 Bearer or PAT) and legacy token without destructive downgrades
             const tokenToUse = tok;
             const legacyToken = getLegacyDTraderToken(loginid) || localStorage.getItem('legacy_dtrader_token') || localStorage.getItem('token1') || '';
-            const effectiveOtpUrl = otpUrlParam || this.cachedOtpUrl || '';
+            const fallbackWsUrl = `wss://ws.derivws.com/websockets/v3?app_id=${encodeURIComponent(appIdStr || '121856')}&l=en&brand=deriv`;
+            const effectiveOtpUrl = otpUrlParam || this.cachedOtpUrl || fallbackWsUrl;
 
             const hasToken =
                 Boolean(tokenToUse && !isInvalidBearerToken(tokenToUse));
@@ -691,13 +692,10 @@ export class ParentBridgeClient {
                 return;
             }
 
-            if (syncToken && loginid && !loginid.includes('100000')) {
-                this.sendAuthPayloadToWindow(event.source as Window, syncToken, loginid, currency, appIdStr);
-            }
-
             if (msgType === 'REQUEST_TOKEN') {
                 // Iframe is explicitly asking for an OTT — fetch and relay it
                 this.sendOTT(event.source as Window, event.origin);
+                return;
             } else if (msgType === 'NEWDTRADER_BRIDGE_AUTH_SUCCESS') {
                 console.log('[ParentBridge] DTrader Bridge authenticated successfully.');
                 if (this.retryIntervalId) {
@@ -716,8 +714,6 @@ export class ParentBridgeClient {
                 this.diagnostics.lastError = parsedData?.error?.message || 'Bridge Auth Failed';
                 this.stateMachine.transitionTo(BridgeState.FAILED);
                 return;
-            } else if (syncToken && loginid && !loginid.includes('100000')) {
-                this.sendAuthInit();
             }
         }
 
