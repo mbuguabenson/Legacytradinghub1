@@ -9,7 +9,6 @@ interface BeginnerActionCardProps {
 export const BeginnerActionCard: React.FC<BeginnerActionCardProps> = observer(({ engine }) => {
     const status = engine.signal_status;
     const symbol = engine.display_name;
-    const isUnder = status === 'UNDER CONDITIONS MET' || engine.selected_direction_tab === 'UNDER 6';
     const isUnderMet = status === 'UNDER CONDITIONS MET';
     const isOverMet = status === 'OVER CONDITIONS MET';
     const isForming = status === 'UNDER FORMING' || status === 'OVER FORMING';

@@ -1,7 +1,6 @@
 import { makeObservable, observable, action, computed, runInAction } from 'mobx';
 import { api_base } from '@/external/bot-skeleton/services/api/api-base';
 import { subscribeTicks } from '@/utils/websocket-handler';
-import { ALL_DERIV_MARKETS } from '@/constants/markets';
 import {
     TSignalStatus,
     TMarketStability,
@@ -17,6 +16,38 @@ import {
     TSignalLogItem,
     TViewMode,
 } from './types';
+
+export const FALLBACK_VOL_AND_JUMP_MARKETS = [
+    // Continuous Volatilities
+    { symbol: 'R_10', display_name: 'Volatility 10 Index', pip_size: 3 },
+    { symbol: 'R_25', display_name: 'Volatility 25 Index', pip_size: 3 },
+    { symbol: 'R_50', display_name: 'Volatility 50 Index', pip_size: 4 },
+    { symbol: 'R_75', display_name: 'Volatility 75 Index', pip_size: 4 },
+    { symbol: 'R_100', display_name: 'Volatility 100 Index', pip_size: 2 },
+    // 1-Second Volatilities
+    { symbol: '1HZ10V', display_name: 'Volatility 10 (1s) Index', pip_size: 2 },
+    { symbol: '1HZ15V', display_name: 'Volatility 15 (1s) Index', pip_size: 2 },
+    { symbol: '1HZ25V', display_name: 'Volatility 25 (1s) Index', pip_size: 2 },
+    { symbol: '1HZ30V', display_name: 'Volatility 30 (1s) Index', pip_size: 2 },
+    { symbol: '1HZ50V', display_name: 'Volatility 50 (1s) Index', pip_size: 2 },
+    { symbol: '1HZ75V', display_name: 'Volatility 75 (1s) Index', pip_size: 2 },
+    { symbol: '1HZ90V', display_name: 'Volatility 90 (1s) Index', pip_size: 2 },
+    { symbol: '1HZ100V', display_name: 'Volatility 100 (1s) Index', pip_size: 2 },
+    // Jump Indices
+    { symbol: 'JD10', display_name: 'Jump 10 Index', pip_size: 2 },
+    { symbol: 'JD25', display_name: 'Jump 25 Index', pip_size: 2 },
+    { symbol: 'JD50', display_name: 'Jump 50 Index', pip_size: 2 },
+    { symbol: 'JD75', display_name: 'Jump 75 Index', pip_size: 2 },
+    { symbol: 'JD100', display_name: 'Jump 100 Index', pip_size: 2 },
+];
+
+export const isVolOrJump = (s: any) => {
+    const sym = String(s.symbol || s.value || '').toUpperCase();
+    const sub = String(s.submarket || '').toLowerCase();
+    const isVol = sym.startsWith('R_') || sym.includes('1HZ');
+    const isJump = sym.startsWith('JD') || sym.includes('JUMP') || sub === 'jump_index';
+    return (isVol || isJump) && !s.is_trading_suspended;
+};
 
 export class MegastreakEngine {
     // ── Observable State ────────────────────────────────────────────────────────
@@ -79,6 +110,12 @@ export class MegastreakEngine {
         await this.loadAvailableSymbols();
         await this.selectSymbol(this.selected_symbol);
         this.startStaleTickWatchdog();
+        // Background scan so Best Market card is auto-populated
+        setTimeout(() => {
+            if (!this.isDestroyed && this.all_markets_stats.length === 0) {
+                this.scanAllMarkets();
+            }
+        }, 1200);
     }
 
     public destroy() {
@@ -108,17 +145,17 @@ export class MegastreakEngine {
                 rawList = res?.active_symbols || [];
             }
 
+            // Strictly filter for Volatilities and Jump indices only
+            const isVolOrJump = (s: any) => {
+                const sym = String(s.symbol || '').toUpperCase();
+                const sub = String(s.submarket || '').toLowerCase();
+                const isVol = sym.startsWith('R_') || sym.includes('1HZ');
+                const isJump = sym.startsWith('JD') || sym.includes('JUMP') || sub === 'jump_index';
+                return (isVol || isJump) && !s.is_trading_suspended;
+            };
+
             const synthetics = (rawList || [])
-                .filter((s: any) => {
-                    const isSynthetic =
-                        s.market === 'synthetic_index' ||
-                        s.submarket === 'random_index' ||
-                        s.submarket === 'continuous_index' ||
-                        s.submarket === 'random_daily' ||
-                        s.submarket === 'crash_index';
-                    const isOpen = !s.is_trading_suspended;
-                    return isSynthetic && isOpen;
-                })
+                .filter(isVolOrJump)
                 .map((s: any) => {
                     let pipSize = 2;
                     if (typeof s.pip === 'number' && s.pip > 0) {
@@ -137,14 +174,7 @@ export class MegastreakEngine {
                 if (synthetics.length > 0) {
                     this.available_symbols = synthetics;
                 } else {
-                    // Fallback to core ALL_DERIV_MARKETS
-                    this.available_symbols = ALL_DERIV_MARKETS.filter(
-                        m => m.market === 'synthetic_index' || m.group === 'Continuous Indices'
-                    ).map(m => ({
-                        symbol: m.value,
-                        display_name: m.label,
-                        pip_size: 2,
-                    }));
+                    this.available_symbols = FALLBACK_VOL_AND_JUMP_MARKETS;
                 }
 
                 // Match pip_size of current symbol if available
@@ -157,13 +187,7 @@ export class MegastreakEngine {
         } catch (e) {
             console.warn('[MegastreakEngine] Symbol discovery fallback:', e);
             runInAction(() => {
-                this.available_symbols = ALL_DERIV_MARKETS.filter(
-                    m => m.market === 'synthetic_index' || m.group === 'Continuous Indices'
-                ).map(m => ({
-                    symbol: m.value,
-                    display_name: m.label,
-                    pip_size: 2,
-                }));
+                this.available_symbols = FALLBACK_VOL_AND_JUMP_MARKETS;
             });
         }
     }
@@ -399,7 +423,6 @@ export class MegastreakEngine {
     @action
     private setSignalStatus(status: TSignalStatus, reason: string) {
         if (this.signal_status !== status) {
-            const previous = this.signal_status;
             this.signal_status = status;
             this.stop_reason = reason;
 
@@ -907,7 +930,7 @@ export class MegastreakEngine {
 
         const targetMarkets = this.available_symbols.length > 0
             ? this.available_symbols
-            : ALL_DERIV_MARKETS.slice(0, 15).map(m => ({ symbol: m.value, display_name: m.label, pip_size: 2 }));
+            : FALLBACK_VOL_AND_JUMP_MARKETS;
 
         const results: TMarketScanSummary[] = [];
         const total = targetMarkets.length;

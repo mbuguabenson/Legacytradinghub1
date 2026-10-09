@@ -20,18 +20,23 @@ export const DigitCircles: React.FC<DigitCirclesProps> = observer(({ engine }) =
             : undefined;
 
     return (
-        <div className='megastreak-digit-circles-panel'>
+        <div className='megastreak-digit-circles-panel curved-card'>
             <div className='megastreak-panel-header'>
                 <div className='megastreak-panel-title-group'>
-                    <span className='megastreak-panel-title'>Live Digit Distribution</span>
-                    <span className='megastreak-panel-subtitle'>50 Rolling Ticks • DTrader Style</span>
+                    <div className='title-icon-wrapper'>
+                        <span className='icon'>🎯</span>
+                    </div>
+                    <div className='title-text-group'>
+                        <span className='megastreak-panel-title'>Live Digit Distribution</span>
+                        <span className='megastreak-panel-subtitle'>50 Rolling Ticks • Real-Time Pointer</span>
+                    </div>
                 </div>
                 <div className='megastreak-legend'>
-                    <span className='megastreak-legend-item under'>
-                        <span className='dot under-dot' /> Max Frequency
+                    <span className='megastreak-legend-pill max-pill'>
+                        <span className='legend-dot max-dot' /> Max Frequency
                     </span>
-                    <span className='megastreak-legend-item over'>
-                        <span className='dot over-dot' /> Min Frequency
+                    <span className='megastreak-legend-pill min-pill'>
+                        <span className='legend-dot min-dot' /> Min Frequency
                     </span>
                 </div>
             </div>
