@@ -3,7 +3,6 @@ import { observer } from 'mobx-react-lite';
 import { useStore } from '@/hooks/useStore';
 import { useDevice } from '@deriv-com/ui';
 import DigitDisplay from './digit-display';
-import LastDigitPointer from './last-digit-pointer';
 import './last-digit-prediction.scss';
 
 const display_array = Array.from(Array(10).keys()); // [0,1,2,...,9]
@@ -151,6 +150,7 @@ const LastDigitPrediction = observer(
                         value={idx}
                         onSelect={onSelect || null}
                         selected_digit={selected_digit ?? undefined}
+                        total={total}
                         isMobile={isMobile}
                     />
                 ))}

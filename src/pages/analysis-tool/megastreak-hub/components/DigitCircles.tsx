@@ -19,33 +19,48 @@ export const DigitCircles: React.FC<DigitCirclesProps> = observer(({ engine }) =
               }
             : undefined;
 
+    const freqs = engine.digit_frequencies;
+    let hottest = freqs[0];
+    let coldest = freqs[0];
+    freqs.forEach(f => {
+        if (f.percentage > (hottest?.percentage || 0)) hottest = f;
+        if (f.percentage < (coldest?.percentage || 100)) coldest = f;
+    });
+
     return (
-        <div className='megastreak-digit-circles-panel curved-card'>
-            <div className='megastreak-panel-header'>
-                <div className='megastreak-panel-title-group'>
-                    <div className='title-icon-wrapper'>
-                        <span className='icon'>🎯</span>
-                    </div>
-                    <div className='title-text-group'>
-                        <span className='megastreak-panel-title'>Live Digit Distribution</span>
-                        <span className='megastreak-panel-subtitle'>50 Rolling Ticks • Real-Time Pointer</span>
+        <div className='megastreak-hero-circles-card'>
+            <div className='hero-circles-header'>
+                <div className='circles-title-cluster'>
+                    <div className='circles-badge-icon'>🎯</div>
+                    <div className='circles-headings'>
+                        <h2 className='circles-main-title'>Live Digit Distribution (0 – 9)</h2>
+                        <span className='circles-sub-title'>
+                            Last 50 Ticks • Real-Time Pointer &amp; Percentage Rings
+                        </span>
                     </div>
                 </div>
-                <div className='megastreak-legend'>
-                    <span className='megastreak-legend-pill max-pill'>
-                        <span className='legend-dot max-dot' /> Max Frequency
-                    </span>
-                    <span className='megastreak-legend-pill min-pill'>
-                        <span className='legend-dot min-dot' /> Min Frequency
-                    </span>
+
+                <div className='circles-legend-pills'>
+                    <div className='legend-stat-pill hot'>
+                        <span className='pill-dot hot-dot' />
+                        <span className='pill-label'>Max Frequency:</span>
+                        <strong className='pill-val'>Digit {hottest?.digit ?? '-'} ({Math.round(hottest?.percentage || 0)}%)</strong>
+                    </div>
+
+                    <div className='legend-stat-pill cold'>
+                        <span className='pill-dot cold-dot' />
+                        <span className='pill-label'>Min Frequency:</span>
+                        <strong className='pill-val'>Digit {coldest?.digit ?? '-'} ({Math.round(coldest?.percentage || 0)}%)</strong>
+                    </div>
                 </div>
             </div>
 
-            <div className='megastreak-official-circles-wrapper'>
+            <div className='hero-circles-canvas'>
                 <DigitDistributionCircles
                     digits={rawDigits}
                     tick={tickData}
                     selected_digit={engine.latest_digit}
+                    dimension={60}
                 />
             </div>
         </div>

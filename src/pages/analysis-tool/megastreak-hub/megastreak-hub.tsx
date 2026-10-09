@@ -159,14 +159,14 @@ export const MegastreakHub: React.FC = observer(() => {
                 <DigitCircles engine={engine} />
             </section>
 
-            {/* 4. Streamlined Two-Column Layout: Stats & Signals */}
-            <section className='megastreak-simple-grid'>
-                <div className='grid-column col-stats'>
-                    <SimpleStatsCard engine={engine} />
-                </div>
-                <div className='grid-column col-signals'>
-                    <EntryExitSignalCard engine={engine} />
-                </div>
+            {/* 4. Minimal Stats Bar */}
+            <section className='megastreak-section section-stats'>
+                <SimpleStatsCard engine={engine} />
+            </section>
+
+            {/* 5. Entry & Exit Action Center */}
+            <section className='megastreak-section section-signals'>
+                <EntryExitSignalCard engine={engine} />
             </section>
 
             {/* 5. Beginner Walkthrough Guide Modal */}

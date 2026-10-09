@@ -20,6 +20,7 @@ type TDigitDisplay = {
     selected_digit?: number;
     status?: string | null;
     stats?: number | null;
+    total?: number;
     value: number;
 };
 
@@ -41,13 +42,14 @@ const DigitDisplay = ({
     selected_digit,
     status,
     stats,
+    total,
     value,
 }: TDigitDisplay) => {
     const { digit, spot } = latest_digit;
     const is_latest = value === digit;
     const is_selected = value === barrier;
     const is_selected_winning = digit === barrier;
-    const percentage = stats ? (stats * 100) / 1000 : null;
+    const percentage = stats ? (stats * 100) / (total && total > 0 ? total : 1000) : null;
 
     const is_digit_selectable = typeof onSelect === 'function' && !status;
     const is_digit_selected = value === selected_digit && !status;

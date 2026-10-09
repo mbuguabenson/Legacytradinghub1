@@ -9,18 +9,9 @@ interface SimpleStatsCardProps {
 export const SimpleStatsCard: React.FC<SimpleStatsCardProps> = observer(({ engine }) => {
     const primary = engine.primary_distribution;
     const contract = engine.contract_analysis;
-    const freqs = engine.digit_frequencies;
     const totalTicks = engine.ticks.length;
     const stability = engine.market_stability;
     const last10 = engine.rolling_stats_10;
-
-    // Find hottest (highest frequency) and coldest (lowest frequency) digits
-    let hottest = freqs[0];
-    let coldest = freqs[0];
-    freqs.forEach(f => {
-        if (f.percentage > (hottest?.percentage || 0)) hottest = f;
-        if (f.percentage < (coldest?.percentage || 100)) coldest = f;
-    });
 
     const u04Pct = Math.round(primary.under04Pct);
     const o59Pct = Math.round(primary.over59Pct);
@@ -28,94 +19,81 @@ export const SimpleStatsCard: React.FC<SimpleStatsCardProps> = observer(({ engin
     const o49Pct = Math.round(contract.over49Pct);
 
     return (
-        <div className='megastreak-simple-stats-card'>
-            <div className='stats-card-header'>
-                <div className='stats-title-group'>
-                    <span className='stats-title-icon'>📊</span>
-                    <span className='stats-title'>Market Statistics</span>
-                    <span className='stats-tick-count'>({totalTicks}/50 Ticks)</span>
+        <div className='megastreak-minimal-stats-strip'>
+            <div className='stats-strip-header'>
+                <div className='header-left'>
+                    <span className='stats-icon'>📊</span>
+                    <span className='stats-heading'>Digit Momentum &amp; Distribution</span>
+                    <span className='ticks-badge'>({totalTicks}/50 Ticks)</span>
                 </div>
-                <div className={`stability-tag ${stability.toLowerCase()}`}>
-                    {stability === 'STABLE' && '🛡️ Stable Flow'}
-                    {stability === 'MODERATE' && '⚡ Moderate'}
-                    {stability === 'UNSTABLE' && '⚠️ Choppy'}
+
+                <div className='header-right'>
+                    <div className='momentum-pill'>
+                        <span className='pill-label'>Last 10 Momentum:</span>
+                        <strong className='pill-value'>
+                            {last10.dominantDirection === 'UNDER'
+                                ? `Low Digits (${last10.under04Count}/10)`
+                                : last10.dominantDirection === 'OVER'
+                                ? `High Digits (${last10.over59Count}/10)`
+                                : 'Balanced (5/5)'}
+                        </strong>
+                    </div>
+
+                    <div className={`stability-badge ${stability.toLowerCase()}`}>
+                        {stability === 'STABLE' && '🛡️ Stable Flow'}
+                        {stability === 'MODERATE' && '⚡ Moderate'}
+                        {stability === 'UNSTABLE' && '⚠️ Choppy'}
+                    </div>
                 </div>
             </div>
 
-            <div className='stats-bars-container'>
-                {/* 1. Low vs High (Under 0-4 vs Over 5-9) */}
-                <div className='stat-bar-block'>
-                    <div className='stat-bar-label-row'>
-                        <span className='label-left under-color'>
-                            Low Digits [0-4]: <strong>{u04Pct}%</strong> ({primary.under04Count})
+            <div className='stats-progress-grid'>
+                {/* 1. Low Digits [0-4] vs High Digits [5-9] */}
+                <div className='stat-bar-card'>
+                    <div className='bar-labels'>
+                        <span className='label-under'>
+                            Low Digits [0 – 4]: <strong>{u04Pct}%</strong> ({primary.under04Count})
                         </span>
-                        <span className='label-right over-color'>
-                            High Digits [5-9]: <strong>{o59Pct}%</strong> ({primary.over59Count})
+                        <span className='label-over'>
+                            High Digits [5 – 9]: <strong>{o59Pct}%</strong> ({primary.over59Count})
                         </span>
                     </div>
-                    <div className='split-progress-track'>
+                    <div className='bar-track'>
                         <div
-                            className='progress-fill fill-under'
+                            className='bar-fill fill-under'
                             style={{ width: `${u04Pct}%` }}
                             title={`Under 0-4: ${u04Pct}%`}
                         />
                         <div
-                            className='progress-fill fill-over'
+                            className='bar-fill fill-over'
                             style={{ width: `${o59Pct}%` }}
                             title={`Over 5-9: ${o59Pct}%`}
                         />
                     </div>
                 </div>
 
-                {/* 2. Contract Under 0-5 vs Over 4-9 */}
-                <div className='stat-bar-block'>
-                    <div className='stat-bar-label-row'>
-                        <span className='label-left under-color'>
-                            Under 6 Target [0-5]: <strong>{u05Pct}%</strong> ({contract.under05Count})
+                {/* 2. Target Under 6 [0-5] vs Target Over 3 [4-9] */}
+                <div className='stat-bar-card'>
+                    <div className='bar-labels'>
+                        <span className='label-under'>
+                            Under 6 Target [0 – 5]: <strong>{u05Pct}%</strong> ({contract.under05Count})
                         </span>
-                        <span className='label-right over-color'>
-                            Over 3 Target [4-9]: <strong>{o49Pct}%</strong> ({contract.over49Count})
+                        <span className='label-over'>
+                            Over 3 Target [4 – 9]: <strong>{o49Pct}%</strong> ({contract.over49Count})
                         </span>
                     </div>
-                    <div className='split-progress-track'>
+                    <div className='bar-track'>
                         <div
-                            className='progress-fill fill-under'
+                            className='bar-fill fill-under-6'
                             style={{ width: `${Math.min(100, (u05Pct / (u05Pct + o49Pct || 1)) * 100)}%` }}
                             title={`Under 0-5: ${u05Pct}%`}
                         />
                         <div
-                            className='progress-fill fill-over'
+                            className='bar-fill fill-over-3'
                             style={{ width: `${Math.min(100, (o49Pct / (u05Pct + o49Pct || 1)) * 100)}%` }}
                             title={`Over 4-9: ${o49Pct}%`}
                         />
                     </div>
-                </div>
-            </div>
-
-            {/* Quick Metrics Grid */}
-            <div className='stats-quick-grid'>
-                <div className='quick-stat-pill hot'>
-                    <span className='pill-label'>🔥 Hot Digit</span>
-                    <span className='pill-value'>Digit {hottest?.digit ?? '-'}</span>
-                    <span className='pill-sub'>({Math.round(hottest?.percentage || 0)}%)</span>
-                </div>
-
-                <div className='quick-stat-pill cold'>
-                    <span className='pill-label'>❄️ Cold Digit</span>
-                    <span className='pill-value'>Digit {coldest?.digit ?? '-'}</span>
-                    <span className='pill-sub'>({Math.round(coldest?.percentage || 0)}%)</span>
-                </div>
-
-                <div className='quick-stat-pill momentum'>
-                    <span className='pill-label'>📈 Last 10 Ticks</span>
-                    <span className='pill-value'>
-                        {last10.dominantDirection === 'UNDER'
-                            ? `Low (${last10.under04Count}/10)`
-                            : last10.dominantDirection === 'OVER'
-                            ? `High (${last10.over59Count}/10)`
-                            : 'Balanced'}
-                    </span>
-                    <span className='pill-sub'>Momentum</span>
                 </div>
             </div>
         </div>
