@@ -315,7 +315,7 @@ export const getDefaultTabConfig = (): TabConfigItem[] => [
     { key: 'bot_builder', label: 'Bot Builder', enabled: true, order: 1 },
     { key: 'chart', label: 'Charts', enabled: true, order: 2 },
     { key: 'trading_bots', label: 'Trading Bots', enabled: true, order: 3 },
-    { key: 'analysis_tool', label: 'MEGASTREAK HUB', enabled: true, order: 4 },
+    { key: 'analysis_tool', label: 'Analysis Tool', enabled: true, order: 4 },
     { key: 'tradingview', label: 'TradingView', enabled: true, order: 5 },
     { key: 'signals', label: 'Signals', enabled: true, order: 6 },
     { key: 'ai_intelligence', label: 'AI Intelligence Hub', enabled: true, order: 7 },
@@ -326,7 +326,7 @@ export const getDefaultTabConfig = (): TabConfigItem[] => [
 ];
 
 // Bump this when new tabs are added or removed to force clients to pick up new defaults
-const TAB_CONFIG_VERSION = 32;
+const TAB_CONFIG_VERSION = 33;
 
 export const getSiteConfig = (): SiteConfig => {
     try {

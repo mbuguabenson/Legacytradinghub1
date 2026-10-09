@@ -844,6 +844,24 @@
     padding: 12px 14px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 
+    .megastreak-official-circles-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        overflow-x: auto;
+        padding: 6px 0;
+
+        .digits {
+            width: 100%;
+            justify-content: space-around;
+        }
+
+        .digits__digit {
+            margin: 0 2px;
+        }
+    }
+
     .megastreak-circles-grid {
         display: grid;
         grid-template-columns: repeat(10, 1fr);
