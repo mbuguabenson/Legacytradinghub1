@@ -732,6 +732,14 @@ const AnalysisTools: React.FC = () => {
                         onMouseMove={handleMouseMove}
                     >
                         <div
+                            className={`analysis-tools__card analysis-tools__card--light ${active_tool === 'analysis-tool' ? 'analysis-tools__card--active' : ''}`}
+                            onClick={() => handleCardClick('analysis-tool')}
+                        >
+                            <div className='analysis-tools__card-content'>
+                                <span className='analysis-tools__card-label'>MEGASTREAK HUB</span>
+                            </div>
+                        </div>
+                        <div
                             className={`analysis-tools__card analysis-tools__card--light ${active_tool === 'all-analysis' ? 'analysis-tools__card--active' : ''}`}
                             onClick={() => handleCardClick('all-analysis')}
                         >
@@ -745,14 +753,6 @@ const AnalysisTools: React.FC = () => {
                         >
                             <div className='analysis-tools__card-content'>
                                 <span className='analysis-tools__card-label'>Tick Analyser</span>
-                            </div>
-                        </div>
-                        <div
-                            className={`analysis-tools__card analysis-tools__card--light ${active_tool === 'analysis-tool' ? 'analysis-tools__card--active' : ''}`}
-                            onClick={() => handleCardClick('analysis-tool')}
-                        >
-                            <div className='analysis-tools__card-content'>
-                                <span className='analysis-tools__card-label'>ProfitHub Analysis</span>
                             </div>
                         </div>
                         <div

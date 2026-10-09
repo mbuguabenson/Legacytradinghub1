@@ -458,11 +458,11 @@ const AppWrapper = observer(() => {
             {
                 key: 'analysis_tool',
                 id: 'id-analysis-tool',
-                label: <TabIcon iconKey='analysis_tool' label='Analysis Tool' />,
+                label: <TabIcon iconKey='analysis_tool' label='MEGASTREAK HUB' />,
                 content: (
-                    <TabErrorBoundary tabId='id-analysis-tool' tabName='Analysis Tool'>
+                    <TabErrorBoundary tabId='id-analysis-tool' tabName='MEGASTREAK HUB'>
                         <Suspense
-                            fallback={<ChunkLoader message={localize('Please wait, loading Analysis Tool...')} />}
+                            fallback={<ChunkLoader message={localize('Please wait, loading MEGASTREAK HUB...')} />}
                         >
                             <AnalysisTools />
                         </Suspense>

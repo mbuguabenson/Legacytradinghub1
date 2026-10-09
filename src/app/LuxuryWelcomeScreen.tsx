@@ -221,7 +221,7 @@ const Icon3DSignals = () => (
 const FEATURES = [
     { icon: <Icon3DRobot />, name: 'Free Bots', color: 'radial-gradient(circle at 35% 30%, #38bdf8 0%, #0369a1 70%, #082f49 100%)', border: 'rgba(56, 189, 248, 0.45)' },
     { icon: <Icon3DBrain />, name: 'AI Bots', color: 'radial-gradient(circle at 35% 30%, #f472b6 0%, #db2777 70%, #500724 100%)', border: 'rgba(236, 72, 153, 0.45)' },
-    { icon: <Icon3DChart />, name: 'Analysis Tool', color: 'radial-gradient(circle at 35% 30%, #818cf8 0%, #4f46e5 70%, #1e1b4b 100%)', border: 'rgba(99, 102, 241, 0.45)' },
+    { icon: <Icon3DChart />, name: 'MEGASTREAK HUB', color: 'radial-gradient(circle at 35% 30%, #818cf8 0%, #4f46e5 70%, #1e1b4b 100%)', border: 'rgba(99, 102, 241, 0.45)' },
     { icon: <Icon3DSparkle />, name: 'Smart Analysis', color: 'radial-gradient(circle at 35% 30%, #fbbf24 0%, #d97706 70%, #451a03 100%)', border: 'rgba(245, 158, 11, 0.45)' },
     { icon: <Icon3DCopy />, name: 'Copy Trading', color: 'radial-gradient(circle at 35% 30%, #34d399 0%, #059669 70%, #022c22 100%)', border: 'rgba(16, 185, 129, 0.45)' },
     { icon: <Icon3DSignals />, name: 'Signals', color: 'radial-gradient(circle at 35% 30%, #22d3ee 0%, #0891b2 70%, #083344 100%)', border: 'rgba(14, 165, 233, 0.45)' },
